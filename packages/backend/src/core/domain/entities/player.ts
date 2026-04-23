@@ -1,0 +1,40 @@
+import { PlayerId } from '../value-objects/player-id.js';
+
+export class Player {
+  private score: number = 0;
+  private isImpostor: boolean = false;
+
+  constructor(
+    private id: PlayerId,
+    private gameId: string,
+    private name: string
+  ) {}
+
+  getId(): PlayerId {
+    return this.id;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  getGameId(): string {
+    return this.gameId;
+  }
+
+  isTheImpostor(): boolean {
+    return this.isImpostor;
+  }
+
+  getScore(): number {
+    return this.score;
+  }
+
+  setImpostor(): void {
+    this.isImpostor = true;
+  }
+
+  addScore(points: number): void {
+    this.score += points;
+  }
+}

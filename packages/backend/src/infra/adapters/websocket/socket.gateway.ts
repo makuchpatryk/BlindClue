@@ -1,0 +1,58 @@
+import { Server } from 'socket.io';
+import {
+  RoundSubmittedEvent,
+  VotingStartedEvent,
+  VotesRevealedEvent,
+  GameEndedEvent,
+  PlayerJoinedEvent,
+  GameStartedEvent,
+  GameCreatedEvent,
+} from './events.js';
+
+export class SocketGateway {
+  constructor(private io: Server) {}
+
+  broadcastGameCreated(gameId: string): void {
+    const event: GameCreatedEvent = { gameId };
+    this.io.emit('GameCreated', event);
+  }
+
+  broadcastPlayerJoined(gameId: string, playerId: string, playerName: string): void {
+    const event: PlayerJoinedEvent = { gameId, playerId, playerName };
+    this.io.to(gameId).emit('PlayerJoined', event);
+  }
+
+  broadcastGameStarted(gameId: string, category: string, impostorId: string, players: any[]): void {
+    const event: GameStartedEvent = {
+      gameId,
+      category,
+      impostorId,
+      players,
+    };
+    this.io.to(gameId).emit('GameStarted', event);
+  }
+
+  broadcastRoundSubmitted(gameId: string, round: number): void {
+    const event: RoundSubmittedEvent = { gameId, round };
+    this.io.to(gameId).emit('RoundSubmitted', event);
+  }
+
+  broadcastVotingStarted(gameId: string): void {
+    const event: VotingStartedEvent = { gameId };
+    this.io.to(gameId).emit('VotingStarted', event);
+  }
+
+  broadcastVotesRevealed(gameId: string, voteMap: Map<string, number>, mostVoted: string): void {
+    const event: VotesRevealedEvent = {
+      gameId,
+      voteMap: Object.fromEntries(voteMap),
+      mostVoted,
+    };
+    this.io.to(gameId).emit('VotesRevealed', event);
+  }
+
+  broadcastGameEnded(gameId: string, scores: Array<{ playerId: string; playerName: string; score: number }>): void {
+    const event: GameEndedEvent = { gameId, scores };
+    this.io.to(gameId).emit('GameEnded', event);
+  }
+}

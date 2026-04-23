@@ -19,4 +19,4 @@ Tasks should be managed in the `specs/` directory with the following structure:
 
 This keeps active work organized and provides a clear history of completed items.
 
-if I meant plan, I mean plan in the plan folder there is my main plan
+if I meant plan, I mean plan in the plan folder(plan/GAME_PLAN_FINAL.md) there is my main plan

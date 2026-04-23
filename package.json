@@ -1,0 +1,17 @@
+{
+  "name": "impostor",
+  "version": "1.0.0",
+  "description": "Impostor - multiplayer word-guessing game",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

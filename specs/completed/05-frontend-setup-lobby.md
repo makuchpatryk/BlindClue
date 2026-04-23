@@ -1,41 +1,42 @@
 ---
 title: Frontend Setup & Lobby - Phase 4
 phase: 4
+status: completed
 ---
 
-# Task: Frontend Setup & Lobby
+# Task: Frontend Setup & Lobby ✅
 
 Initialize Vue 3 + Vite + Tailwind frontend package and implement the lobby feature.
 
-## Checklist
+## Completed ✅
 
-### Project Init
-- [ ] `packages/frontend/package.json` with dependencies (vue, vite, pinia, socket.io-client, tailwindcss, vue-router)
-- [ ] `packages/frontend/tsconfig.json`
-- [ ] `packages/frontend/vite.config.ts`
-- [ ] `packages/frontend/tailwind.config.ts`
-- [ ] `packages/frontend/index.html`
-- [ ] `src/main.ts` — app bootstrap
-- [ ] `src/App.vue`
-- [ ] `src/router.ts` — vue-router setup
+### Project Init ✅
+- [x] `packages/frontend/package.json` with all dependencies + tailwindcss, postcss
+- [x] `packages/frontend/tsconfig.json` extending root config
+- [x] `packages/frontend/vite.config.ts` with Vue plugin & API proxy
+- [x] `packages/frontend/tailwind.config.ts` with postcss
+- [x] `packages/frontend/postcss.config.ts`
+- [x] `packages/frontend/index.html` with app div
+- [x] `packages/frontend/vite-env.d.ts`
+- [x] `src/main.ts` — Pinia + Router + Socket setup
+- [x] `src/App.vue` — Root layout with router
+- [x] `src/router/index.ts` — Home & game routes
 
-### Shared Infrastructure
-- [ ] `src/features/shared/utils/socket.ts` — Socket.io client instance
-- [ ] `src/features/shared/utils/constants.ts`
-- [ ] `src/features/shared/services/game-client.service.ts` — singleton socket orchestrator
-- [ ] `src/features/shared/types/game.ts` — shared type definitions (GameStateDTO, PlayerDTO, etc.)
-- [ ] `src/features/shared/types/events.ts`
-- [ ] `src/features/shared/composables/use-socket.ts`
-- [ ] Shared UI components: `modal.vue`, `button.vue`, `timer.vue`, `game-code.vue`
+### Shared Infrastructure ✅
+- [x] `src/features/shared/utils/socket.ts` — Socket.io client singleton
+- [x] `src/features/shared/utils/constants.ts` — API/Socket URLs and timings
+- [x] `src/features/shared/services/game-client.service.ts` — Full socket orchestrator
+- [x] `src/features/shared/types/game.ts` — GameStateDTO, PlayerDTO, etc.
+- [x] `src/features/shared/styles/index.css` — Tailwind directives
+- [x] Shared UI components: `button.vue`, `modal.vue`, `game-code.vue` ✅
 
-### Game Pinia Store
-- [ ] `src/features/game/stores/game.store.ts` — reactive game state
-  - state: gameId, status, currentRound, word, category, isImpostor, players, descriptions, votes, finalScores
-  - actions: setGameStarted, setStatus, addRoundSubmissions, setVotes, setFinalScores, reset
+### Game Pinia Store ✅
+- [x] `src/features/game/stores/game.store.ts` — Full state + actions
+  - All state properties, all actions, computed currentPlayer
 
-### Lobby Feature
-- [ ] `src/features/lobby/components/create-game-form.vue`
-- [ ] `src/features/lobby/components/join-game-form.vue`
-- [ ] `src/features/lobby/components/lobby-waiting-room.vue`
-- [ ] `src/features/lobby/composables/use-lobby.ts`
-- [ ] `src/features/lobby/stores/lobby.store.ts`
+### Lobby Feature ✅
+- [x] `src/features/lobby/components/create-game-form.vue` — Create with player name
+- [x] `src/features/lobby/components/join-game-form.vue` — Join with game code + player name
+- [x] `src/features/lobby/components/lobby-waiting-room.vue` — Side-by-side forms
+- [x] `src/features/lobby/composables/use-lobby.ts` — Reusable lobby logic
+- [x] `src/features/lobby/stores/lobby.store.ts` — Lobby state management

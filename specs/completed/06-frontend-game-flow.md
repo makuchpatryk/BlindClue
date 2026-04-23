@@ -1,42 +1,53 @@
 ---
 title: Frontend Game Flow - Phase 5
 phase: 5
+status: completed
 ---
 
-# Task: Frontend Game Flow
+# Task: Frontend Game Flow ✅
 
 Implement all game phase components, socket event subscriptions, and real-time UI updates.
 
-## Checklist
+## Completed ✅
 
-### Game Composables
-- [ ] `src/features/game/composables/use-game-state.ts` — exposes store state + actions
-- [ ] `src/features/game/composables/use-game-flow.ts` — handles phase transitions
-- [ ] `src/features/game/composables/use-round-timer.ts`
+### Game Composables ✅
+- [x] `src/features/game/composables/use-game-state.ts` — Exposes all store state & actions
+- [x] `src/features/game/composables/use-game-flow.ts` — Phase transition logic
+- [x] `src/features/game/composables/use-round-timer.ts` — Timer management
 
-### Game Phase Components
-- [ ] `src/features/game/components/round-phase.vue` — shows current round info
-- [ ] `src/features/game/components/description-submit.vue` — input for submitting description
-- [ ] `src/features/game/components/description-display.vue` — shows submitted descriptions
-- [ ] `src/features/game/components/voting-phase.vue` — player vote selection
-- [ ] `src/features/game/components/reveal-phase.vue` — show vote results + who was caught
-- [ ] `src/features/game/components/impostor-guess-phase.vue` — impostor word guess input
+### Game Phase Components ✅
+- [x] `src/features/game/components/round-phase.vue` — Round info + players
+- [x] `src/features/game/components/description-submit.vue` — Submit description form
+- [x] `src/features/game/components/description-display.vue` — Show round descriptions
+- [x] `src/features/game/components/voting-phase.vue` — Vote selection
+- [x] `src/features/game/components/reveal-phase.vue` — Vote results & most voted
+- [x] `src/features/game/components/impostor-guess-phase.vue` — Impostor guess input
+- [x] `src/features/game/components/game-view.vue` — Main game container
 
-### Scoreboard
-- [ ] `src/features/scoreboard/components/final-scoreboard.vue`
-- [ ] `src/features/scoreboard/components/player-card.vue`
+### Scoreboard ✅
+- [x] `src/features/scoreboard/components/final-scoreboard.vue` — Sorted final scores
+- [x] `src/features/scoreboard/components/player-card.vue` — Score display card
 
-### Admin Panel
-- [ ] `src/features/admin/components/manage-categories.vue`
-- [ ] `src/features/admin/components/manage-words.vue`
-- [ ] `src/features/admin/composables/use-admin-service.ts`
+### Admin Panel ✅
+- [x] `src/features/admin/components/manage-categories.vue` — Add/list categories
+- [x] `src/features/admin/components/manage-words.vue` — Add words to categories
+- [x] `src/features/admin/composables/use-admin-service.ts` — API calls for admin
 
-### Socket Integration
-- [ ] Connect `GameClientService` socket listeners to Pinia store
-  - `GameStarted` → setGameStarted
-  - `RoundSubmitted` → addRoundSubmissions
-  - `VotingStarted` → setStatus('VOTING')
-  - `VotesRevealed` → setVotes
-  - `GameEnded` → setFinalScores + setStatus('ENDED')
-- [ ] Wire emit methods: `submitDescription`, `voteImpostor`, `guessWord`
-- [ ] Provide `GameClientService` via `app.provide()` in main.ts
+### Socket Integration ✅
+- [x] GameClientService socket listeners connected to store:
+  - GameStarted → setGameStarted
+  - RoundSubmitted → setRoundSubmitted
+  - VotingStarted → setStatus
+  - VotesRevealed → setVotes
+  - GameEnded → setFinalScores + setStatus
+  - PlayerJoined → addPlayer
+- [x] Emit methods: submitDescription, voteImpostor, guessWord, joinGame, startGame
+- [x] GameClientService provided via app.provide() in main.ts
+
+## Implementation Details
+
+- Real-time socket event handling fully integrated
+- Component states driven by Pinia store
+- Admin panel separate from game flow
+- Composables reuse socket service via injection
+- All components styled with Tailwind CSS

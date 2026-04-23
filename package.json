@@ -4,14 +4,17 @@
   "description": "Impostor - multiplayer word-guessing game",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/backend",
-    "packages/frontend",
-    "packages/shared"
-  ],
+  "packageManager": "pnpm@8.0.0",
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "dev": "pnpm -r run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "node scripts/clean.mjs",
+    "clean:node-modules": "rimraf node_modules packages/*/node_modules",
+    "clean:locks": "rimraf pnpm-lock.yaml",
+    "clean:dist": "rimraf packages/*/dist packages/*/.next",
+    "clean:all": "pnpm clean:node-modules && pnpm clean:locks && pnpm clean:dist",
+    "reinstall": "pnpm clean && pnpm install"
   }
 }

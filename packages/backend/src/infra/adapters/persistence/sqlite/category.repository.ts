@@ -1,55 +1,67 @@
-import Database from 'better-sqlite3';
+import sqlite3 from 'sqlite3';
 import { Category, ICategoryRepository } from '../../../../core/domain/ports/category.repository.js';
 import { Result, ResultError } from '../../../../application/utils/result.js';
 
 export class CategoryRepository implements ICategoryRepository {
-  constructor(private db: Database.Database) {}
+  constructor(private db: sqlite3.Database) {}
 
   async getAll(): Promise<Result<Category[], ResultError>> {
-    try {
-      const stmt = this.db.prepare('SELECT id, name FROM categories');
-      const rows = stmt.all();
-      const categories = rows.map(row => ({ id: row.id, name: row.name }));
-      return { ok: true, value: categories };
-    } catch (error) {
-      return { ok: false, error: new ResultError('DB_ERROR', (error as Error).message) };
-    }
+    return new Promise((resolve) => {
+      this.db.all('SELECT id, name FROM categories', (err: Error | null, rows: any[]) => {
+        if (err) {
+          resolve({ ok: false, error: new ResultError('DB_ERROR', err.message) });
+          return;
+        }
+
+        const categories = (rows || []).map((row) => ({ id: row.id, name: row.name }));
+        resolve({ ok: true, value: categories });
+      });
+    });
   }
 
   async findById(id: string): Promise<Result<Category, ResultError>> {
-    try {
-      const stmt = this.db.prepare('SELECT id, name FROM categories WHERE id = ?');
-      const row = stmt.get(id);
+    return new Promise((resolve) => {
+      this.db.get('SELECT id, name FROM categories WHERE id = ?', [id], (err: Error | null, row: any) => {
+        if (err) {
+          resolve({ ok: false, error: new ResultError('DB_ERROR', err.message) });
+          return;
+        }
 
-      if (!row) {
-        return { ok: false, error: new ResultError('NOT_FOUND', 'Category not found') };
-      }
+        if (!row) {
+          resolve({ ok: false, error: new ResultError('NOT_FOUND', 'Category not found') });
+          return;
+        }
 
-      return { ok: true, value: { id: row.id, name: row.name } };
-    } catch (error) {
-      return { ok: false, error: new ResultError('DB_ERROR', (error as Error).message) };
-    }
+        resolve({ ok: true, value: { id: row.id, name: row.name } });
+      });
+    });
   }
 
   async save(category: Category): Promise<Result<void, ResultError>> {
-    try {
-      const stmt = this.db.prepare(
-        'INSERT INTO categories (id, name) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name'
+    return new Promise((resolve) => {
+      this.db.run(
+        'INSERT INTO categories (id, name) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name',
+        [category.id, category.name],
+        (err: Error | null) => {
+          if (err) {
+            resolve({ ok: false, error: new ResultError('DB_ERROR', err.message) });
+          } else {
+            resolve({ ok: true, value: undefined });
+          }
+        }
       );
-      stmt.run(category.id, category.name);
-      return { ok: true, value: undefined };
-    } catch (error) {
-      return { ok: false, error: new ResultError('DB_ERROR', (error as Error).message) };
-    }
+    });
   }
 
   async delete(id: string): Promise<Result<void, ResultError>> {
-    try {
-      const stmt = this.db.prepare('DELETE FROM categories WHERE id = ?');
-      stmt.run(id);
-      return { ok: true, value: undefined };
-    } catch (error) {
-      return { ok: false, error: new ResultError('DB_ERROR', (error as Error).message) };
-    }
+    return new Promise((resolve) => {
+      this.db.run('DELETE FROM categories WHERE id = ?', [id], (err: Error | null) => {
+        if (err) {
+          resolve({ ok: false, error: new ResultError('DB_ERROR', err.message) });
+        } else {
+          resolve({ ok: true, value: undefined });
+        }
+      });
+    });
   }
 }

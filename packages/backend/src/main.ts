@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config.js';
 import { DatabaseConnection } from './infra/adapters/persistence/sqlite/database.js';
@@ -12,6 +13,12 @@ import { GameEventHandler } from './infra/adapters/websocket/game-event.handler.
 import { registerRoutes } from './infra/adapters/http/routes.js';
 
 const fastify = Fastify({ logger: true });
+
+// Enable CORS
+await fastify.register(cors, {
+  origin: '*',
+  credentials: true,
+});
 
 // Initialize database
 const db = DatabaseConnection.getInstance(config.databasePath);

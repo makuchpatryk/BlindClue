@@ -6,29 +6,29 @@ A real-time multiplayer game where one player is the impostor who doesn't know t
 
 - **Backend**: Fastify + Socket.io + SQLite + TypeScript
 - **Frontend**: Vue 3 + Vite + Pinia + Tailwind CSS
-- **Architecture**: Monorepo (npm workspaces) with Clean Architecture patterns
+- **Monorepo**: pnpm workspaces with Clean Architecture patterns
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- npm 8+
+- pnpm 8+
 
 ### Setup
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start both backend and frontend in development mode
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 
 # Run tests
-npm run test
+pnpm test
 ```
 
 ### Development Servers
@@ -116,7 +116,12 @@ Copy `.env.example` to `.env` and configure:
 
 ### Run Backend Tests
 ```bash
-npm test --workspace=@impostor/backend
+pnpm test --filter @impostor/backend
+```
+
+### Run All Tests
+```bash
+pnpm test
 ```
 
 Tests include:
@@ -131,12 +136,31 @@ Tests include:
 3. Move to completed when done: `mv specs/todos/task-name.md specs/completed/`
 4. Reference main plan: `plan/GAME_PLAN_FINAL.md`
 
+## Useful pnpm Commands
+
+```bash
+# Install workspace dependencies
+pnpm install
+
+# Run script in all packages
+pnpm -r run <script>
+
+# Run script in specific package
+pnpm --filter @impostor/backend run <script>
+
+# Add dependency to specific package
+pnpm --filter @impostor/backend add lodash
+
+# Remove dependency from package
+pnpm --filter @impostor/frontend remove tailwindcss
+```
+
 ## Architecture Decisions
 
 - **In-Memory Games**: Games stored in GameManager, deleted after completion
 - **Clean Architecture**: Domain entities, use-cases, application services, adapters
 - **Result Pattern**: All operations return `Result<T, Error>` for explicit error handling
-- **Monorepo**: Unified workspaces for backend/frontend with shared configuration
+- **Package Manager**: pnpm workspaces for better monorepo management and faster installs
 
 ---
 

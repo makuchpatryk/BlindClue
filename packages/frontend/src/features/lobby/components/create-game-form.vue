@@ -1,6 +1,5 @@
 <<template>
   <div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-    <h2 class="text-2xl font-bold mb-4">Create Game</h2>
     <form @submit.prevent="createGame" class="space-y-4">
       <button
         type="submit"
@@ -25,6 +24,11 @@ const isCreating = ref(false);
 const error = ref<string | null>(null);
 
 async function createGame() {
+  if (!lobbyStore.playerName.trim()) {
+    error.value = 'Please enter your name';
+    return;
+  }
+
   isCreating.value = true;
   error.value = null;
 

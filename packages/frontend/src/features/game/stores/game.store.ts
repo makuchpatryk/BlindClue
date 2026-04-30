@@ -63,6 +63,10 @@ export const useGameStore = defineStore('game', () => {
     myPlayerName.value = name;
   };
 
+  const setPlayers = (list: PlayerDTO[]) => {
+    players.value = list;
+  };
+
   const addJoinRequest = (request: { requestId: string; playerName: string }) => {
     pendingJoinRequests.value.push(request);
   };
@@ -117,6 +121,7 @@ export const useGameStore = defineStore('game', () => {
     setVotes,
     setFinalScores,
     setMyPlayer,
+    setPlayers,
     addJoinRequest,
     removeJoinRequest,
     setJoinStatus,

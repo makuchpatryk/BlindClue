@@ -32,10 +32,12 @@ export class GameEventHandler {
       // First joiner becomes the host
       if (!game || game.getPlayers().length === 0) {
         this.hostSockets.set(data.gameId, socket.id);
+        socket.join(data.gameId);
         const result = await this.gameOrchestrator.joinGame(data.gameId, data.playerName);
         if (result.ok) {
-          socket.join(data.gameId);
-          socket.emit('joinGameSuccess', { playerId: result.value });
+          const game = this.gameManager.getGame(data.gameId);
+          const players = game?.getPlayers().map(p => ({ id: p.getId().value, name: p.getName(), score: p.getScore() })) ?? [];
+          socket.emit('joinGameSuccess', { playerId: result.value, players });
         } else {
           socket.emit('joinGameError', { error: result.error });
         }
@@ -56,10 +58,12 @@ export class GameEventHandler {
     socket.on('approveJoin', async (data: { requestId: string; gameId: string }) => {
       const pendingRequest = this.pendingRequests.get(data.requestId);
       if (pendingRequest) {
+        pendingRequest.socket.join(data.gameId);
         const result = await this.gameOrchestrator.joinGame(data.gameId, pendingRequest.playerName);
         if (result.ok) {
-          pendingRequest.socket.join(data.gameId);
-          pendingRequest.socket.emit('joinGameSuccess', { playerId: result.value });
+          const game = this.gameManager.getGame(data.gameId);
+          const players = game?.getPlayers().map(p => ({ id: p.getId().value, name: p.getName(), score: p.getScore() })) ?? [];
+          pendingRequest.socket.emit('joinGameSuccess', { playerId: result.value, players });
           this.pendingRequests.delete(data.requestId);
         } else {
           pendingRequest.socket.emit('joinGameError', { error: result.error });

@@ -1,27 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto">
-    <!-- Name Entry Modal -->
-    <div v-if="!myPlayerId" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-8 max-w-sm w-full">
-        <h2 class="text-2xl font-bold mb-4">Enter Your Name</h2>
-        <input
-          v-model="playerNameInput"
-          type="text"
-          placeholder="Your name"
-          class="w-full px-3 py-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          @keyup.enter="submitName"
-        />
-        <button
-          @click="submitName"
-          class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Join Game
-        </button>
-      </div>
-    </div>
-
     <!-- Approval Waiting Modal -->
-    <div v-if="myPlayerId && joinStatus === 'pending'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div v-if="joinStatus === 'pending'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-8 max-w-sm w-full">
         <h2 class="text-2xl font-bold mb-4">Waiting for approval...</h2>
         <p class="text-gray-600">The host is reviewing your request to join.</p>
@@ -59,7 +39,7 @@
           <h3 class="font-semibold mb-2">Players:</h3>
           <ul class="space-y-2">
             <li v-for="player in players" :key="player.id" class="text-gray-700">
-              {{ player.name }}
+              [{{ player.id.slice(0, 4).toUpperCase() }}] {{ player.name }}
             </li>
           </ul>
         </div>
@@ -107,16 +87,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/game.store.js';
+import { useLobbyStore } from '../../lobby/stores/lobby.store.js';
 import { getSocket } from '../../shared/utils/socket.js';
 import { GameClientService } from '../../shared/services/game-client.service.js';
 
 const route = useRoute();
 const gameStore = useGameStore();
+const lobbyStore = useLobbyStore();
 const gameId = route.params.gameId as string;
-const playerNameInput = ref<string>('');
 
 const status = computed(() => gameStore.status);
 const currentRound = computed(() => gameStore.currentRound);
@@ -138,14 +119,6 @@ const gameStatus = computed(() => {
   };
   return statusMap[status.value];
 });
-
-function submitName() {
-  if (!playerNameInput.value.trim()) return;
-  const socket = getSocket();
-  const gameClientService = GameClientService.getInstance(socket);
-  gameStore.setJoinStatus('pending');
-  gameClientService.requestJoin(gameId, playerNameInput.value);
-}
 
 function startGame() {
   const socket = getSocket();
@@ -169,5 +142,11 @@ function rejectJoin(requestId: string) {
 onMounted(async () => {
   const socket = getSocket();
   GameClientService.getInstance(socket);
+  const playerName = lobbyStore.playerName;
+  if (playerName.trim()) {
+    gameStore.setJoinStatus('pending');
+    const gameClientService = GameClientService.getInstance(socket);
+    gameClientService.requestJoin(gameId, playerName);
+  }
 });
 </script>

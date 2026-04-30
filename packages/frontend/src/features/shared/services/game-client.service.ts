@@ -61,6 +61,7 @@ export class GameClientService {
 
     this.socket.on('joinGameSuccess', (data) => {
       gameStore.setMyPlayer(data.playerId, '');
+      gameStore.setPlayers(data.players);
       gameStore.setJoinStatus('approved');
     });
 

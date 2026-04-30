@@ -1,4 +1,4 @@
-# Lobby & Player List Fixes
+-m "# Lobby & Player List Fixes
 
 ## Context
 6 bugs in lobby/game flow: duplicate headings, complex game IDs, player list not syncing across browsers, name modal in wrong place, missing waiting state, no player display tags.

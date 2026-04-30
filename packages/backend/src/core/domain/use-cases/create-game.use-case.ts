@@ -12,7 +12,7 @@ export class CreateGameUseCase {
     }
 
     const word = wordResult.value;
-    const gameId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const gameId = Array.from({ length: 6 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('');
     const game = new Game(gameId, word.getId(), word.getCategoryId());
 
     return {

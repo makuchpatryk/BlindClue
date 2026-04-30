@@ -1,6 +1,6 @@
 export class IdGenerator {
   static gameId(): string {
-    return `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return Array.from({ length: 6 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('');
   }
 
   static playerId(): string {

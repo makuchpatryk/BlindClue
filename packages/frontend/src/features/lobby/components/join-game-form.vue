@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-    <h2 class="text-2xl font-bold mb-4">Join Game</h2>
     <form @submit.prevent="joinGame" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Game Code</label>
@@ -36,6 +35,11 @@ const isJoining = ref(false);
 const error = ref<string | null>(null);
 
 function joinGame() {
+  if (!lobbyStore.playerName.trim()) {
+    error.value = 'Please enter your name';
+    return;
+  }
+
   isJoining.value = true;
   error.value = null;
 

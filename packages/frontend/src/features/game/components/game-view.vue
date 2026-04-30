@@ -52,13 +52,32 @@
       </div>
 
       <div v-else-if="status === 'RUNNING'" class="space-y-4">
-        <h2 class="text-2xl font-bold text-white">Round {{ currentRound }}/3</h2>
-        <p class="text-lg text-gray-300">Category: <strong>{{ category }}</strong></p>
-        <div v-if="isImpostor" class="text-lg text-red-400">
-          <p class="font-bold">You are the Impostor</p>
+        <RoundPhase />
+
+        <DescriptionSubmit v-if="!isImpostor" />
+        <div v-else class="bg-gray-700 rounded-lg shadow p-6">
+          <h3 class="text-xl font-bold mb-4 text-white">Waiting for descriptions...</h3>
+          <p class="text-gray-400">Listen carefully as other players describe the word!</p>
         </div>
-        <div v-else class="text-lg text-blue-400">
-          <p>Word: <span class="font-bold">{{ word }}</span></p>
+
+        <div v-if="showDescriptions" class="space-y-4">
+          <DescriptionDisplay :round="currentDisplayRound" />
+          <div class="flex gap-3">
+            <button
+              v-if="currentDisplayRound > 1"
+              @click="currentDisplayRound--"
+              class="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              ← Previous Round
+            </button>
+            <button
+              v-if="currentDisplayRound < currentRound"
+              @click="currentDisplayRound++"
+              class="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              Next Round →
+            </button>
+          </div>
         </div>
       </div>
 
@@ -68,8 +87,13 @@
       </div>
 
       <div v-else-if="status === 'ENDED'" class="space-y-4">
-        <h2 class="text-2xl font-bold text-white">Game Over</h2>
-        <div class="mt-4">
+        <h2 class="text-2xl font-bold text-white">Results</h2>
+
+        <div v-if="isImpostor && !votes" class="mb-4">
+          <ImpostorGuessPhase />
+        </div>
+
+        <div v-else class="mt-4">
           <h3 class="font-semibold mb-2 text-gray-300">Final Scores:</h3>
           <ul class="space-y-2">
             <li v-for="score in finalScores" :key="score.playerId" class="flex justify-between text-gray-400">
@@ -77,20 +101,20 @@
               <span class="font-bold text-gray-300">{{ score.score }}</span>
             </li>
           </ul>
+          <button
+            @click="$router.push('/')"
+            class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Back to Lobby
+          </button>
         </div>
-        <button
-          @click="$router.push('/')"
-          class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Back to Lobby
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide } from 'vue';
+import { computed, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/game.store.js';
 import { useLobbyStore } from '../../lobby/stores/lobby.store.js';
@@ -98,6 +122,10 @@ import { getSocket } from '../../shared/utils/socket.js';
 import { GameClientService } from '../../shared/services/game-client.service.js';
 import VotingPhase from './voting-phase.vue';
 import RevealPhase from './reveal-phase.vue';
+import RoundPhase from './round-phase.vue';
+import DescriptionSubmit from './description-submit.vue';
+import DescriptionDisplay from './description-display.vue';
+import ImpostorGuessPhase from './impostor-guess-phase.vue';
 
 const route = useRoute();
 const gameStore = useGameStore();
@@ -120,6 +148,13 @@ const joinStatus = computed(() => gameStore.joinStatus);
 const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
 const canStartGame = computed(() => players.value.length >= 2);
 const votes = computed(() => gameStore.votes);
+const currentDisplayRound = ref(1);
+
+const descriptions = computed(() => gameStore.descriptions);
+const showDescriptions = computed(() => {
+  return descriptions.value.get(currentRound.value) &&
+         descriptions.value.get(currentRound.value).length > 0;
+});
 
 function startGame() {
   const socket = getSocket();

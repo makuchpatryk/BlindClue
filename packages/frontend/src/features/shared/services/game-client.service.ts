@@ -28,7 +28,7 @@ export class GameClientService {
     });
 
     this.socket.on('RoundSubmitted', (data) => {
-      gameStore.setRoundSubmitted(data.round);
+      gameStore.setRoundSubmitted(data.round, data.descriptions);
     });
 
     this.socket.on('VotingStarted', () => {

@@ -40,8 +40,11 @@ export const useGameStore = defineStore('game', () => {
     status.value = newStatus;
   };
 
-  const setRoundSubmitted = (round: number) => {
+  const setRoundSubmitted = (round: number, descs?: any[]) => {
     currentRound.value = round;
+    if (descs) {
+      descriptions.set(round, descs);
+    }
   };
 
   const addPlayer = (player: PlayerDTO) => {

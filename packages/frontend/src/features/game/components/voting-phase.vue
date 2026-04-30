@@ -1,33 +1,46 @@
 <template>
   <div class="bg-gray-700 rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4 text-white">Vote for the Impostor</h3>
-    <p class="text-gray-400 mb-6">Who do you think is the impostor?</p>
+    <h3 class="text-2xl font-bold mb-4 text-white text-center">Who is the impostor?</h3>
+    <p class="text-gray-400 mb-6 text-center">Select a player and confirm your vote</p>
 
-    <div class="space-y-3">
+    <PlayerSelectionList :disabled="isVoting" />
+
+    <div v-if="selectedPlayerId" class="mt-6">
       <button
-        v-for="player in players"
-        :key="player.id"
-        @click="vote(player.id)"
+        @click="vote"
         :disabled="isVoting"
-        class="w-full p-4 text-left border-2 border-gray-600 rounded hover:border-blue-400 hover:bg-gray-600 disabled:opacity-50 transition text-white font-semibold"
+        class="w-full px-6 py-3 bg-green-600 text-white text-lg font-bold rounded hover:bg-green-700 disabled:opacity-50 transition"
       >
-        {{ player.name }}
+        {{ isVoting ? 'Voting...' : 'Show Impostor' }}
       </button>
+    </div>
+    <div v-else class="mt-6">
+      <button disabled class="w-full px-6 py-3 bg-gray-600 text-gray-400 text-lg font-bold rounded opacity-50 cursor-not-allowed">
+        Select a player first
+      </button>
+      <p class="text-sm text-gray-400 text-center mt-2">Choose who you think the impostor is above</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useGameStore } from '../stores/game.store.js';
 import { useGameState } from '../composables/use-game-state.js';
+import PlayerSelectionList from './player-selection-list.vue';
 
-const { voteImpostor, players } = useGameState();
+const { voteImpostor } = useGameState();
+const gameStore = useGameStore();
 const isVoting = ref(false);
 
-async function vote(playerId: string) {
+const selectedPlayerId = computed(() => gameStore.selectedImpostorGuess);
+
+async function vote() {
+  if (!selectedPlayerId.value) return;
+
   isVoting.value = true;
   try {
-    voteImpostor(playerId);
+    voteImpostor(selectedPlayerId.value);
   } finally {
     isVoting.value = false;
   }

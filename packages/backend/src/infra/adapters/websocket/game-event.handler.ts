@@ -182,6 +182,14 @@ export class GameEventHandler {
       });
     });
 
+    socket.on('advanceTurn', (data: { gameId: string; playerId: string; currentPlayerIndex: number; playersClickedThisRound: string[]; isNextButtonBlocked: boolean }) => {
+      this.socketGateway.broadcastPlayerTurnAdvanced(data.gameId, data.currentPlayerIndex, data.playersClickedThisRound, data.isNextButtonBlocked);
+    });
+
+    socket.on('unblockButton', (data: { gameId: string }) => {
+      this.socketGateway.broadcastButtonUnblocked(data.gameId);
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
       const socketPlayer = this.socketToPlayer.get(socket.id);

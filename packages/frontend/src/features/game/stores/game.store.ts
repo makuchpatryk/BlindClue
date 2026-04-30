@@ -19,8 +19,16 @@ export const useGameStore = defineStore('game', () => {
   const myPlayerName = ref<string>('');
   const pendingJoinRequests = ref<Array<{ requestId: string; playerName: string }>>([]);
   const joinStatus = ref<'idle' | 'pending' | 'approved' | 'rejected'>('idle');
+  const currentPlayerIndex = ref<number>(0);
+  const playersClickedThisRound = ref<Set<string>>(new Set());
+  const selectedImpostorGuess = ref<string | null>(null);
+  const isNextButtonBlocked = ref<boolean>(false);
 
-  const currentPlayer = computed(() => players.value[0] || null);
+  const currentPlayer = computed(() => players.value[currentPlayerIndex.value] || null);
+
+  const canShowShowImpostorButton = computed(() => {
+    return currentRound.value === 3 && playersClickedThisRound.value.size === players.value.length;
+  });
 
   const setGameStarted = (data: {
     gameId: string;
@@ -88,6 +96,56 @@ export const useGameStore = defineStore('game', () => {
     word.value = wordText;
   };
 
+  const setCurrentPlayerIndex = (index: number) => {
+    currentPlayerIndex.value = index;
+  };
+
+  const setPlayersClicked = (players: string[]) => {
+    playersClickedThisRound.value = new Set(players);
+  };
+
+  const setNextButtonBlocked = (blocked: boolean) => {
+    isNextButtonBlocked.value = blocked;
+  };
+
+  const advancePlayerTurn = (currentPlayerId: string) => {
+    if (!playersClickedThisRound.value.has(currentPlayerId)) {
+      playersClickedThisRound.value.add(currentPlayerId);
+    }
+
+    if (playersClickedThisRound.value.size === players.value.length) {
+      if (currentRound.value < 3) {
+        currentRound.value++;
+        playersClickedThisRound.value = new Set();
+        currentPlayerIndex.value = 0;
+        isNextButtonBlocked.value = false;
+      }
+    } else {
+      currentPlayerIndex.value = (currentPlayerIndex.value + 1) % players.value.length;
+      isNextButtonBlocked.value = true;
+    }
+  };
+
+  const hasPlayerClickedThisRound = (playerId: string) => {
+    return playersClickedThisRound.value.has(playerId);
+  };
+
+  const unblockNextButton = () => {
+    isNextButtonBlocked.value = false;
+  };
+
+  const resetRoundClicks = () => {
+    playersClickedThisRound.value = new Set();
+  };
+
+  const selectImpostorGuess = (playerId: string) => {
+    selectedImpostorGuess.value = playerId;
+  };
+
+  const clearImpostorGuess = () => {
+    selectedImpostorGuess.value = null;
+  };
+
   const reset = () => {
     gameId.value = '';
     status.value = 'LOBBY';
@@ -105,6 +163,10 @@ export const useGameStore = defineStore('game', () => {
     myPlayerName.value = '';
     pendingJoinRequests.value = [];
     joinStatus.value = 'idle';
+    currentPlayerIndex.value = 0;
+    playersClickedThisRound.value = new Set();
+    selectedImpostorGuess.value = null;
+    isNextButtonBlocked.value = false;
   };
 
   return {
@@ -125,6 +187,11 @@ export const useGameStore = defineStore('game', () => {
     pendingJoinRequests,
     joinStatus,
     currentPlayer,
+    currentPlayerIndex,
+    playersClickedThisRound,
+    selectedImpostorGuess,
+    isNextButtonBlocked,
+    canShowShowImpostorButton,
     setGameStarted,
     setStatus,
     setRoundSubmitted,
@@ -137,6 +204,15 @@ export const useGameStore = defineStore('game', () => {
     removeJoinRequest,
     setJoinStatus,
     setWord,
+    setCurrentPlayerIndex,
+    setPlayersClicked,
+    setNextButtonBlocked,
+    advancePlayerTurn,
+    resetRoundClicks,
+    hasPlayerClickedThisRound,
+    unblockNextButton,
+    selectImpostorGuess,
+    clearImpostorGuess,
     reset,
   };
 });

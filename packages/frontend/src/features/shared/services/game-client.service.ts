@@ -90,6 +90,16 @@ export class GameClientService {
       gameStore.setWord(data.word);
     });
 
+    this.socket.on('PlayerTurnAdvanced', (data) => {
+      gameStore.setCurrentPlayerIndex(data.currentPlayerIndex);
+      gameStore.setPlayersClicked(data.playersClickedThisRound);
+      gameStore.setNextButtonBlocked(data.isNextButtonBlocked);
+    });
+
+    this.socket.on('ButtonUnblocked', (data) => {
+      gameStore.setNextButtonBlocked(data.isNextButtonBlocked);
+    });
+
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
     });
@@ -125,5 +135,13 @@ export class GameClientService {
 
   startGame(gameId: string): void {
     this.socket.emit('startGame', { gameId });
+  }
+
+  advanceTurn(gameId: string, playerId: string, currentPlayerIndex: number, playersClickedThisRound: string[], isNextButtonBlocked: boolean): void {
+    this.socket.emit('advanceTurn', { gameId, playerId, currentPlayerIndex, playersClickedThisRound, isNextButtonBlocked });
+  }
+
+  unblockButton(gameId: string): void {
+    this.socket.emit('unblockButton', { gameId });
   }
 }

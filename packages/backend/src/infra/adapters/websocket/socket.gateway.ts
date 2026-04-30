@@ -74,4 +74,12 @@ export class SocketGateway {
   sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void {
     this.io.to(hostSocketId).emit('JoinRequest', event);
   }
+
+  broadcastPlayerTurnAdvanced(gameId: string, currentPlayerIndex: number, playersClickedThisRound: string[], isNextButtonBlocked: boolean): void {
+    this.io.to(gameId).emit('PlayerTurnAdvanced', { gameId, currentPlayerIndex, playersClickedThisRound, isNextButtonBlocked });
+  }
+
+  broadcastButtonUnblocked(gameId: string): void {
+    this.io.to(gameId).emit('ButtonUnblocked', { gameId, isNextButtonBlocked: false });
+  }
 }

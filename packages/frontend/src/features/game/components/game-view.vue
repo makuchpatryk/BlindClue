@@ -60,8 +60,8 @@
       </div>
 
       <div v-else-if="status === 'VOTING'" class="space-y-4">
-        <h2 class="text-2xl font-bold">Voting Phase</h2>
-        <p class="text-gray-600">Who is the impostor?</p>
+        <VotingPhase v-if="!votes" />
+        <RevealPhase v-else />
       </div>
 
       <div v-else-if="status === 'ENDED'" class="space-y-4">
@@ -87,17 +87,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/game.store.js';
 import { useLobbyStore } from '../../lobby/stores/lobby.store.js';
 import { getSocket } from '../../shared/utils/socket.js';
 import { GameClientService } from '../../shared/services/game-client.service.js';
+import VotingPhase from './voting-phase.vue';
+import RevealPhase from './reveal-phase.vue';
 
 const route = useRoute();
 const gameStore = useGameStore();
 const lobbyStore = useLobbyStore();
 const gameId = route.params.gameId as string;
+
+const socket = getSocket();
+const gameClientService = GameClientService.getInstance(socket);
+provide('gameClientService', gameClientService);
 
 const status = computed(() => gameStore.status);
 const currentRound = computed(() => gameStore.currentRound);
@@ -109,6 +115,7 @@ const myPlayerId = computed(() => gameStore.myPlayerId);
 const joinStatus = computed(() => gameStore.joinStatus);
 const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
 const canStartGame = computed(() => players.value.length >= 2);
+const votes = computed(() => gameStore.votes);
 
 const gameStatus = computed(() => {
   const statusMap = {
@@ -140,12 +147,25 @@ function rejectJoin(requestId: string) {
 }
 
 onMounted(async () => {
-  const socket = getSocket();
-  GameClientService.getInstance(socket);
+  gameStore.gameId = gameId;
+
+  const sessionStr = localStorage.getItem('game_session');
+  if (sessionStr) {
+    try {
+      const session = JSON.parse(sessionStr);
+      if (session.gameId === gameId) {
+        gameStore.setJoinStatus('pending');
+        gameClientService.rejoinGame(gameId, session.playerId);
+        return;
+      }
+    } catch (e) {
+      localStorage.removeItem('game_session');
+    }
+  }
+
   const playerName = lobbyStore.playerName;
   if (playerName.trim()) {
     gameStore.setJoinStatus('pending');
-    const gameClientService = GameClientService.getInstance(socket);
     gameClientService.requestJoin(gameId, playerName);
   }
 });

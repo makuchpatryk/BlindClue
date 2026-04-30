@@ -2,6 +2,8 @@ import { GameApplicationService } from './game.application-service.js';
 import { GameManager } from './game-manager.js';
 import { Result, ResultError } from '../utils/result.js';
 import { GameStatus } from '../../core/domain/value-objects/game-status.js';
+import { IWordRepository } from '../../core/domain/ports/word.repository.js';
+import { ICategoryRepository } from '../../core/domain/ports/category.repository.js';
 
 export interface JoinRequestEvent {
   gameId: string;
@@ -12,7 +14,7 @@ export interface JoinRequestEvent {
 export interface SocketGateway {
   broadcastGameCreated(gameId: string): void;
   broadcastPlayerJoined(gameId: string, playerId: string, playerName: string): void;
-  broadcastGameStarted(gameId: string): void;
+  broadcastGameStarted(gameId: string, category: string, impostorId: string, players: Array<{ id: string; name: string }>): void;
   broadcastRoundSubmitted(gameId: string, round: number): void;
   broadcastVotingStarted(gameId: string): void;
   broadcastVotesRevealed(gameId: string, voteMap: Map<string, number>, mostVoted: string): void;
@@ -25,7 +27,9 @@ export class GameOrchestrator {
 
   constructor(
     private gameApplicationService: GameApplicationService,
-    private socketGateway: SocketGateway
+    private socketGateway: SocketGateway,
+    private wordRepository: IWordRepository,
+    private categoryRepository: ICategoryRepository
   ) {
     this.gameManager = GameManager.getInstance();
   }
@@ -49,7 +53,18 @@ export class GameOrchestrator {
   async startGame(gameId: string): Promise<Result<void, ResultError>> {
     const result = await this.gameApplicationService.startGame(gameId);
     if (result.ok) {
-      this.socketGateway.broadcastGameStarted(gameId);
+      const game = this.gameManager.getGame(gameId);
+      if (game) {
+        const wordResult = await this.wordRepository.findById(game.getWordId());
+        if (wordResult.ok) {
+          const categoryResult = await this.categoryRepository.findById(wordResult.value.getCategoryId());
+          if (categoryResult.ok) {
+            game.setCategoryName(categoryResult.value.name);
+          }
+        }
+        const players = game.getPlayers().map(p => ({ id: p.getId().value, name: p.getName() }));
+        this.socketGateway.broadcastGameStarted(gameId, game.getCategoryName(), game.getImpostorId()!, players);
+      }
     }
     return result;
   }

@@ -32,6 +32,7 @@ export const useGameStore = defineStore('game', () => {
     category.value = data.category;
     impostorId.value = data.impostorId;
     players.value = data.players;
+    isImpostor.value = data.impostorId === myPlayerId.value;
   };
 
   const setStatus = (newStatus: 'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED') => {

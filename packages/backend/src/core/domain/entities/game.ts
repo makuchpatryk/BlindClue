@@ -11,6 +11,7 @@ export class Game {
   private descriptions: Map<number, RoundSubmission[]> = new Map();
   private votes: Map<string, string> = new Map();
   private impostorGuess: string | null = null;
+  private categoryName: string = '';
   private createdAt: Date;
 
   constructor(
@@ -162,5 +163,13 @@ export class Game {
 
   getImpostorGuess(): string | null {
     return this.impostorGuess;
+  }
+
+  setCategoryName(name: string): void {
+    this.categoryName = name;
+  }
+
+  getCategoryName(): string {
+    return this.categoryName;
   }
 }

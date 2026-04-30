@@ -63,10 +63,27 @@ export class GameClientService {
       gameStore.setMyPlayer(data.playerId, '');
       gameStore.setPlayers(data.players);
       gameStore.setJoinStatus('approved');
+      localStorage.setItem('game_session', JSON.stringify({ gameId: gameStore.gameId, playerId: data.playerId }));
     });
 
     this.socket.on('joinGameError', (data) => {
       gameStore.setJoinStatus('rejected');
+      localStorage.removeItem('game_session');
+    });
+
+    this.socket.on('rejoinSuccess', (data) => {
+      const gameId = data.gameId || gameStore.gameId;
+      gameStore.setMyPlayer(data.playerId, '');
+      gameStore.setPlayers(data.players);
+      gameStore.setStatus(data.status);
+      if (data.category) gameStore.setGameStarted({ gameId, category: data.category, impostorId: data.impostorId, players: data.players });
+      gameStore.setJoinStatus('approved');
+      localStorage.setItem('game_session', JSON.stringify({ gameId, playerId: data.playerId }));
+    });
+
+    this.socket.on('rejoinError', () => {
+      gameStore.setJoinStatus('rejected');
+      localStorage.removeItem('game_session');
     });
 
     this.socket.on('error', (error) => {
@@ -88,6 +105,10 @@ export class GameClientService {
 
   requestJoin(gameId: string, playerName: string): void {
     this.socket.emit('requestJoin', { gameId, playerName });
+  }
+
+  rejoinGame(gameId: string, playerId: string): void {
+    this.socket.emit('rejoinGame', { gameId, playerId });
   }
 
   approveJoin(requestId: string, gameId: string): void {

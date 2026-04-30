@@ -16,10 +16,11 @@ export function useGameState() {
   const votes = computed(() => gameStore.votes);
   const mostVoted = computed(() => gameStore.mostVoted);
   const finalScores = computed(() => gameStore.finalScores);
+  const myPlayerId = computed(() => gameStore.myPlayerId);
 
   const submitDescription = (description: string) => {
     const gameId = gameStore.gameId;
-    const playerId = gameStore.players[0]?.id;
+    const playerId = myPlayerId.value;
     if (gameClientService && playerId) {
       gameClientService.submitDescription(gameId, playerId, description);
     }
@@ -27,7 +28,7 @@ export function useGameState() {
 
   const voteImpostor = (votedForId: string) => {
     const gameId = gameStore.gameId;
-    const playerId = gameStore.players[0]?.id;
+    const playerId = myPlayerId.value;
     if (gameClientService && playerId) {
       gameClientService.voteImpostor(gameId, playerId, votedForId);
     }
@@ -51,6 +52,7 @@ export function useGameState() {
     votes,
     mostVoted,
     finalScores,
+    myPlayerId,
     submitDescription,
     voteImpostor,
     guessWord,

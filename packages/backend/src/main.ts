@@ -37,7 +37,7 @@ const categoryRepository = new CategoryRepository(db);
 const gameApplicationService = new GameApplicationService(wordRepository);
 const adminGameService = new AdminGameService(categoryRepository, wordRepository);
 const socketGateway = new SocketGateway(io);
-const gameOrchestrator = new GameOrchestrator(gameApplicationService, socketGateway);
+const gameOrchestrator = new GameOrchestrator(gameApplicationService, socketGateway, wordRepository, categoryRepository);
 const gameEventHandler = new GameEventHandler(gameOrchestrator, wordRepository);
 
 // Register HTTP routes

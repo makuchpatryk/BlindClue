@@ -1,9 +1,9 @@
 <template>
-  <div id="app" class="min-h-screen bg-gray-50">
-    <header class="bg-white shadow">
+  <div id="app" class="min-h-screen bg-gray-900 text-gray-100">
+    <header class="bg-gray-800 shadow">
       <nav class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
-          <router-link to="/" class="text-2xl font-bold text-blue-600">Impostor</router-link>
+          <router-link to="/" class="text-2xl font-bold text-blue-400">Impostor</router-link>
         </div>
       </nav>
     </header>

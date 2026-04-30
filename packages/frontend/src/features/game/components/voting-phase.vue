@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4">Vote for the Impostor</h3>
-    <p class="text-gray-600 mb-6">Who do you think is the impostor?</p>
+  <div class="bg-gray-700 rounded-lg shadow p-6">
+    <h3 class="text-xl font-bold mb-4 text-white">Vote for the Impostor</h3>
+    <p class="text-gray-400 mb-6">Who do you think is the impostor?</p>
 
     <div class="space-y-3">
       <button
@@ -9,9 +9,9 @@
         :key="player.id"
         @click="vote(player.id)"
         :disabled="isVoting"
-        class="w-full p-4 text-left border-2 border-gray-300 rounded hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 transition"
+        class="w-full p-4 text-left border-2 border-gray-600 rounded hover:border-blue-400 hover:bg-gray-600 disabled:opacity-50 transition text-white font-semibold"
       >
-        <span class="font-semibold">{{ player.name }}</span>
+        {{ player.name }}
       </button>
     </div>
   </div>

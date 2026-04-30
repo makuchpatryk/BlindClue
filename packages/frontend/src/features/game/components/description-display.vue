@@ -1,13 +1,13 @@
 <template>
-  <div class="bg-white rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4">Round {{ round }} Descriptions</h3>
-    <div v-if="roundDescriptions.length === 0" class="text-gray-500 text-center py-4">
+  <div class="bg-gray-700 rounded-lg shadow p-6">
+    <h3 class="text-xl font-bold mb-4 text-white">Round {{ round }} Descriptions</h3>
+    <div v-if="roundDescriptions.length === 0" class="text-gray-400 text-center py-4">
       Waiting for descriptions...
     </div>
     <div v-else class="space-y-4">
-      <div v-for="desc in roundDescriptions" :key="desc.id" class="p-4 bg-gray-50 rounded">
-        <p class="font-semibold text-gray-700">{{ desc.playerName }}</p>
-        <p class="text-gray-600 mt-2">{{ desc.text }}</p>
+      <div v-for="desc in roundDescriptions" :key="desc.id" class="p-4 bg-gray-600 rounded">
+        <p class="font-semibold text-gray-200">{{ desc.playerName }}</p>
+        <p class="text-gray-300 mt-2">{{ desc.text }}</p>
       </div>
     </div>
   </div>
@@ -21,7 +21,7 @@ interface Props {
   round: number;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const { descriptions } = useGameState();
 

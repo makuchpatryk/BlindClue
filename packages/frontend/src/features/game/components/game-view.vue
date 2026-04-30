@@ -60,8 +60,9 @@
           <div class="text-center">
             <h3 class="text-sm font-semibold text-gray-400 mb-2">ROUND {{ currentRound }}/3</h3>
             <h2 class="text-3xl font-bold text-white mb-4">It's {{ currentPlayer?.name }}'s turn</h2>
-            <div class="bg-gray-800 rounded p-4 mb-6">
+            <div class="bg-gray-800 rounded p-4 mb-6 space-y-3">
               <p class="text-gray-300 text-lg">Category: <span class="text-yellow-400 font-bold">{{ isImpostor ? category : '???' }}</span></p>
+              <p v-if="!isImpostor && word" class="text-gray-300 text-lg">Word to guess: <span class="text-green-400 font-bold">{{ word }}</span></p>
             </div>
 
             <div v-if="currentRound < 3 || playersClickedThisRound.size < players.length" class="space-y-4">

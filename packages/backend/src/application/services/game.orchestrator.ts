@@ -61,6 +61,7 @@ export class GameOrchestrator {
           if (categoryResult.ok) {
             game.setCategoryName(categoryResult.value.name);
           }
+          game.setWord(wordResult.value.getText());
         }
         const players = game.getPlayers().map(p => ({ id: p.getId().value, name: p.getName() }));
         this.socketGateway.broadcastGameStarted(gameId, game.getCategoryName(), game.getImpostorId()!, players);

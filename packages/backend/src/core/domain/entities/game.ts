@@ -12,6 +12,7 @@ export class Game {
   private votes: Map<string, string> = new Map();
   private impostorGuess: string | null = null;
   private categoryName: string = '';
+  private word: string = '';
   private createdAt: Date;
 
   constructor(
@@ -171,5 +172,13 @@ export class Game {
 
   getCategoryName(): string {
     return this.categoryName;
+  }
+
+  setWord(wordText: string): void {
+    this.word = wordText;
+  }
+
+  getWord(): string {
+    return this.word;
   }
 }

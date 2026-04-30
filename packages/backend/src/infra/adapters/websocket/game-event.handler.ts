@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { GameOrchestrator } from '../../../application/services/game.orchestrator.js';
 import { GameManager } from '../../../application/services/game-manager.js';
 import { IWordRepository } from '../../../core/domain/ports/word.repository.js';
+import { SocketGateway } from './socket.gateway.js';
 
 interface PendingRequest {
   socket: Socket;
@@ -24,7 +25,8 @@ export class GameEventHandler {
 
   constructor(
     private gameOrchestrator: GameOrchestrator,
-    private wordRepository: IWordRepository
+    private wordRepository: IWordRepository,
+    private socketGateway: SocketGateway
   ) {
     this.gameManager = GameManager.getInstance();
   }
@@ -93,7 +95,21 @@ export class GameEventHandler {
 
     socket.on('startGame', async (data: { gameId: string }) => {
       const result = await this.gameOrchestrator.startGame(data.gameId);
-      if (!result.ok) {
+      if (result.ok) {
+        const game = this.gameManager.getGame(data.gameId);
+        if (game) {
+          const impostorId = game.getImpostorId();
+          const word = game.getWord();
+          if (impostorId && word) {
+            const impostorSocketId = Array.from(this.socketToPlayer.entries()).find(
+              ([_, player]) => player.playerId === impostorId && player.gameId === data.gameId
+            )?.[0];
+            if (impostorSocketId) {
+              this.socketGateway.broadcastWordRevealed(data.gameId, impostorSocketId, word);
+            }
+          }
+        }
+      } else {
         socket.emit('error', { error: result.error });
       }
     });

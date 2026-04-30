@@ -38,7 +38,7 @@ const gameApplicationService = new GameApplicationService(wordRepository);
 const adminGameService = new AdminGameService(categoryRepository, wordRepository);
 const socketGateway = new SocketGateway(io);
 const gameOrchestrator = new GameOrchestrator(gameApplicationService, socketGateway, wordRepository, categoryRepository);
-const gameEventHandler = new GameEventHandler(gameOrchestrator, wordRepository);
+const gameEventHandler = new GameEventHandler(gameOrchestrator, wordRepository, socketGateway);
 
 // Register HTTP routes
 await registerRoutes(fastify, adminGameService, gameApplicationService, gameOrchestrator);

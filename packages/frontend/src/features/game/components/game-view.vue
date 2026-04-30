@@ -55,8 +55,12 @@
       <div v-else-if="status === 'RUNNING'" class="space-y-4">
         <h2 class="text-2xl font-bold">Round {{ currentRound }}/3</h2>
         <p class="text-lg">Category: <strong>{{ category }}</strong></p>
-        <p v-if="!isImpostor" class="text-lg text-blue-600">You know the word</p>
-        <p v-else class="text-lg text-red-600">You are the Impostor</p>
+        <div v-if="isImpostor" class="text-lg text-red-600">
+          <p class="font-bold">You are the Impostor</p>
+        </div>
+        <div v-else class="text-lg text-blue-600">
+          <p>Word: <span class="font-bold">{{ word }}</span></p>
+        </div>
       </div>
 
       <div v-else-if="status === 'VOTING'" class="space-y-4">
@@ -108,6 +112,7 @@ provide('gameClientService', gameClientService);
 const status = computed(() => gameStore.status);
 const currentRound = computed(() => gameStore.currentRound);
 const category = computed(() => gameStore.category);
+const word = computed(() => gameStore.word);
 const isImpostor = computed(() => gameStore.isImpostor);
 const players = computed(() => gameStore.players);
 const finalScores = computed(() => gameStore.finalScores);

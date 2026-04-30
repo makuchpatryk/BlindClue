@@ -7,6 +7,7 @@ export const useGameStore = defineStore('game', () => {
   const status = ref<'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED'>('LOBBY');
   const currentRound = ref<number>(1);
   const category = ref<string>('');
+  const word = ref<string>('');
   const isImpostor = ref<boolean>(false);
   const impostorId = ref<string | null>(null);
   const players = ref<PlayerDTO[]>([]);
@@ -80,11 +81,16 @@ export const useGameStore = defineStore('game', () => {
     joinStatus.value = status;
   };
 
+  const setWord = (wordText: string) => {
+    word.value = wordText;
+  };
+
   const reset = () => {
     gameId.value = '';
     status.value = 'LOBBY';
     currentRound.value = 1;
     category.value = '';
+    word.value = '';
     isImpostor.value = false;
     impostorId.value = null;
     players.value = [];
@@ -103,6 +109,7 @@ export const useGameStore = defineStore('game', () => {
     status,
     currentRound,
     category,
+    word,
     isImpostor,
     impostorId,
     players,
@@ -126,6 +133,7 @@ export const useGameStore = defineStore('game', () => {
     addJoinRequest,
     removeJoinRequest,
     setJoinStatus,
+    setWord,
     reset,
   };
 });

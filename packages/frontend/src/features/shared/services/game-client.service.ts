@@ -86,6 +86,10 @@ export class GameClientService {
       localStorage.removeItem('game_session');
     });
 
+    this.socket.on('wordRevealed', (data) => {
+      gameStore.setWord(data.word);
+    });
+
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
     });

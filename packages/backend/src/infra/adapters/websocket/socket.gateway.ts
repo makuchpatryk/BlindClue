@@ -33,6 +33,20 @@ export class SocketGateway {
     this.io.to(gameId).emit('GameStarted', event);
   }
 
+  broadcastWordRevealed(gameId: string, impostorSocketId: string, word: string): void {
+    const room = this.io.sockets.adapter.rooms.get(gameId);
+    if (room) {
+      for (const socketId of room) {
+        if (socketId !== impostorSocketId) {
+          const socket = this.io.sockets.sockets.get(socketId);
+          if (socket) {
+            socket.emit('wordRevealed', { gameId, word });
+          }
+        }
+      }
+    }
+  }
+
   broadcastRoundSubmitted(gameId: string, round: number): void {
     const event: RoundSubmittedEvent = { gameId, round };
     this.io.to(gameId).emit('RoundSubmitted', event);

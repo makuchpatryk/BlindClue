@@ -3,8 +3,15 @@ import { GameOrchestrator } from '../../../application/services/game.orchestrato
 import { GameManager } from '../../../application/services/game-manager.js';
 import { IWordRepository } from '../../../core/domain/ports/word.repository.js';
 
+interface PendingRequest {
+  socket: Socket;
+  playerName: string;
+}
+
 export class GameEventHandler {
   private gameManager: GameManager;
+  private pendingRequests: Map<string, PendingRequest> = new Map();
+  private hostSockets: Map<string, string> = new Map();
 
   constructor(
     private gameOrchestrator: GameOrchestrator,
@@ -13,14 +20,58 @@ export class GameEventHandler {
     this.gameManager = GameManager.getInstance();
   }
 
+  private generateRequestId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   register(socket: Socket): void {
-    socket.on('joinGame', async (data: { gameId: string; playerName: string }) => {
-      const result = await this.gameOrchestrator.joinGame(data.gameId, data.playerName);
-      if (result.ok) {
-        socket.join(data.gameId);
-        socket.emit('joinGameSuccess', { playerId: result.value });
+    socket.on('requestJoin', async (data: { gameId: string; playerName: string }) => {
+      const requestId = this.generateRequestId();
+      const game = this.gameManager.getGame(data.gameId);
+
+      // First joiner becomes the host
+      if (!game || game.getPlayers().length === 0) {
+        this.hostSockets.set(data.gameId, socket.id);
+        const result = await this.gameOrchestrator.joinGame(data.gameId, data.playerName);
+        if (result.ok) {
+          socket.join(data.gameId);
+          socket.emit('joinGameSuccess', { playerId: result.value });
+        } else {
+          socket.emit('joinGameError', { error: result.error });
+        }
       } else {
-        socket.emit('joinGameError', { error: result.error });
+        // Subsequent joiners send request to host
+        this.pendingRequests.set(requestId, { socket, playerName: data.playerName });
+        const hostSocketId = this.hostSockets.get(data.gameId);
+        if (hostSocketId) {
+          this.gameOrchestrator.sendJoinRequestToHost(hostSocketId, {
+            gameId: data.gameId,
+            requestId,
+            playerName: data.playerName,
+          });
+        }
+      }
+    });
+
+    socket.on('approveJoin', async (data: { requestId: string; gameId: string }) => {
+      const pendingRequest = this.pendingRequests.get(data.requestId);
+      if (pendingRequest) {
+        const result = await this.gameOrchestrator.joinGame(data.gameId, pendingRequest.playerName);
+        if (result.ok) {
+          pendingRequest.socket.join(data.gameId);
+          pendingRequest.socket.emit('joinGameSuccess', { playerId: result.value });
+          this.pendingRequests.delete(data.requestId);
+        } else {
+          pendingRequest.socket.emit('joinGameError', { error: result.error });
+        }
+      }
+    });
+
+    socket.on('rejectJoin', (data: { requestId: string }) => {
+      const pendingRequest = this.pendingRequests.get(data.requestId);
+      if (pendingRequest) {
+        pendingRequest.socket.emit('joinGameError', { error: 'Host rejected your request' });
+        this.pendingRequests.delete(data.requestId);
       }
     });
 

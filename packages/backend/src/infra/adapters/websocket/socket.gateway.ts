@@ -7,6 +7,7 @@ import {
   PlayerJoinedEvent,
   GameStartedEvent,
   GameCreatedEvent,
+  JoinRequestEvent,
 } from './events.js';
 
 export class SocketGateway {
@@ -54,5 +55,9 @@ export class SocketGateway {
   broadcastGameEnded(gameId: string, scores: Array<{ playerId: string; playerName: string; score: number }>): void {
     const event: GameEndedEvent = { gameId, scores };
     this.io.to(gameId).emit('GameEnded', event);
+  }
+
+  sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void {
+    this.io.to(hostSocketId).emit('JoinRequest', event);
   }
 }

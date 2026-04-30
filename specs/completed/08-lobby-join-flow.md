@@ -1,7 +1,8 @@
 ---
 title: Lobby Join Flow — Name Popup + Host Approval
 phase: 7
-status: todo
+status: completed
+completedDate: 2026-04-24
 ---
 
 # Task: Lobby Join Flow
@@ -81,3 +82,40 @@ On reject: joiner sees "Host rejected your request"
 - Tab B enters name → Tab A sees approval popup
 - Tab A approves → both tabs show player in list
 - Test rejection: Tab A rejects → Tab B shows rejection message
+
+## Completion Notes
+
+### Implemented Changes
+
+**Backend:**
+- ✅ `events.ts`: Added JoinRequestEvent, JoinApprovedEvent, JoinRejectedEvent interfaces
+- ✅ `socket.gateway.ts`: Added sendJoinRequestToHost() method + imported JoinRequestEvent
+- ✅ `game.orchestrator.ts`: Added JoinRequestEvent interface and sendJoinRequestToHost() delegation method
+- ✅ `game-event.handler.ts`: 
+  - Changed 'joinGame' handler to 'requestJoin'
+  - Added pendingRequests and hostSockets tracking maps
+  - Implemented approveJoin and rejectJoin handlers
+  - First joiner automatically becomes host
+
+**Frontend:**
+- ✅ `game.store.ts`: Added myPlayerId, myPlayerName, pendingJoinRequests, joinStatus state + setter methods
+- ✅ `game-client.service.ts`:
+  - Added listeners for JoinRequest, joinGameSuccess, joinGameError
+  - Changed joinGame() to requestJoin()
+  - Added approveJoin() and rejectJoin() emit methods
+- ✅ `game-view.vue`:
+  - Added name entry modal (shown when myPlayerId is empty)
+  - Added approval waiting modal (shown when joinStatus is 'pending')
+  - Added host approval modal (shown when pendingJoinRequests exist)
+  - Implemented submitName(), approveJoin(), rejectJoin() functions
+- ✅ `create-game-form.vue`: Removed name input field, now just creates game and navigates
+- ✅ `join-game-form.vue`: Removed name input field, now just navigates to game
+
+### Flow Summary
+1. Game creator or player navigates to /game/:gameId
+2. Name entry modal appears (no myPlayerId yet)
+3. First joiner auto-becomes host and gets joinGameSuccess
+4. Subsequent joiners send requestJoin, which notifies host
+5. Host sees approval popup and can allow/deny
+6. On approval: joiner receives joinGameSuccess and enters lobby
+7. On rejection: joiner sees rejection message

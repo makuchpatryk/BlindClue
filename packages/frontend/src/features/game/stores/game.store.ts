@@ -14,6 +14,10 @@ export const useGameStore = defineStore('game', () => {
   const votes = ref<Map<string, number> | null>(null);
   const mostVoted = ref<string | null>(null);
   const finalScores = ref<ScoreDTO[]>([]);
+  const myPlayerId = ref<string>('');
+  const myPlayerName = ref<string>('');
+  const pendingJoinRequests = ref<Array<{ requestId: string; playerName: string }>>([]);
+  const joinStatus = ref<'idle' | 'pending' | 'approved' | 'rejected'>('idle');
 
   const currentPlayer = computed(() => players.value[0] || null);
 
@@ -54,6 +58,23 @@ export const useGameStore = defineStore('game', () => {
     finalScores.value = scores;
   };
 
+  const setMyPlayer = (id: string, name: string) => {
+    myPlayerId.value = id;
+    myPlayerName.value = name;
+  };
+
+  const addJoinRequest = (request: { requestId: string; playerName: string }) => {
+    pendingJoinRequests.value.push(request);
+  };
+
+  const removeJoinRequest = (requestId: string) => {
+    pendingJoinRequests.value = pendingJoinRequests.value.filter(r => r.requestId !== requestId);
+  };
+
+  const setJoinStatus = (status: 'idle' | 'pending' | 'approved' | 'rejected') => {
+    joinStatus.value = status;
+  };
+
   const reset = () => {
     gameId.value = '';
     status.value = 'LOBBY';
@@ -66,6 +87,10 @@ export const useGameStore = defineStore('game', () => {
     votes.value = null;
     mostVoted.value = null;
     finalScores.value = [];
+    myPlayerId.value = '';
+    myPlayerName.value = '';
+    pendingJoinRequests.value = [];
+    joinStatus.value = 'idle';
   };
 
   return {
@@ -80,6 +105,10 @@ export const useGameStore = defineStore('game', () => {
     votes,
     mostVoted,
     finalScores,
+    myPlayerId,
+    myPlayerName,
+    pendingJoinRequests,
+    joinStatus,
     currentPlayer,
     setGameStarted,
     setStatus,
@@ -87,6 +116,10 @@ export const useGameStore = defineStore('game', () => {
     addPlayer,
     setVotes,
     setFinalScores,
+    setMyPlayer,
+    addJoinRequest,
+    removeJoinRequest,
+    setJoinStatus,
     reset,
   };
 });

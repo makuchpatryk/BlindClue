@@ -3,6 +3,12 @@ import { GameManager } from './game-manager.js';
 import { Result, ResultError } from '../utils/result.js';
 import { GameStatus } from '../../core/domain/value-objects/game-status.js';
 
+export interface JoinRequestEvent {
+  gameId: string;
+  requestId: string;
+  playerName: string;
+}
+
 export interface SocketGateway {
   broadcastGameCreated(gameId: string): void;
   broadcastPlayerJoined(gameId: string, playerId: string, playerName: string): void;
@@ -11,6 +17,7 @@ export interface SocketGateway {
   broadcastVotingStarted(gameId: string): void;
   broadcastVotesRevealed(gameId: string, voteMap: Map<string, number>, mostVoted: string): void;
   broadcastGameEnded(gameId: string, scores: Array<{ playerId: string; playerName: string; score: number }>): void;
+  sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void;
 }
 
 export class GameOrchestrator {
@@ -100,5 +107,9 @@ export class GameOrchestrator {
     }
 
     return result;
+  }
+
+  sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void {
+    this.socketGateway.sendJoinRequestToHost(hostSocketId, event);
   }
 }

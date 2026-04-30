@@ -51,3 +51,17 @@ export interface GameStartedEvent {
 export interface GameCreatedEvent {
   gameId: string;
 }
+
+export interface JoinRequestEvent {
+  gameId: string;
+  requestId: string;
+  playerName: string;
+}
+
+export interface JoinApprovedEvent {
+  playerId: string;
+}
+
+export interface JoinRejectedEvent {
+  reason: string;
+}

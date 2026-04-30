@@ -52,6 +52,22 @@ export class GameClientService {
       });
     });
 
+    this.socket.on('JoinRequest', (data) => {
+      gameStore.addJoinRequest({
+        requestId: data.requestId,
+        playerName: data.playerName,
+      });
+    });
+
+    this.socket.on('joinGameSuccess', (data) => {
+      gameStore.setMyPlayer(data.playerId, '');
+      gameStore.setJoinStatus('approved');
+    });
+
+    this.socket.on('joinGameError', (data) => {
+      gameStore.setJoinStatus('rejected');
+    });
+
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
     });
@@ -69,8 +85,16 @@ export class GameClientService {
     this.socket.emit('guessWord', { gameId, guess });
   }
 
-  joinGame(gameId: string, playerName: string): void {
-    this.socket.emit('joinGame', { gameId, playerName });
+  requestJoin(gameId: string, playerName: string): void {
+    this.socket.emit('requestJoin', { gameId, playerName });
+  }
+
+  approveJoin(requestId: string, gameId: string): void {
+    this.socket.emit('approveJoin', { requestId, gameId });
+  }
+
+  rejectJoin(requestId: string): void {
+    this.socket.emit('rejectJoin', { requestId });
   }
 
   startGame(gameId: string): void {

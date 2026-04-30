@@ -1,5 +1,55 @@
 <template>
   <div class="max-w-4xl mx-auto">
+    <!-- Name Entry Modal -->
+    <div v-if="!myPlayerId" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-8 max-w-sm w-full">
+        <h2 class="text-2xl font-bold mb-4">Enter Your Name</h2>
+        <input
+          v-model="playerNameInput"
+          type="text"
+          placeholder="Your name"
+          class="w-full px-3 py-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          @keyup.enter="submitName"
+        />
+        <button
+          @click="submitName"
+          class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Join Game
+        </button>
+      </div>
+    </div>
+
+    <!-- Approval Waiting Modal -->
+    <div v-if="myPlayerId && joinStatus === 'pending'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-8 max-w-sm w-full">
+        <h2 class="text-2xl font-bold mb-4">Waiting for approval...</h2>
+        <p class="text-gray-600">The host is reviewing your request to join.</p>
+      </div>
+    </div>
+
+    <!-- Host Approval Modal -->
+    <div v-if="pendingJoinRequests.length > 0" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-8 max-w-sm w-full">
+        <h2 class="text-2xl font-bold mb-4">Join Request</h2>
+        <p class="text-lg mb-6">{{ pendingJoinRequests[0].playerName }} wants to join</p>
+        <div class="flex gap-3">
+          <button
+            @click="approveJoin(pendingJoinRequests[0].requestId)"
+            class="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Allow
+          </button>
+          <button
+            @click="rejectJoin(pendingJoinRequests[0].requestId)"
+            class="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Deny
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h1 class="text-3xl font-bold mb-6">{{ gameStatus }}</h1>
     <div class="bg-white rounded-lg shadow p-6">
       <div v-if="status === 'LOBBY'" class="space-y-4">
@@ -57,14 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/game.store.js';
 import { getSocket } from '../../shared/utils/socket.js';
+import { GameClientService } from '../../shared/services/game-client.service.js';
 
 const route = useRoute();
 const gameStore = useGameStore();
 const gameId = route.params.gameId as string;
+const playerNameInput = ref<string>('');
 
 const status = computed(() => gameStore.status);
 const currentRound = computed(() => gameStore.currentRound);
@@ -72,6 +124,9 @@ const category = computed(() => gameStore.category);
 const isImpostor = computed(() => gameStore.isImpostor);
 const players = computed(() => gameStore.players);
 const finalScores = computed(() => gameStore.finalScores);
+const myPlayerId = computed(() => gameStore.myPlayerId);
+const joinStatus = computed(() => gameStore.joinStatus);
+const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
 const canStartGame = computed(() => players.value.length >= 2);
 
 const gameStatus = computed(() => {
@@ -84,8 +139,35 @@ const gameStatus = computed(() => {
   return statusMap[status.value];
 });
 
+function submitName() {
+  if (!playerNameInput.value.trim()) return;
+  const socket = getSocket();
+  const gameClientService = GameClientService.getInstance(socket);
+  gameStore.setJoinStatus('pending');
+  gameClientService.requestJoin(gameId, playerNameInput.value);
+}
+
 function startGame() {
   const socket = getSocket();
   socket.emit('startGame', { gameId });
 }
+
+function approveJoin(requestId: string) {
+  const socket = getSocket();
+  const gameClientService = GameClientService.getInstance(socket);
+  gameClientService.approveJoin(requestId, gameId);
+  gameStore.removeJoinRequest(requestId);
+}
+
+function rejectJoin(requestId: string) {
+  const socket = getSocket();
+  const gameClientService = GameClientService.getInstance(socket);
+  gameClientService.rejectJoin(requestId);
+  gameStore.removeJoinRequest(requestId);
+}
+
+onMounted(async () => {
+  const socket = getSocket();
+  GameClientService.getInstance(socket);
+});
 </script>

@@ -320,6 +320,13 @@ export class GameEventHandler {
         if (!result.ok) {
           socket.emit("error", { error: result.error });
         }
+
+        // Also process as a description submission to handle round logic
+        await this.gameOrchestrator.submitDescription(
+          data.gameId,
+          data.playerId,
+          data.word,
+        );
       },
     );
 

@@ -24,13 +24,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { useGameStore } from '../stores/game.store.js';
 import { useGameState } from '../composables/use-game-state.js';
+import { GameClientService } from '../../shared/services/game-client.service.js';
 import PlayerSelectionList from './player-selection-list.vue';
 
 const { voteImpostor } = useGameState();
 const gameStore = useGameStore();
+const gameClientService = inject<GameClientService>('gameClientService');
 const isVoting = ref(false);
 
 const selectedPlayerId = computed(() => gameStore.selectedImpostorGuess);
@@ -40,7 +42,15 @@ async function vote() {
 
   isVoting.value = true;
   try {
+    gameStore.addVotedPlayer(gameStore.myPlayerId);
+    gameClientService?.broadcastPlayerVoted(gameStore.gameId, gameStore.myPlayerId);
     voteImpostor(selectedPlayerId.value);
+
+    // Check if all players have voted
+    if (gameStore.votedPlayersThisRound.size === gameStore.players.length) {
+      gameStore.setStatus('ENDED');
+      gameClientService?.allPlayersVoted(gameStore.gameId);
+    }
   } finally {
     isVoting.value = false;
   }

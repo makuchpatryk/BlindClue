@@ -100,6 +100,14 @@ export class GameClientService {
       gameStore.setNextButtonBlocked(data.isNextButtonBlocked);
     });
 
+    this.socket.on('PlayerVoted', (data) => {
+      gameStore.addVotedPlayer(data.playerId);
+    });
+
+    this.socket.on('AllPlayersVoted', (data) => {
+      gameStore.setStatus('ENDED');
+    });
+
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
     });
@@ -143,5 +151,17 @@ export class GameClientService {
 
   unblockButton(gameId: string): void {
     this.socket.emit('unblockButton', { gameId });
+  }
+
+  transitionToVoting(gameId: string): void {
+    this.socket.emit('transitionToVoting', { gameId });
+  }
+
+  broadcastPlayerVoted(gameId: string, playerId: string): void {
+    this.socket.emit('playerVoted', { gameId, playerId });
+  }
+
+  allPlayersVoted(gameId: string): void {
+    this.socket.emit('allPlayersVoted', { gameId });
   }
 }

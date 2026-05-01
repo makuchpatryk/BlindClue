@@ -1,5 +1,10 @@
 <template>
   <div class="max-w-4xl mx-auto">
+    <!-- Copy Snackbar -->
+    <div v-if="showCopiedSnackbar" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-40">
+      ✓ Game ID copied to clipboard
+    </div>
+
     <!-- Approval Waiting Modal -->
     <div v-if="joinStatus === 'pending'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-gray-800 rounded-lg p-8 max-w-sm w-full">
@@ -33,7 +38,16 @@
     <div class="bg-gray-800 rounded-lg shadow p-6 text-gray-100">
       <div v-if="status === 'LOBBY'" class="space-y-4">
         <h2 class="text-2xl font-bold text-white">Waiting for players...</h2>
-        <p class="text-gray-400">Game Code: <code class="font-mono font-bold text-blue-400">{{ gameId }}</code></p>
+        <div class="flex items-center gap-2">
+          <p class="text-gray-400">Game Code: <code class="font-mono font-bold text-blue-400">{{ gameId }}</code></p>
+          <button
+            @click="copyGameIdToClipboard"
+            class="p-1 text-gray-400 hover:text-blue-400 transition"
+            title="Copy game ID"
+          >
+            📋
+          </button>
+        </div>
         <div class="mt-4">
           <h3 class="font-semibold mb-2 text-gray-300">Players:</h3>
           <ul class="space-y-2">
@@ -68,14 +82,12 @@
             <div v-if="currentRound < 3 || playersClickedThisRound.size < players.length" class="space-y-4">
               <button
                 @click="handleNextPerson"
-                :disabled="!isMyTurn || (!isNextButtonBlocked && hasPlayerClicked)"
+                :disabled="!isMyTurn || hasPlayerClicked"
                 class="w-full px-6 py-3 bg-blue-600 text-white text-lg font-bold rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                <span v-if="isNextButtonBlocked && isMyTurn">I'm Ready</span>
-                <span v-else-if="!isNextButtonBlocked && isMyTurn">Next Person</span>
+                <span v-if="isMyTurn">Next Person</span>
                 <span v-else>Waiting for {{ currentPlayer?.name }}...</span>
               </button>
-              <p v-if="!isMyTurn" class="text-sm text-gray-400">Waiting for {{ currentPlayer?.name }} to continue...</p>
             </div>
 
             <div v-else class="space-y-4">
@@ -101,11 +113,17 @@
       <div v-else-if="status === 'ENDED'" class="space-y-4">
         <h2 class="text-2xl font-bold text-white mb-6">Game Over</h2>
 
-        <div v-if="isImpostor && !votes" class="mb-4">
-          <ImpostorGuessPhase />
+        <div v-if="!gameStore.impostorDoneGuessing" class="mb-4">
+          <div v-if="isImpostor">
+            <ImpostorGuessPhase />
+          </div>
+          <div v-else class="bg-gray-700 rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold mb-4 text-white">Waiting for Impostor</h3>
+            <p class="text-gray-400">The impostor is guessing the word... Please wait.</p>
+          </div>
         </div>
 
-        <div v-else class="space-y-4">
+        <div v-if="gameStore.impostorDoneGuessing" class="space-y-4">
           <div class="bg-gray-700 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-300 mb-2">Most Voted</h3>
             <p class="text-xl text-white">
@@ -129,11 +147,12 @@
           </div>
 
           <div class="bg-gray-700 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-300 mb-4">Final Scores</h3>
+            <h3 class="text-lg font-semibold text-gray-300 mb-4">Vote Results</h3>
             <div class="space-y-2">
-              <div v-for="(score, index) in finalScores" :key="score.playerId" class="flex justify-between items-center">
-                <span class="text-white">{{ index + 1 }}. {{ score.playerName }}</span>
-                <span class="font-bold text-yellow-400">{{ score.score }} pts</span>
+              <div v-if="!votes || votes.size === 0" class="text-gray-400">No votes recorded</div>
+              <div v-else v-for="(voteCount, playerId) in votes" :key="playerId" class="flex justify-between items-center p-2 bg-gray-600 rounded">
+                <span class="text-white">{{ getPlayerName(playerId as string) }}</span>
+                <span class="font-bold text-yellow-400">{{ voteCount }} vote{{ voteCount !== 1 ? 's' : '' }}</span>
               </div>
             </div>
           </div>
@@ -151,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide } from 'vue';
+import { computed, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/game.store.js';
 import { useLobbyStore } from '../../lobby/stores/lobby.store.js';
@@ -161,6 +180,8 @@ import VotingPhase from './voting-phase.vue';
 import RevealPhase from './reveal-phase.vue';
 import ImpostorGuessPhase from './impostor-guess-phase.vue';
 import PlayerSelectionList from './player-selection-list.vue';
+
+const showCopiedSnackbar = ref(false);
 
 const route = useRoute();
 const gameStore = useGameStore();
@@ -198,11 +219,17 @@ function startGame() {
   socket.emit('startGame', { gameId });
 }
 
+function copyGameIdToClipboard() {
+  navigator.clipboard.writeText(gameId).then(() => {
+    showCopiedSnackbar.value = true;
+    setTimeout(() => {
+      showCopiedSnackbar.value = false;
+    }, 2000);
+  });
+}
+
 function handleNextPerson() {
-  if (isNextButtonBlocked.value) {
-    gameStore.unblockNextButton();
-    gameClientService.unblockButton(gameId);
-  } else if (currentPlayer.value) {
+  if (currentPlayer.value) {
     gameStore.advancePlayerTurn(currentPlayer.value.id);
     gameClientService.advanceTurn(
       gameId,
@@ -211,6 +238,12 @@ function handleNextPerson() {
       Array.from(gameStore.playersClickedThisRound),
       gameStore.isNextButtonBlocked
     );
+
+    // Check if all rounds are complete - transition to voting
+    if (gameStore.currentRound === 3 && gameStore.playersClickedThisRound.size === gameStore.players.length) {
+      gameStore.setStatus('VOTING');
+      gameClientService.transitionToVoting(gameId);
+    }
   }
 }
 
@@ -232,6 +265,11 @@ function getMostVotedCount() {
 function getImpostorName() {
   if (!gameStore.impostorId) return 'Unknown';
   const player = players.value.find(p => p.id === gameStore.impostorId);
+  return player?.name || 'Unknown';
+}
+
+function getPlayerName(playerId: string) {
+  const player = players.value.find(p => p.id === playerId);
   return player?.name || 'Unknown';
 }
 

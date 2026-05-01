@@ -15,7 +15,10 @@
     >
       <div class="flex items-center justify-between">
         <span>{{ player.name }}</span>
-        <span v-if="selectedPlayerId === player.id" class="text-yellow-300">✓</span>
+        <div class="flex items-center gap-2">
+          <span v-if="gameStore.hasPlayerVoted(player.id)" class="text-green-400" title="Player voted">✔️</span>
+          <span v-if="selectedPlayerId === player.id" class="text-yellow-300">✓</span>
+        </div>
       </div>
     </button>
   </div>

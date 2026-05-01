@@ -23,6 +23,8 @@ export const useGameStore = defineStore('game', () => {
   const playersClickedThisRound = ref<Set<string>>(new Set());
   const selectedImpostorGuess = ref<string | null>(null);
   const isNextButtonBlocked = ref<boolean>(false);
+  const votedPlayersThisRound = ref<Set<string>>(new Set());
+  const impostorDoneGuessing = ref<boolean>(false);
 
   const currentPlayer = computed(() => players.value[currentPlayerIndex.value] || null);
 
@@ -108,6 +110,22 @@ export const useGameStore = defineStore('game', () => {
     isNextButtonBlocked.value = blocked;
   };
 
+  const addVotedPlayer = (playerId: string) => {
+    votedPlayersThisRound.value.add(playerId);
+  };
+
+  const hasPlayerVoted = (playerId: string) => {
+    return votedPlayersThisRound.value.has(playerId);
+  };
+
+  const resetVotedPlayers = () => {
+    votedPlayersThisRound.value = new Set();
+  };
+
+  const setImpostorDoneGuessing = (done: boolean) => {
+    impostorDoneGuessing.value = done;
+  };
+
   const advancePlayerTurn = (currentPlayerId: string) => {
     if (!playersClickedThisRound.value.has(currentPlayerId)) {
       playersClickedThisRound.value.add(currentPlayerId);
@@ -167,6 +185,7 @@ export const useGameStore = defineStore('game', () => {
     playersClickedThisRound.value = new Set();
     selectedImpostorGuess.value = null;
     isNextButtonBlocked.value = false;
+    votedPlayersThisRound.value = new Set();
   };
 
   return {
@@ -191,6 +210,8 @@ export const useGameStore = defineStore('game', () => {
     playersClickedThisRound,
     selectedImpostorGuess,
     isNextButtonBlocked,
+    votedPlayersThisRound,
+    impostorDoneGuessing,
     canShowShowImpostorButton,
     setGameStarted,
     setStatus,
@@ -207,6 +228,10 @@ export const useGameStore = defineStore('game', () => {
     setCurrentPlayerIndex,
     setPlayersClicked,
     setNextButtonBlocked,
+    addVotedPlayer,
+    hasPlayerVoted,
+    resetVotedPlayers,
+    setImpostorDoneGuessing,
     advancePlayerTurn,
     resetRoundClicks,
     hasPlayerClickedThisRound,

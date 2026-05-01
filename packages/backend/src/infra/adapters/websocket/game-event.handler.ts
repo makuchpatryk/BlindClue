@@ -137,10 +137,14 @@ export class GameEventHandler {
       if (game) {
         const wordResult = await this.wordRepository.findById(game.getWordId());
         if (wordResult.ok) {
-          const result = await this.gameOrchestrator.guessWord(data.gameId, data.guess, wordResult.value.getText());
+          const word = wordResult.value.getText();
+          const result = await this.gameOrchestrator.guessWord(data.gameId, data.guess, word);
           if (!result.ok) {
             socket.emit('error', { error: result.error });
           }
+
+          // Send the word to all players (including impostor who just guessed)
+          this.socketGateway.broadcastWordReveal(data.gameId, word);
         }
       }
     });
@@ -188,6 +192,27 @@ export class GameEventHandler {
 
     socket.on('unblockButton', (data: { gameId: string }) => {
       this.socketGateway.broadcastButtonUnblocked(data.gameId);
+    });
+
+    socket.on('transitionToVoting', (data: { gameId: string }) => {
+      this.socketGateway.broadcastVotingPhaseStarted(data.gameId);
+    });
+
+    socket.on('playerVoted', (data: { gameId: string; playerId: string }) => {
+      this.socketGateway.broadcastPlayerVoted(data.gameId, data.playerId);
+    });
+
+    socket.on('allPlayersVoted', async (data: { gameId: string }) => {
+      this.socketGateway.broadcastAllPlayersVoted(data.gameId);
+
+      // Send the word to all players (including impostor)
+      const game = this.gameManager.getGame(data.gameId);
+      if (game) {
+        const wordResult = await this.wordRepository.findById(game.getWordId());
+        if (wordResult.ok) {
+          this.socketGateway.broadcastWordReveal(data.gameId, wordResult.value.getText());
+        }
+      }
     });
 
     socket.on('disconnect', () => {

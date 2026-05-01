@@ -82,4 +82,20 @@ export class SocketGateway {
   broadcastButtonUnblocked(gameId: string): void {
     this.io.to(gameId).emit('ButtonUnblocked', { gameId, isNextButtonBlocked: false });
   }
+
+  broadcastVotingPhaseStarted(gameId: string): void {
+    this.io.to(gameId).emit('VotingStarted', { gameId });
+  }
+
+  broadcastPlayerVoted(gameId: string, playerId: string): void {
+    this.io.to(gameId).emit('PlayerVoted', { gameId, playerId });
+  }
+
+  broadcastAllPlayersVoted(gameId: string): void {
+    this.io.to(gameId).emit('AllPlayersVoted', { gameId });
+  }
+
+  broadcastWordReveal(gameId: string, word: string): void {
+    this.io.to(gameId).emit('WordRevealed', { gameId, word });
+  }
 }

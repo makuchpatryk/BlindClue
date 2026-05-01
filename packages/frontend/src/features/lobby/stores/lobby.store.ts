@@ -1,8 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { getStorageAdapter } from "../../../core/storage/storage.adapter";
+
+const PLAYER_NAME_KEY = "impostor_playerName";
 
 export const useLobbyStore = defineStore("lobby", () => {
-  const playerName = ref<string>("");
+  const storage = getStorageAdapter();
+  const playerName = ref<string>(storage.getItem(PLAYER_NAME_KEY) || "");
   const gameCode = ref<string>("");
   const isCreatingGame = ref<boolean>(false);
   const isJoiningGame = ref<boolean>(false);
@@ -10,6 +14,7 @@ export const useLobbyStore = defineStore("lobby", () => {
 
   const setPlayerName = (name: string) => {
     playerName.value = name;
+    storage.setItem(PLAYER_NAME_KEY, name);
   };
 
   const setGameCode = (code: string) => {
@@ -34,6 +39,7 @@ export const useLobbyStore = defineStore("lobby", () => {
     isCreatingGame.value = false;
     isJoiningGame.value = false;
     error.value = null;
+    storage.removeItem(PLAYER_NAME_KEY);
   };
 
   return {

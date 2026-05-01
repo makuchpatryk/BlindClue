@@ -1,7 +1,5 @@
 <template>
   <div class="max-w-2xl mx-auto p-6">
-    <h1 class="text-4xl font-bold text-center mb-8 text-blue-400">Impostor</h1>
-
     <div class="mb-6">
       <input
         v-model="playerName"

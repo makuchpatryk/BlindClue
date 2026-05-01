@@ -47,7 +47,6 @@ export class GameClientService {
 
     this.socket.on(SOCKET_EVENTS.GAME_ENDED, (data) => {
       gameStore.setStatus(GameStatus.ENDED);
-      gameStore.setFinalScores(data.scores);
       gameStore.setImpostorDoneGuessing(true);
     });
 
@@ -55,7 +54,6 @@ export class GameClientService {
       gameStore.addPlayer({
         id: data.playerId,
         name: data.playerName,
-        score: 0,
       });
     });
 

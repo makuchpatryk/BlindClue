@@ -61,7 +61,6 @@ export class GameEventHandler {
               game?.getPlayers().map((p) => ({
                 id: p.getId().value,
                 name: p.getName(),
-                score: p.getScore(),
               })) ?? [];
             socket.emit("joinGameSuccess", { playerId: result.value, players });
           } else {
@@ -105,7 +104,6 @@ export class GameEventHandler {
               game?.getPlayers().map((p) => ({
                 id: p.getId().value,
                 name: p.getName(),
-                score: p.getScore(),
               })) ?? [];
             pendingRequest.socket.emit("joinGameSuccess", {
               playerId: result.value,
@@ -266,7 +264,6 @@ export class GameEventHandler {
         const players = game.getPlayers().map((p) => ({
           id: p.getId().value,
           name: p.getName(),
-          score: p.getScore(),
         }));
         socket.emit("rejoinSuccess", {
           playerId: data.playerId,

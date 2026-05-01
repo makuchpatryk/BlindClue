@@ -1,7 +1,6 @@
 import { PlayerId } from "../value-objects/player-id.js";
 
 export class Player {
-  private score: number = 0;
   private isImpostor: boolean = false;
 
   constructor(
@@ -26,15 +25,7 @@ export class Player {
     return this.isImpostor;
   }
 
-  getScore(): number {
-    return this.score;
-  }
-
   setImpostor(): void {
     this.isImpostor = true;
-  }
-
-  addScore(points: number): void {
-    this.score += points;
   }
 }

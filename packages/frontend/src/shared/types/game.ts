@@ -10,7 +10,6 @@ export interface GameStateDTO {
 export interface PlayerDTO {
   id: string;
   name: string;
-  score: number;
 }
 
 export interface DescriptionDTO {
@@ -19,10 +18,4 @@ export interface DescriptionDTO {
   playerName: string;
   text: string;
   round: number;
-}
-
-export interface ScoreDTO {
-  playerId: string;
-  playerName: string;
-  score: number;
 }

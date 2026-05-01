@@ -33,10 +33,7 @@ export interface SocketGateway {
     mostVoted: string,
     gameStatus: string,
   ): void;
-  broadcastGameEnded(
-    gameId: string,
-    scores: Array<{ playerId: string; playerName: string; score: number }>,
-  ): void;
+  broadcastGameEnded(gameId: string): void;
   broadcastImpostorDoneGuessing(gameId: string): void;
   broadcastPlayerWordSubmitted(
     gameId: string,
@@ -191,21 +188,8 @@ export class GameOrchestrator {
     if (result.ok) {
       const game = this.gameManager.getGame(gameId);
       if (game) {
-        console.log(`[Orchestrator] Game found, calculating scores...`);
-        const scoresResult = this.gameApplicationService.calculateScores(
-          gameId,
-          result.value,
-        );
-        const scoresMap = scoresResult.ok
-          ? scoresResult.value
-          : new Map<string, number>();
-        const scores = game.getPlayers().map((p) => ({
-          playerId: p.getId().value,
-          playerName: p.getName(),
-          score: scoresMap.get(p.getId().value) || 0,
-        }));
         console.log(`[Orchestrator] Broadcasting GameEnded to all players...`);
-        this.socketGateway.broadcastGameEnded(gameId, scores);
+        this.socketGateway.broadcastGameEnded(gameId);
         console.log(`[Orchestrator] Broadcasting impostorDoneGuessing...`);
         this.socketGateway.broadcastImpostorDoneGuessing(gameId);
         console.log(`[Orchestrator] Deleting game...`);

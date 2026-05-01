@@ -20,7 +20,6 @@
 
     <div v-else class="p-4 bg-blue-900 rounded border border-blue-600">
       <p class="text-blue-400 font-bold text-lg">Guess submitted!</p>
-      <p class="text-blue-300">Calculating final scores...</p>
     </div>
   </div>
 </template>

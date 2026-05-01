@@ -8,7 +8,6 @@ import { CreateGameUseCase } from "../../core/domain/use-cases/create-game.use-c
 import { SubmitDescriptionUseCase } from "../../core/domain/use-cases/submit-description.use-case.js";
 import { VoteImpostorUseCase } from "../../core/domain/use-cases/vote-impostor.use-case.js";
 import { GuessWordUseCase } from "../../core/domain/use-cases/guess-word.use-case.js";
-import { CalculateScoresUseCase } from "../../core/domain/use-cases/calculate-scores.use-case.js";
 import {
   GetGameStateUseCase,
   GameStateDTO,
@@ -21,7 +20,6 @@ export class GameApplicationService {
   private submitDescriptionUseCase: SubmitDescriptionUseCase;
   private voteImpostorUseCase: VoteImpostorUseCase;
   private guessWordUseCase: GuessWordUseCase;
-  private calculateScoresUseCase: CalculateScoresUseCase;
   private getGameStateUseCase: GetGameStateUseCase;
 
   constructor(private wordRepository: IWordRepository) {
@@ -30,7 +28,6 @@ export class GameApplicationService {
     this.submitDescriptionUseCase = new SubmitDescriptionUseCase();
     this.voteImpostorUseCase = new VoteImpostorUseCase();
     this.guessWordUseCase = new GuessWordUseCase();
-    this.calculateScoresUseCase = new CalculateScoresUseCase();
     this.getGameStateUseCase = new GetGameStateUseCase();
   }
 
@@ -125,24 +122,6 @@ export class GameApplicationService {
       };
     }
     return this.guessWordUseCase.execute(game, guess, word);
-  }
-
-  calculateScores(
-    gameId: string,
-    impostorCorrectlyGuessed: boolean,
-  ): Result<Map<string, number>, ResultError> {
-    const game = this.gameManager.getGame(gameId);
-    if (!game) {
-      return {
-        ok: false,
-        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
-      };
-    }
-    const scores = this.calculateScoresUseCase.execute(
-      game,
-      impostorCorrectlyGuessed,
-    );
-    return { ok: true, value: scores };
   }
 
   getGameState(gameId: string): Result<GameStateDTO, ResultError> {

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed, reactive } from "vue";
-import { PlayerDTO, ScoreDTO } from "@/shared/types/game.js";
+import { PlayerDTO } from "@/shared/types/game.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import { MAX_ROUNDS } from "@/shared/utils/constants.js";
 import { clearGameSession } from "@/shared/utils/session-storage.js";
@@ -18,7 +18,6 @@ export const useGameStore = defineStore("game", () => {
   const descriptions = reactive<Map<number, any[]>>(new Map());
   const votes = ref<Map<string, number> | null>(null);
   const mostVoted = ref<string | null>(null);
-  const finalScores = ref<ScoreDTO[]>([]);
   const myPlayerId = ref<string>("");
   const myPlayerName = ref<string>("");
   const pendingJoinRequests = ref<
@@ -63,10 +62,6 @@ export const useGameStore = defineStore("game", () => {
     isImpostor.value = data.impostorId === myPlayerId.value;
   };
 
-  const setStatus = (newStatus: GameStatus) => {
-    status.value = newStatus;
-  };
-
   const setRoundSubmitted = (round: number, descs?: any[]) => {
     currentRound.value = round;
     if (descs) {
@@ -84,10 +79,6 @@ export const useGameStore = defineStore("game", () => {
   const setVotes = (voteMap: Record<string, number>, mostVotedId: string) => {
     votes.value = new Map(Object.entries(voteMap));
     mostVoted.value = mostVotedId;
-  };
-
-  const setFinalScores = (scores: ScoreDTO[]) => {
-    finalScores.value = scores;
   };
 
   const setMyPlayer = (id: string, name: string) => {
@@ -225,7 +216,6 @@ export const useGameStore = defineStore("game", () => {
     descriptions.clear();
     votes.value = null;
     mostVoted.value = null;
-    finalScores.value = [];
     myPlayerId.value = "";
     myPlayerName.value = "";
     pendingJoinRequests.value = [];
@@ -245,6 +235,46 @@ export const useGameStore = defineStore("game", () => {
     clearGameSession();
   };
 
+  function setStatus(forceState?: GameStatus): void {
+    let nextStatus: GameStatus | null = null;
+
+    if(forceState) status.value = forceState;
+
+    const currentStatus = status.value;
+
+    switch (currentStatus) {
+      case GameStatus.RUNNING:
+        // Transition to VOTING when all rounds done and all players submitted
+        if (
+            currentRound.value === numberOfRounds.value &&
+            playersClickedThisRound.value.size === players.value.length
+        ) {
+          nextStatus = GameStatus.VOTING;
+        }
+        break;
+
+      case GameStatus.VOTING:
+        // Transition to GUESSING when all players voted
+        if (
+            votedPlayersThisRound.value.size === players.value.length
+        ) {
+          nextStatus = GameStatus.GUESSING;
+        }
+        break;
+
+      case GameStatus.GUESSING:
+        // Transition to ENDED when impostor done guessing
+        if (impostorDoneGuessing.value) {
+          nextStatus = GameStatus.ENDED;
+        }
+        break;
+    }
+
+    if (nextStatus) {
+      status.value = nextStatus;
+    }
+  }
+
   return {
     gameId,
     status,
@@ -258,7 +288,6 @@ export const useGameStore = defineStore("game", () => {
     descriptions,
     votes,
     mostVoted,
-    finalScores,
     myPlayerId,
     myPlayerName,
     pendingJoinRequests,
@@ -278,7 +307,6 @@ export const useGameStore = defineStore("game", () => {
     setRoundSubmitted,
     addPlayer,
     setVotes,
-    setFinalScores,
     setMyPlayer,
     setPlayers,
     addJoinRequest,

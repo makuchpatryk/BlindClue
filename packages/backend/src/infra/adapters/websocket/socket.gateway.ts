@@ -87,11 +87,8 @@ export class SocketGateway {
     this.io.to(gameId).emit("VotesRevealed", event);
   }
 
-  broadcastGameEnded(
-    gameId: string,
-    scores: Array<{ playerId: string; playerName: string; score: number }>,
-  ): void {
-    const event: GameEndedEvent = { gameId, scores };
+  broadcastGameEnded(gameId: string): void {
+    const event: GameEndedEvent = { gameId };
     this.io.to(gameId).emit("GameEnded", event);
   }
 

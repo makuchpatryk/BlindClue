@@ -10,7 +10,6 @@ export interface GameStateDTO {
   players: Array<{
     id: string;
     name: string;
-    score: number;
   }>;
 }
 
@@ -26,7 +25,6 @@ export class GetGameStateUseCase {
       players: game.getPlayers().map((p) => ({
         id: p.getId().value,
         name: p.getName(),
-        score: p.getScore(),
       })),
     };
   }

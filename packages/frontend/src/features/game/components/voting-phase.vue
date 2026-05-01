@@ -64,10 +64,9 @@ async function vote() {
     );
     voteImpostor(selectedPlayerId.value);
 
-    // Check if all players have voted
     if (gameStore.votedPlayersThisRound.size === gameStore.players.length) {
-      gameStore.setStatus(GameStatus.GUESSING);
-      gameClientService?.allPlayersVoted(gameStore.gameId);
+        gameStore.setStatus();
+        gameClientService?.allPlayersVoted(gameStore.gameId);
     }
   } finally {
     isVoting.value = false;

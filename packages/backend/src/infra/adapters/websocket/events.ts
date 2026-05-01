@@ -26,11 +26,6 @@ export interface GuessResultEvent {
 
 export interface GameEndedEvent {
   gameId: string;
-  scores: Array<{
-    playerId: string;
-    playerName: string;
-    score: number;
-  }>;
 }
 
 export interface PlayerJoinedEvent {

@@ -115,13 +115,12 @@ function handleNextPerson(word: string) {
     gameStore.currentRound === gameStore.numberOfRounds &&
     gameStore.playersClickedThisRound.size === gameStore.players.length
   ) {
-    gameStore.setStatus(GameStatus.VOTING);
-    gameClientService.transitionToVoting(gameId);
+    handleShowImpostor()
   }
 }
 
 function handleShowImpostor() {
-  gameStore.setStatus(GameStatus.VOTING);
+  gameStore.setStatus();
   gameClientService.transitionToVoting(gameId);
 }
 

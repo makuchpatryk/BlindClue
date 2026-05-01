@@ -1,6 +1,7 @@
 -m "# Lobby & Player List Fixes
 
 ## Context
+
 6 bugs in lobby/game flow: duplicate headings, complex game IDs, player list not syncing across browsers, name modal in wrong place, missing waiting state, no player display tags.
 
 Root cause of player list bug: `socket.join(gameId)` is called AFTER `broadcastPlayerJoined` in both host join and approveJoin handlers — so joiners miss their own and prior `PlayerJoined` events.
@@ -8,9 +9,11 @@ Root cause of player list bug: `socket.join(gameId)` is called AFTER `broadcastP
 ---
 
 ## Fix 1 — Duplicate headings
+
 `lobby-waiting-room.vue` already has `<h2>Create Game</h2>` and `<h2>Join Game</h2>` as card headers. The child forms repeat them.
 
 **Remove** `<h2>` headings from:
+
 - `packages/frontend/src/features/lobby/components/create-game-form.vue`
 - `packages/frontend/src/features/lobby/components/join-game-form.vue`
 
@@ -21,11 +24,15 @@ Root cause of player list bug: `socket.join(gameId)` is called AFTER `broadcastP
 **File**: `packages/backend/src/core/domain/use-cases/create-game.use-case.ts`
 
 Replace inline ID generation:
+
 ```ts
 // before
-`game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+`game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 // after
-Array.from({ length: 6 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('')
+Array.from(
+  { length: 6 },
+  () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)],
+).join("");
 ```
 
 Also update `packages/backend/src/application/utils/id-generator.ts` `gameId()` to match.
@@ -39,31 +46,42 @@ Also update `packages/backend/src/application/utils/id-generator.ts` `gameId()` 
 **File**: `packages/backend/src/infra/adapters/websocket/game-event.handler.ts`
 
 Changes:
+
 1. Move `socket.join(data.gameId)` to BEFORE `joinGame()` call (host join, line 37)
 2. Move `pendingRequest.socket.join(data.gameId)` to BEFORE `joinGame()` call (approveJoin, line 61)
 3. After both join calls, include full player list in `joinGameSuccess`:
    ```ts
    const game = this.gameManager.getGame(data.gameId);
-   const players = game?.getPlayers().map(p => ({ id: p.getId().value, name: p.getName(), score: p.getScore() })) ?? [];
-   socket.emit('joinGameSuccess', { playerId: result.value, players });
+   const players =
+     game?.getPlayers().map((p) => ({
+       id: p.getId().value,
+       name: p.getName(),
+       score: p.getScore(),
+     })) ?? [];
+   socket.emit("joinGameSuccess", { playerId: result.value, players });
    ```
 
 **File**: `packages/frontend/src/features/game/stores/game.store.ts`
 
 Add `setPlayers` action:
+
 ```ts
-const setPlayers = (list: PlayerDTO[]) => { players.value = list; };
+const setPlayers = (list: PlayerDTO[]) => {
+  players.value = list;
+};
 ```
+
 Export it.
 
 **File**: `packages/frontend/src/features/shared/services/game-client.service.ts`
 
 Update `joinGameSuccess` handler:
+
 ```ts
-this.socket.on('joinGameSuccess', (data) => {
-  gameStore.setMyPlayer(data.playerId, '');
+this.socket.on("joinGameSuccess", (data) => {
+  gameStore.setMyPlayer(data.playerId, "");
   gameStore.setPlayers(data.players);
-  gameStore.setJoinStatus('approved');
+  gameStore.setJoinStatus("approved");
 });
 ```
 
@@ -74,9 +92,11 @@ this.socket.on('joinGameSuccess', (data) => {
 **File**: `packages/frontend/src/features/lobby/components/lobby-waiting-room.vue`
 
 Add name input above the grid:
+
 ```html
 <input v-model="playerName" placeholder="Your name" ... />
 ```
+
 On change, call `lobbyStore.setPlayerName(playerName)`.
 
 **File**: `packages/frontend/src/features/lobby/components/create-game-form.vue`
@@ -101,6 +121,7 @@ Same — validate name before navigating.
 **File**: `packages/frontend/src/features/game/components/game-view.vue`
 
 Change player list item (line 61):
+
 ```html
 <!-- before -->
 {{ player.name }}
@@ -111,21 +132,23 @@ Change player list item (line 61):
 ---
 
 ## Files to Modify
-| File | Change |
-|---|---|
-| `backend/src/core/domain/use-cases/create-game.use-case.ts` | New game ID format |
-| `backend/src/application/utils/id-generator.ts` | Match new format |
-| `backend/src/infra/adapters/websocket/game-event.handler.ts` | Fix socket.join timing, add players to joinGameSuccess |
-| `frontend/src/features/lobby/components/lobby-waiting-room.vue` | Add name input at top |
-| `frontend/src/features/lobby/components/create-game-form.vue` | Remove duplicate heading, validate name |
-| `frontend/src/features/lobby/components/join-game-form.vue` | Remove duplicate heading, validate name |
-| `frontend/src/features/game/components/game-view.vue` | Remove name modal, auto-join on mount, player tags |
-| `frontend/src/features/game/stores/game.store.ts` | Add setPlayers action |
-| `frontend/src/features/shared/services/game-client.service.ts` | Handle players in joinGameSuccess |
+
+| File                                                            | Change                                                 |
+| --------------------------------------------------------------- | ------------------------------------------------------ |
+| `backend/src/core/domain/use-cases/create-game.use-case.ts`     | New game ID format                                     |
+| `backend/src/application/utils/id-generator.ts`                 | Match new format                                       |
+| `backend/src/infra/adapters/websocket/game-event.handler.ts`    | Fix socket.join timing, add players to joinGameSuccess |
+| `frontend/src/features/lobby/components/lobby-waiting-room.vue` | Add name input at top                                  |
+| `frontend/src/features/lobby/components/create-game-form.vue`   | Remove duplicate heading, validate name                |
+| `frontend/src/features/lobby/components/join-game-form.vue`     | Remove duplicate heading, validate name                |
+| `frontend/src/features/game/components/game-view.vue`           | Remove name modal, auto-join on mount, player tags     |
+| `frontend/src/features/game/stores/game.store.ts`               | Add setPlayers action                                  |
+| `frontend/src/features/shared/services/game-client.service.ts`  | Handle players in joinGameSuccess                      |
 
 ---
 
 ## Verification
+
 1. Start backend + frontend
 2. Browser A: enter name → Create Game → lands in game lobby, sees `[XXXX] Name`
 3. Browser B: enter name → Join Game (6-char code) → "Waiting for approval" shows

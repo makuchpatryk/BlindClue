@@ -1,4 +1,4 @@
-import { Game } from '../../core/domain/entities/game.js';
+import { Game } from "../../core/domain/entities/game.js";
 
 export class GameManager {
   private static instance: GameManager;

@@ -1,10 +1,10 @@
-import { computed, inject } from 'vue';
-import { useGameStore } from '../stores/game.store.js';
-import { GameClientService } from '../../shared/services/game-client.service.js';
+import { computed, inject } from "vue";
+import { useGameStore } from "../stores/game.store.js";
+import { GameClientService } from "@/shared/services/game-client.service.js";
 
 export function useGameState() {
   const gameStore = useGameStore();
-  const gameClientService = inject<GameClientService>('gameClientService');
+  const gameClientService = inject<GameClientService>("gameClientService");
 
   const currentRound = computed(() => gameStore.currentRound);
   const status = computed(() => gameStore.status);

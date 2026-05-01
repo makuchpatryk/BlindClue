@@ -1,4 +1,4 @@
-import { Game } from '../entities/game.js';
+import { Game } from "../entities/game.js";
 
 export interface GameStateDTO {
   id: string;
@@ -21,7 +21,7 @@ export class GetGameStateUseCase {
       currentRound: game.getCurrentRound(),
       categoryId: game.getCategoryId(),
       impostorId: game.getImpostorId(),
-      players: game.getPlayers().map(p => ({
+      players: game.getPlayers().map((p) => ({
         id: p.getId().value,
         name: p.getName(),
         score: p.getScore(),

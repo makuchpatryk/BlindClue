@@ -1,7 +1,7 @@
-import { GameStatus } from '../value-objects/game-status.js';
-import { Player } from './player.js';
-import { RoundSubmission } from './round-submission.js';
-import { Result, ResultError } from '../../../application/utils/result.js';
+import { GameStatus } from "../value-objects/game-status.js";
+import { Player } from "./player.js";
+import { RoundSubmission } from "./round-submission.js";
+import { Result, ResultError } from "../../../application/utils/result.js";
 
 export class Game {
   private status: GameStatus = GameStatus.LOBBY;
@@ -11,14 +11,15 @@ export class Game {
   private descriptions: Map<number, RoundSubmission[]> = new Map();
   private votes: Map<string, string> = new Map();
   private impostorGuess: string | null = null;
-  private categoryName: string = '';
-  private word: string = '';
+  private categoryName: string = "";
+  private word: string = "";
+  private playerWords: Map<string, string[]> = new Map();
   private createdAt: Date;
 
   constructor(
     private id: string,
     private wordId: string,
-    private categoryId: string
+    private categoryId: string,
   ) {
     this.createdAt = new Date();
   }
@@ -53,10 +54,13 @@ export class Game {
 
   addPlayer(player: Player): Result<void, ResultError> {
     if (this.players.size >= 4) {
-      return { ok: false, error: new ResultError('GAME_FULL', 'Game is full') };
+      return { ok: false, error: new ResultError("GAME_FULL", "Game is full") };
     }
     if (this.status !== GameStatus.LOBBY) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Cannot join running game') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Cannot join running game"),
+      };
     }
     this.players.set(player.getId().value, player);
     return { ok: true, value: undefined };
@@ -64,7 +68,10 @@ export class Game {
 
   startGame(): Result<void, ResultError> {
     if (this.players.size < 2) {
-      return { ok: false, error: new ResultError('NOT_ENOUGH_PLAYERS', 'Need at least 2 players') };
+      return {
+        ok: false,
+        error: new ResultError("NOT_ENOUGH_PLAYERS", "Need at least 2 players"),
+      };
     }
     const playerIds = Array.from(this.players.keys());
     const randomIdx = Math.floor(Math.random() * playerIds.length);
@@ -73,12 +80,21 @@ export class Game {
     return { ok: true, value: undefined };
   }
 
-  submitDescription(playerId: string, description: string): Result<void, ResultError> {
+  submitDescription(
+    playerId: string,
+    description: string,
+  ): Result<void, ResultError> {
     if (this.status !== GameStatus.RUNNING) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Game not running') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Game not running"),
+      };
     }
     if (!this.players.has(playerId)) {
-      return { ok: false, error: new ResultError('PLAYER_NOT_FOUND', 'Player not in game') };
+      return {
+        ok: false,
+        error: new ResultError("PLAYER_NOT_FOUND", "Player not in game"),
+      };
     }
 
     if (!this.descriptions.has(this.currentRound)) {
@@ -90,7 +106,7 @@ export class Game {
       this.id,
       this.currentRound,
       this.players.get(playerId)!.getId(),
-      description
+      description,
     );
     this.descriptions.get(this.currentRound)!.push(submission);
 
@@ -108,19 +124,31 @@ export class Game {
 
   private allPlayersSubmittedThisRound(): boolean {
     const roundSubs = this.descriptions.get(this.currentRound) ?? [];
-    const submittedIds = new Set(roundSubs.map(s => s.getPlayerId().value));
+    const submittedIds = new Set(roundSubs.map((s) => s.getPlayerId().value));
     return submittedIds.size === this.players.size;
   }
 
-  voteImpostor(playerId: string, votedForId: string): Result<void, ResultError> {
+  voteImpostor(
+    playerId: string,
+    votedForId: string,
+  ): Result<void, ResultError> {
     if (this.status !== GameStatus.VOTING) {
-      return { ok: false, error: new ResultError('NOT_VOTING', 'Not in voting phase') };
+      return {
+        ok: false,
+        error: new ResultError("NOT_VOTING", "Not in voting phase"),
+      };
     }
     if (!this.players.has(playerId) || !this.players.has(votedForId)) {
-      return { ok: false, error: new ResultError('INVALID_PLAYER', 'Invalid player') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_PLAYER", "Invalid player"),
+      };
     }
     if (this.votes.has(playerId)) {
-      return { ok: false, error: new ResultError('ALREADY_VOTED', 'Player already voted') };
+      return {
+        ok: false,
+        error: new ResultError("ALREADY_VOTED", "Player already voted"),
+      };
     }
 
     this.votes.set(playerId, votedForId);
@@ -134,7 +162,7 @@ export class Game {
 
   getVoteResults(): Map<string, number> {
     const voteMap = new Map<string, number>();
-    this.votes.forEach(votedForId => {
+    this.votes.forEach((votedForId) => {
       voteMap.set(votedForId, (voteMap.get(votedForId) ?? 0) + 1);
     });
     return voteMap;
@@ -143,7 +171,9 @@ export class Game {
   getMostVoted(): string | null {
     const voteMap = this.getVoteResults();
     if (voteMap.size === 0) return null;
-    return Array.from(voteMap.entries()).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    return Array.from(voteMap.entries()).reduce((a, b) =>
+      b[1] > a[1] ? b : a,
+    )[0];
   }
 
   getDescriptions(round?: number): RoundSubmission[] {
@@ -154,8 +184,12 @@ export class Game {
   }
 
   guessWord(guess: string, word: string): Result<boolean, ResultError> {
-    if (this.status !== GameStatus.ENDED) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Cannot guess now') };
+    // Allow guessing if votes have been submitted (status is ENDED) or if we have votes
+    if (this.votes.size === 0) {
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Cannot guess before voting"),
+      };
     }
     this.impostorGuess = guess;
     const isCorrect = guess.toLowerCase() === word.toLowerCase();
@@ -180,5 +214,27 @@ export class Game {
 
   getWord(): string {
     return this.word;
+  }
+
+  submitPlayerWord(playerId: string, word: string): Result<void, ResultError> {
+    if (!this.players.has(playerId)) {
+      return {
+        ok: false,
+        error: new ResultError("PLAYER_NOT_FOUND", "Player not in game"),
+      };
+    }
+    if (!this.playerWords.has(playerId)) {
+      this.playerWords.set(playerId, []);
+    }
+    this.playerWords.get(playerId)!.push(word);
+    return { ok: true, value: undefined };
+  }
+
+  getPlayerWords(): Record<string, string[]> {
+    const result: Record<string, string[]> = {};
+    this.playerWords.forEach((words, playerId) => {
+      result[playerId] = words;
+    });
+    return result;
   }
 }

@@ -15,15 +15,18 @@ Two features:
 ### Backend
 
 **`packages/backend/src/core/domain/entities/game.ts`**
+
 - Add `private categoryName: string = ''`
 - Add `setCategoryName(name: string): void` and `getCategoryName(): string`
 
 **`packages/backend/src/application/services/game.orchestrator.ts`**
+
 - Add `IWordRepository` and `ICategoryRepository` to constructor
 - Update `SocketGateway` interface: `broadcastGameStarted(gameId, category, impostorId, players): void`
 - Update `startGame`: after success, look up word (`wordRepository.findById(game.getWordId())`) → get `categoryId` → look up category name (`categoryRepository.findById(categoryId)`) → call `game.setCategoryName(name)` → then broadcast with full data
 
 **`packages/backend/src/infra/adapters/websocket/game-event.handler.ts`**
+
 - Add maps: `socketToPlayer: Map<string, {gameId, playerId}>`, `disconnectTimers: Map<string, NodeJS.Timeout>`, `hostPlayers: Map<string, string>` (gameId → playerId, to rehydrate `hostSockets` on reconnect)
 - After successful host join: set `socketToPlayer`, set `hostPlayers.set(gameId, playerId)`
 - After successful approveJoin: set `socketToPlayer`
@@ -37,16 +40,19 @@ Two features:
   - On failure: emit `rejoinError`
 
 **`packages/backend/src/main.ts`**
+
 - Pass `wordRepository` and `categoryRepository` to `GameOrchestrator` constructor
 
 ### Frontend
 
 **`packages/frontend/src/features/shared/services/game-client.service.ts`**
+
 - Add `rejoinGame(gameId, playerId)` emit method
 - Add `rejoinSuccess` socket listener: call `gameStore.setMyPlayer`, `gameStore.setPlayers`, set `joinStatus('approved')`, save session to localStorage
 - Add `rejoinError` listener: clear `localStorage` game_session key
 
 **`packages/frontend/src/features/game/components/game-view.vue`**
+
 - In setup (sync, before onMounted): get socket + service, `provide('gameClientService', gameClientService)`
 - In `onMounted`: check `localStorage.getItem('game_session')` → if parsed `gameId` matches route param, call `gameClientService.rejoinGame(gameId, savedPlayerId)` instead of `requestJoin`; otherwise proceed with normal join
 - Watch `joinStatus === 'approved'` → write `{ gameId, playerId: myPlayerId }` to localStorage
@@ -63,13 +69,16 @@ Same as Feature 1 — the `startGame` orchestrator fix makes `GameStarted` broad
 ### Frontend
 
 **`packages/frontend/src/features/game/stores/game.store.ts`**
+
 - In `setGameStarted`: add `isImpostor.value = data.impostorId === myPlayerId.value`
 
 **`packages/frontend/src/features/game/composables/use-game-state.ts`**
+
 - `voteImpostor`: replace `gameStore.players[0]?.id` with `gameStore.myPlayerId`
 - `submitDescription`: same fix
 
 **`packages/frontend/src/features/game/components/game-view.vue`**
+
 - Import `VotingPhase` and `RevealPhase`
 - Replace inline VOTING block:
   ```html
@@ -83,16 +92,16 @@ Same as Feature 1 — the `startGame` orchestrator fix makes `GameStarted` broad
 
 ## Files to Modify
 
-| File | Change |
-|---|---|
-| `backend/src/core/domain/entities/game.ts` | Add `categoryName` field, getter, setter |
-| `backend/src/application/services/game.orchestrator.ts` | Fix `startGame` broadcast, add repos to constructor |
-| `backend/src/infra/adapters/websocket/game-event.handler.ts` | socketToPlayer tracking, disconnect timers, rejoinGame handler |
-| `backend/src/main.ts` | Pass extra repos to GameOrchestrator |
-| `frontend/src/features/shared/services/game-client.service.ts` | rejoinGame method, rejoinSuccess/Error handlers, localStorage |
-| `frontend/src/features/game/components/game-view.vue` | provide service, localStorage check on mount, use VotingPhase+RevealPhase |
-| `frontend/src/features/game/stores/game.store.ts` | Set isImpostor in setGameStarted |
-| `frontend/src/features/game/composables/use-game-state.ts` | Use myPlayerId for vote/description |
+| File                                                           | Change                                                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `backend/src/core/domain/entities/game.ts`                     | Add `categoryName` field, getter, setter                                  |
+| `backend/src/application/services/game.orchestrator.ts`        | Fix `startGame` broadcast, add repos to constructor                       |
+| `backend/src/infra/adapters/websocket/game-event.handler.ts`   | socketToPlayer tracking, disconnect timers, rejoinGame handler            |
+| `backend/src/main.ts`                                          | Pass extra repos to GameOrchestrator                                      |
+| `frontend/src/features/shared/services/game-client.service.ts` | rejoinGame method, rejoinSuccess/Error handlers, localStorage             |
+| `frontend/src/features/game/components/game-view.vue`          | provide service, localStorage check on mount, use VotingPhase+RevealPhase |
+| `frontend/src/features/game/stores/game.store.ts`              | Set isImpostor in setGameStarted                                          |
+| `frontend/src/features/game/composables/use-game-state.ts`     | Use myPlayerId for vote/description                                       |
 
 ---
 

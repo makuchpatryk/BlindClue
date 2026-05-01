@@ -1,4 +1,4 @@
-import { Game } from '../entities/game.js';
+import { Game } from "../entities/game.js";
 
 export class CalculateScoresUseCase {
   execute(game: Game, impostorCorrectlyGuessed: boolean): Map<string, number> {
@@ -12,7 +12,7 @@ export class CalculateScoresUseCase {
     if (impostorVotes === 0) {
       // Impostor not caught: +2 points
       scores.set(impostorId!, 2);
-      allPlayers.forEach(p => {
+      allPlayers.forEach((p) => {
         if (p.getId().value !== impostorId) {
           scores.set(p.getId().value, 1); // Others: +1
         }

@@ -7,12 +7,14 @@ Current game UI focuses on description submissions (players typing in app). User
 ## Steps
 
 ### Phase 1: Update Game Store
+
 1. Add `currentPlayerIndex` ref to track whose turn (0-based index into players array)
 2. Add `playersClickedThisRound` Set<string> to track who has clicked "Next" in current round
 3. Add `canShowShowImpostorButton` computed property:
    - Returns true when: `currentRound === 3 AND playersClickedThisRound.size === players.length`
 
 ### Phase 2: Simplify game-view.vue RUNNING Phase
+
 1. Remove DescriptionSubmit, DescriptionDisplay, RoundPhase components
 2. Create simple display showing:
    - Round number (X/3)
@@ -24,6 +26,7 @@ Current game UI focuses on description submissions (players typing in app). User
 5. Round progression: when all players clicked, increment round, clear playersClickedThisRound
 
 ### Phase 3: Add "Show Impostor" Button
+
 1. After round 3 is complete and all players clicked "Next Person":
    - Replace "Next Person" button with "Show Impostor" button
    - Display message: "All rounds complete! Ready to vote?"
@@ -32,10 +35,12 @@ Current game UI focuses on description submissions (players typing in app). User
    - Set status to VOTING (triggers VotingPhase)
 
 ### Phase 4: Update Voting Phase UI
+
 1. Keep VotingPhase component as-is (shows player buttons)
 2. VotingPhase should say: "Who do you think is the impostor?"
 
 ### Phase 5: Improve Results Display (ENDED Phase)
+
 1. Show three sections:
    - **Most Voted**: "Players voted for: [Player Name] with X votes"
    - **Actually Impostor**: "The impostor was: [Player Name]"

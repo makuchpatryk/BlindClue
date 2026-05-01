@@ -1,9 +1,11 @@
 # Persistent Player Selection During Game
 
 ## Context
+
 Currently, players can only select/vote on who they think is the impostor during the VOTING phase. The request is to allow players to **select a player at any time during any game phase** (starting from when the game begins) and **persist that selection** until they change it. This gives players more agency and lets them refine their guess as the game progresses.
 
 ## Requirements
+
 1. **Selection throughout game**: Player list visible and selectable in all phases (RUNNING, VOTING, ENDED)
 2. **Persistent selection**: Selected player persists as user navigates between phases until they pick someone else
 3. **Validation before voting**: When voting, validate that a player is selected (simple check)
@@ -39,6 +41,7 @@ Currently, players can only select/vote on who they think is the impostor during
    - In game.store.ts, add reset logic to `clearImpostorGuess()` when game restarts
 
 ## Files to Modify
+
 - **packages/frontend/src/features/game/stores/game.store.ts**
   - Add `selectedImpostorGuess` state
   - Add `selectImpostorGuess()` and `clearImpostorGuess()` actions
@@ -60,6 +63,7 @@ Currently, players can only select/vote on who they think is the impostor during
   - Show what player was selected (optional, for context)
 
 ## Verification
+
 1. Start a game and verify PlayerSelectionList appears in RUNNING phase (description round)
 2. Click different players and verify selection persists when navigating phases
 3. In VOTING phase, verify vote button is disabled until a player is selected

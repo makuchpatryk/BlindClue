@@ -9,9 +9,13 @@
         class="flex items-center justify-between p-4 bg-gray-600 rounded"
       >
         <div class="flex items-center space-x-4">
-          <div class="text-2xl font-bold text-gray-400 w-8">{{ index + 1 }}</div>
+          <div class="text-2xl font-bold text-gray-400 w-8">
+            {{ index + 1 }}
+          </div>
           <div>
-            <p class="font-semibold text-lg text-gray-200">{{ score.playerName }}</p>
+            <p class="font-semibold text-lg text-gray-200">
+              {{ score.playerName }}
+            </p>
           </div>
         </div>
         <div class="text-3xl font-bold text-blue-400">{{ score.score }}</div>
@@ -21,8 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useGameState } from '../../game/composables/use-game-state.js';
+import { computed } from "vue";
+import { useGameState } from "@/features/game/composables/use-game-state.js";
 
 const { finalScores } = useGameState();
 

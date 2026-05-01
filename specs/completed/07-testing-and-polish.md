@@ -11,6 +11,7 @@ Write integration tests, fix bugs, and prepare for deployment.
 ## Completed ✅
 
 ### Backend Integration Tests ✅
+
 - [x] Vitest setup: `vitest.config.ts` configured
 - [x] `tests/integration/game-lifecycle.test.ts` — 6 tests covering:
   - Create game in LOBBY
@@ -25,9 +26,11 @@ Write integration tests, fix bugs, and prepare for deployment.
   - Impostor caught, guess wrong: +2 voters, +1 impostor
 
 ### Frontend E2E Tests
+
 - E2E tests marked as optional (not implemented, can be added with Playwright/Cypress)
 
 ### Polish ✅
+
 - [x] Error handling in all forms (catch blocks)
 - [x] Loading states on async operations (isCreating, isJoining, isAdding, isVoting)
 - [x] Form validation (disabled buttons when invalid)
@@ -35,6 +38,7 @@ Write integration tests, fix bugs, and prepare for deployment.
 - [x] Responsive Tailwind CSS (md: breakpoints)
 
 ### Deployment ✅
+
 - [x] `packages/backend/Dockerfile` — Multi-stage build, Node 20 Alpine
 - [x] `.env` created with development defaults
 - [x] `.env.example` documented

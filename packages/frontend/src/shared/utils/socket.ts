@@ -1,5 +1,5 @@
-import { io, Socket } from 'socket.io-client';
-import { SOCKET_URL } from './constants.js';
+import { io, Socket } from "socket.io-client";
+import { SOCKET_URL, SOCKET_RECONNECTION_DELAY_MAX } from "./constants.js";
 
 let socket: Socket | null = null;
 
@@ -8,7 +8,7 @@ export function getSocket(): Socket {
     socket = io(SOCKET_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+      reconnectionDelayMax: SOCKET_RECONNECTION_DELAY_MAX,
       reconnectionAttempts: 5,
     });
   }

@@ -2,20 +2,33 @@
   <div class="bg-gray-700 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-2xl font-bold text-white">Round {{ currentRound }}/3</h2>
-      <p class="text-lg font-semibold text-blue-400">Category: {{ category }}</p>
+      <p class="text-lg font-semibold text-blue-400">
+        Category: {{ category }}
+      </p>
     </div>
 
     <div class="mb-6 p-4 bg-blue-900 rounded">
-      <p v-if="!isImpostor" class="text-lg text-blue-200">You know the word. Give a description!</p>
-      <p v-else class="text-lg text-red-400">You are the Impostor. Listen and figure out the word.</p>
+      <p v-if="!isImpostor" class="text-lg text-blue-200">
+        You know the word. Give a description!
+      </p>
+      <p v-else class="text-lg text-red-400">
+        You are the Impostor. Listen and figure out the word.
+      </p>
     </div>
 
     <div class="space-y-4">
       <h3 class="font-semibold text-gray-300">Players in this round:</h3>
       <ul class="space-y-2">
-        <li v-for="player in players" :key="player.id" class="flex items-center p-2 bg-gray-600 rounded text-gray-200">
+        <li
+          v-for="player in players"
+          :key="player.id"
+          class="flex items-center p-2 bg-gray-600 rounded text-gray-200"
+        >
           <span class="font-medium">{{ player.name }}</span>
-          <span v-if="player.id === impostorId" class="ml-auto px-2 py-1 bg-red-900 text-red-300 rounded text-sm">
+          <span
+            v-if="player.id === impostorId"
+            class="ml-auto px-2 py-1 bg-red-900 text-red-300 rounded text-sm"
+          >
             Impostor?
           </span>
         </li>
@@ -25,7 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import { useGameState } from '../composables/use-game-state.js';
+import { useGameState } from "../composables/use-game-state.js";
 
-const { currentRound, category, isImpostor, players, impostorId } = useGameState();
+const { currentRound, category, isImpostor, players, impostorId } =
+  useGameState();
 </script>

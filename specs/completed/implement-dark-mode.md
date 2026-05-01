@@ -1,9 +1,11 @@
 # Implement Dark Mode Theme
 
 ## Issue
+
 Current light mode doesn't match user preference. Need to switch to a dark palette throughout the app.
 
 ## Details
+
 - Change background colors from light grays to dark colors
 - Update text colors for dark mode visibility
 - Update button colors for dark mode
@@ -11,6 +13,7 @@ Current light mode doesn't match user preference. Need to switch to a dark palet
 - Ensure good contrast for accessibility
 
 ## Components to Update
+
 - App.vue (main background and header)
 - game-view.vue
 - All game phase components (voting, reveal, etc.)
@@ -18,6 +21,7 @@ Current light mode doesn't match user preference. Need to switch to a dark palet
 - Cards and containers
 
 ## Components Updated
+
 - [x] App.vue (bg-gray-900, text-gray-100)
 - [x] game-view.vue (bg-gray-800)
 - [x] All lobby components (create-game-form, join-game-form, lobby-waiting-room)
@@ -28,6 +32,7 @@ Current light mode doesn't match user preference. Need to switch to a dark palet
 - [x] Cards and containers (bg-gray-700, bg-gray-800)
 
 ## Status
+
 - [x] Update Tailwind config if needed for dark colors
 - [x] Update App.vue background and styling
 - [x] Update game-view.vue styling
@@ -36,4 +41,5 @@ Current light mode doesn't match user preference. Need to switch to a dark palet
 - [x] Test on different screen sizes
 
 ## Completed
+
 Full dark mode implementation with consistent color scheme throughout the app.

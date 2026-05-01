@@ -66,13 +66,16 @@ impostor/
 ## API Endpoints
 
 ### Health
+
 - `GET /health` - Server health check
 
 ### Games
+
 - `POST /games` - Create a new game
 - `GET /games/:gameId` - Get game state
 
 ### Admin (Categories & Words)
+
 - `POST /admin/categories` - Create category
 - `GET /admin/categories` - List all categories
 - `DELETE /admin/categories/:id` - Delete category
@@ -82,6 +85,7 @@ impostor/
 ## WebSocket Events
 
 ### Client → Server
+
 - `joinGame` - Join a game
 - `startGame` - Start the game
 - `submitDescription` - Submit a description
@@ -89,6 +93,7 @@ impostor/
 - `guessWord` - Guess the word (impostor only)
 
 ### Server → Client
+
 - `GameStarted` - Game has started
 - `RoundSubmitted` - Round descriptions submitted
 - `VotingStarted` - Voting phase started
@@ -98,6 +103,7 @@ impostor/
 ## Deployment
 
 ### Docker
+
 ```bash
 # Build image
 docker build -f packages/backend/Dockerfile -t impostor-backend .
@@ -107,7 +113,9 @@ docker run -p 3000:3000 -e DATABASE_PATH=/data/impostor.db impostor-backend
 ```
 
 ### Environment Variables
+
 Copy `.env.example` to `.env` and configure:
+
 - `NODE_ENV` - Development or production
 - `PORT` - Server port
 - `DATABASE_PATH` - SQLite database path
@@ -115,16 +123,19 @@ Copy `.env.example` to `.env` and configure:
 ## Testing
 
 ### Run Backend Tests
+
 ```bash
 pnpm test --filter @impostor/backend
 ```
 
 ### Run All Tests
+
 ```bash
 pnpm test
 ```
 
 Tests include:
+
 - Game lifecycle (create, join, start, voting, end)
 - Scoring logic (impostor caught/not caught scenarios)
 - Repository integration tests

@@ -8,7 +8,11 @@
         class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <option value="">Select a category</option>
-        <option v-for="category in categories" :key="category.id" :value="category.id">
+        <option
+          v-for="category in categories"
+          :key="category.id"
+          :value="category.id"
+        >
           {{ category.name }}
         </option>
       </select>
@@ -25,7 +29,7 @@
         :disabled="!newWord || !selectedCategoryId || isAdding"
         class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
       >
-        {{ isAdding ? 'Adding...' : 'Add Word' }}
+        {{ isAdding ? "Adding..." : "Add Word" }}
       </button>
     </form>
 
@@ -34,12 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useAdminService } from '../composables/use-admin-service.js';
+import { ref, onMounted } from "vue";
+import { useAdminService } from "../composables/use-admin-service.js";
 
-const { categories, error, getCategories, addWord: addWordService } = useAdminService();
-const selectedCategoryId = ref('');
-const newWord = ref('');
+const {
+  categories,
+  error,
+  getCategories,
+  addWord: addWordService,
+} = useAdminService();
+const selectedCategoryId = ref("");
+const newWord = ref("");
 const isAdding = ref(false);
 
 onMounted(() => {
@@ -52,7 +61,7 @@ async function addWord() {
   isAdding.value = true;
   try {
     await addWordService(selectedCategoryId.value, newWord.value);
-    newWord.value = '';
+    newWord.value = "";
   } finally {
     isAdding.value = false;
   }

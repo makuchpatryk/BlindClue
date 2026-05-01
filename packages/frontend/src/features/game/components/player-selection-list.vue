@@ -10,14 +10,21 @@
         selectedPlayerId === player.id
           ? 'border-yellow-400 bg-yellow-900 hover:bg-yellow-800'
           : 'border-gray-600 bg-gray-700 hover:border-blue-400 hover:bg-gray-600',
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+        disabled ? 'opacity-50 cursor-not-allowed' : '',
       ]"
     >
       <div class="flex items-center justify-between">
         <span>{{ player.name }}</span>
         <div class="flex items-center gap-2">
-          <span v-if="gameStore.hasPlayerVoted(player.id)" class="text-green-400" title="Player voted">✔️</span>
-          <span v-if="selectedPlayerId === player.id" class="text-yellow-300">✓</span>
+          <span
+            v-if="gameStore.hasPlayerVoted(player.id)"
+            class="text-green-400"
+            title="Player voted"
+            >✔️</span
+          >
+          <span v-if="selectedPlayerId === player.id" class="text-yellow-300"
+            >✓</span
+          >
         </div>
       </div>
     </button>
@@ -25,10 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useGameStore } from '../stores/game.store.js';
-import { useGameState } from '../composables/use-game-state.js';
-import type { PlayerDTO } from '../../shared/types/game.js';
+import { computed } from "vue";
+import { useGameStore } from "../stores/game.store.js";
+import { useGameState } from "../composables/use-game-state.js";
+import type { PlayerDTO } from "@/shared/types/game.js";
 
 interface Props {
   disabled?: boolean;

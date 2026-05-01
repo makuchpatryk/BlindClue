@@ -1,13 +1,16 @@
-import { Result, ResultError } from '../utils/result.js';
-import { ICategoryRepository, Category } from '../../core/domain/ports/category.repository.js';
-import { IWordRepository } from '../../core/domain/ports/word.repository.js';
-import { Word } from '../../core/domain/entities/word.js';
-import { IdGenerator } from '../utils/id-generator.js';
+import { Result, ResultError } from "../utils/result.js";
+import {
+  ICategoryRepository,
+  Category,
+} from "../../core/domain/ports/category.repository.js";
+import { IWordRepository } from "../../core/domain/ports/word.repository.js";
+import { Word } from "../../core/domain/entities/word.js";
+import { IdGenerator } from "../utils/id-generator.js";
 
 export class AdminGameService {
   constructor(
     private categoryRepository: ICategoryRepository,
-    private wordRepository: IWordRepository
+    private wordRepository: IWordRepository,
   ) {}
 
   async createCategory(name: string): Promise<Result<string, ResultError>> {
@@ -28,7 +31,10 @@ export class AdminGameService {
     return this.categoryRepository.delete(categoryId);
   }
 
-  async addWord(categoryId: string, word: string): Promise<Result<string, ResultError>> {
+  async addWord(
+    categoryId: string,
+    word: string,
+  ): Promise<Result<string, ResultError>> {
     const wordId = IdGenerator.wordId();
     const wordEntity = new Word(wordId, categoryId, word);
     const result = await this.wordRepository.save(wordEntity);

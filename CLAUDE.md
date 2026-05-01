@@ -13,6 +13,7 @@ Tasks should be managed in the `specs/` directory with the following structure:
   - Keeps a record of what's been accomplished
 
 ### Workflow
+
 1. Create a new task → save to `specs/todos/`
 2. Work on the task
 3. Once complete → move to `specs/completed/`

@@ -19,6 +19,7 @@ Set up the root monorepo structure before any package work begins.
 - [x] Root setup ready for npm install
 
 ## Root package.json
+
 ```json
 {
   "name": "impostor",

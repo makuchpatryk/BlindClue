@@ -19,6 +19,7 @@ Implement proper lobby UX: name entry popup when joining a game, and host approv
 ## Backend Changes
 
 ### `game-event.handler.ts`
+
 - Change `joinGame` to `requestJoin` — store requester socket in a pending map, notify host
 - Add `approveJoin` handler — adds player, emits `joinGameSuccess` to requester + `PlayerJoined` to room
 - Add `rejectJoin` handler — emits `joinGameError` to requester
@@ -26,16 +27,19 @@ Implement proper lobby UX: name entry popup when joining a game, and host approv
 - Track `hostSockets: Map<gameId, socketId>` — first joiner is the host
 
 ### `events.ts`
+
 - Add `JoinRequestEvent { gameId, requestId, playerName }`
 - Add `JoinApprovedEvent { playerId }`
 - Add `JoinRejectedEvent { reason }`
 
 ### `socket.gateway.ts`
+
 - Add `sendJoinRequestToHost(hostSocketId, event)` — targeted emit to host socket only
 
 ## Frontend Changes
 
 ### `game-view.vue`
+
 - On mount: if no `myPlayerId` in store → show name entry modal
 - Name modal: input + "Join" button → emits `requestJoin` via socket
 - After submit: show "Waiting for host approval..." state
@@ -44,6 +48,7 @@ Implement proper lobby UX: name entry popup when joining a game, and host approv
 - Reject button → emit `rejectJoin { requestId }`
 
 ### `game.store.ts`
+
 - Add `myPlayerId: ref<string>('')`
 - Add `myPlayerName: ref<string>('')`
 - Add `pendingJoinRequests: ref<Array<{ requestId, playerName }>>([])` (for host)
@@ -51,6 +56,7 @@ Implement proper lobby UX: name entry popup when joining a game, and host approv
 - Add actions: `setMyPlayer`, `addJoinRequest`, `removeJoinRequest`, `setJoinStatus`
 
 ### `game-client.service.ts`
+
 - Listen for `JoinRequest` → `gameStore.addJoinRequest()`
 - Listen for `joinGameSuccess` → `gameStore.setMyPlayer()` + `setJoinStatus('approved')`
 - Listen for `joinGameError` → `gameStore.setJoinStatus('rejected')`
@@ -88,16 +94,18 @@ On reject: joiner sees "Host rejected your request"
 ### Implemented Changes
 
 **Backend:**
+
 - ✅ `events.ts`: Added JoinRequestEvent, JoinApprovedEvent, JoinRejectedEvent interfaces
 - ✅ `socket.gateway.ts`: Added sendJoinRequestToHost() method + imported JoinRequestEvent
 - ✅ `game.orchestrator.ts`: Added JoinRequestEvent interface and sendJoinRequestToHost() delegation method
-- ✅ `game-event.handler.ts`: 
+- ✅ `game-event.handler.ts`:
   - Changed 'joinGame' handler to 'requestJoin'
   - Added pendingRequests and hostSockets tracking maps
   - Implemented approveJoin and rejectJoin handlers
   - First joiner automatically becomes host
 
 **Frontend:**
+
 - ✅ `game.store.ts`: Added myPlayerId, myPlayerName, pendingJoinRequests, joinStatus state + setter methods
 - ✅ `game-client.service.ts`:
   - Added listeners for JoinRequest, joinGameSuccess, joinGameError
@@ -112,6 +120,7 @@ On reject: joiner sees "Host rejected your request"
 - ✅ `join-game-form.vue`: Removed name input field, now just navigates to game
 
 ### Flow Summary
+
 1. Game creator or player navigates to /game/:gameId
 2. Name entry modal appears (no myPlayerId yet)
 3. First joiner auto-becomes host and gets joinGameSuccess

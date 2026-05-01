@@ -1,4 +1,4 @@
-import { PlayerId } from '../value-objects/player-id.js';
+import { PlayerId } from "../value-objects/player-id.js";
 
 export class Player {
   private score: number = 0;
@@ -7,7 +7,7 @@ export class Player {
   constructor(
     private id: PlayerId,
     private gameId: string,
-    private name: string
+    private name: string,
   ) {}
 
   getId(): PlayerId {

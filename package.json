@@ -10,11 +10,22 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
+    "validate": "pnpm run validate:prettier && pnpm run validate:eslint && pnpm run validate:typescript",
+    "validate:prettier": "prettier --check .",
+    "validate:eslint": "eslint . --ext .ts,.tsx,.vue,.js,.jsx",
+    "validate:typescript": "pnpm -r run build",
     "clean": "node scripts/clean.mjs",
     "clean:node-modules": "rimraf node_modules packages/*/node_modules",
     "clean:locks": "rimraf pnpm-lock.yaml",
     "clean:dist": "rimraf packages/*/dist packages/*/.next",
     "clean:all": "pnpm clean:node-modules && pnpm clean:locks && pnpm clean:dist",
     "reinstall": "pnpm clean && pnpm install"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "9.26.0",
+    "prettier": "^3.1.0",
+    "vue-eslint-parser": "^10.4.0",
+    "vue-tsc": "^3.2.7"
   }
 }

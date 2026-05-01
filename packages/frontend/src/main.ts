@@ -1,10 +1,10 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import { router } from './router/index.js';
-import App from './App.vue';
-import { getSocket } from './features/shared/utils/socket.js';
-import { GameClientService } from './features/shared/services/game-client.service.js';
-import './features/shared/styles/index.css';
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import { router } from "./router/index.js";
+import App from "./App.vue";
+import { getSocket } from "./shared/utils/socket.js";
+import { GameClientService } from "./shared/services/game-client.service.js";
+import "./shared/styles/index.css";
 
 const app = createApp(App);
 
@@ -18,6 +18,6 @@ app.use(router);
 // Initialize Socket.io and GameClientService
 const socket = getSocket();
 const gameClientService = GameClientService.getInstance(socket);
-app.provide('gameClientService', gameClientService);
+app.provide("gameClientService", gameClientService);
 
-app.mount('#app');
+app.mount("#app");

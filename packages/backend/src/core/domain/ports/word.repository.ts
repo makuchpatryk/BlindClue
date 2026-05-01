@@ -1,5 +1,5 @@
-import { Word } from '../entities/word.js';
-import { Result, ResultError } from '../../../application/utils/result.js';
+import { Word } from "../entities/word.js";
+import { Result, ResultError } from "../../../application/utils/result.js";
 
 export interface IWordRepository {
   getRandomWord(categoryId?: string): Promise<Result<Word, ResultError>>;

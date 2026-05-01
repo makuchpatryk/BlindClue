@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import { API_BASE_URL } from '../../shared/utils/constants.js';
+import { ref } from "vue";
+import { API_BASE_URL } from "@/shared/utils/constants.js";
 
 export function useAdminService() {
   const categories = ref<Array<{ id: string; name: string }>>([]);
@@ -12,7 +12,7 @@ export function useAdminService() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/admin/categories`);
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
       categories.value = data;
     } catch (e) {
@@ -25,12 +25,12 @@ export function useAdminService() {
   async function createCategory(name: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/categories`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
 
-      if (!response.ok) throw new Error('Failed to create category');
+      if (!response.ok) throw new Error("Failed to create category");
       await getCategories();
     } catch (e) {
       error.value = (e as Error).message;
@@ -41,12 +41,12 @@ export function useAdminService() {
   async function addWord(categoryId: string, word: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/words`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryId, word }),
       });
 
-      if (!response.ok) throw new Error('Failed to add word');
+      if (!response.ok) throw new Error("Failed to add word");
     } catch (e) {
       error.value = (e as Error).message;
       throw e;

@@ -1,13 +1,16 @@
-import { defineStore } from 'pinia';
-import { ref, computed, reactive } from 'vue';
-import { PlayerDTO, ScoreDTO } from '../../shared/types/game.js';
+import { defineStore } from "pinia";
+import { ref, computed, reactive } from "vue";
+import { PlayerDTO, ScoreDTO } from "@/shared/types/game.js";
+import { GameStatus } from "@/shared/utils/game-status.js";
+import { MAX_ROUNDS } from "@/shared/utils/constants.js";
+import { clearGameSession } from "@/shared/utils/session-storage.js";
 
-export const useGameStore = defineStore('game', () => {
-  const gameId = ref<string>('');
-  const status = ref<'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED'>('LOBBY');
+export const useGameStore = defineStore("game", () => {
+  const gameId = ref<string>("");
+  const status = ref<GameStatus>(GameStatus.LOBBY);
   const currentRound = ref<number>(1);
-  const category = ref<string>('');
-  const word = ref<string>('');
+  const category = ref<string>("");
+  const word = ref<string>("");
   const isImpostor = ref<boolean>(false);
   const impostorId = ref<string | null>(null);
   const players = ref<PlayerDTO[]>([]);
@@ -15,21 +18,30 @@ export const useGameStore = defineStore('game', () => {
   const votes = ref<Map<string, number> | null>(null);
   const mostVoted = ref<string | null>(null);
   const finalScores = ref<ScoreDTO[]>([]);
-  const myPlayerId = ref<string>('');
-  const myPlayerName = ref<string>('');
-  const pendingJoinRequests = ref<Array<{ requestId: string; playerName: string }>>([]);
-  const joinStatus = ref<'idle' | 'pending' | 'approved' | 'rejected'>('idle');
+  const myPlayerId = ref<string>("");
+  const myPlayerName = ref<string>("");
+  const pendingJoinRequests = ref<
+    Array<{ requestId: string; playerName: string }>
+  >([]);
+  const joinStatus = ref<"idle" | "pending" | "approved" | "rejected">("idle");
   const currentPlayerIndex = ref<number>(0);
   const playersClickedThisRound = ref<Set<string>>(new Set());
   const selectedImpostorGuess = ref<string | null>(null);
   const isNextButtonBlocked = ref<boolean>(false);
   const votedPlayersThisRound = ref<Set<string>>(new Set());
   const impostorDoneGuessing = ref<boolean>(false);
+  const playerWords = reactive<Map<string, string[]>>(new Map());
+  const currentPlayerWord = ref<string>("");
 
-  const currentPlayer = computed(() => players.value[currentPlayerIndex.value] || null);
+  const currentPlayer = computed(
+    () => players.value[currentPlayerIndex.value] || null,
+  );
 
   const canShowShowImpostorButton = computed(() => {
-    return currentRound.value === 3 && playersClickedThisRound.value.size === players.value.length;
+    return (
+      currentRound.value === MAX_ROUNDS &&
+      playersClickedThisRound.value.size === players.value.length
+    );
   });
 
   const setGameStarted = (data: {
@@ -39,14 +51,14 @@ export const useGameStore = defineStore('game', () => {
     players: PlayerDTO[];
   }) => {
     gameId.value = data.gameId;
-    status.value = 'RUNNING';
+    status.value = GameStatus.RUNNING;
     category.value = data.category;
     impostorId.value = data.impostorId;
     players.value = data.players;
     isImpostor.value = data.impostorId === myPlayerId.value;
   };
 
-  const setStatus = (newStatus: 'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED') => {
+  const setStatus = (newStatus: GameStatus) => {
     status.value = newStatus;
   };
 
@@ -58,7 +70,7 @@ export const useGameStore = defineStore('game', () => {
   };
 
   const addPlayer = (player: PlayerDTO) => {
-    const exists = players.value.find(p => p.id === player.id);
+    const exists = players.value.find((p) => p.id === player.id);
     if (!exists) {
       players.value.push(player);
     }
@@ -82,15 +94,22 @@ export const useGameStore = defineStore('game', () => {
     players.value = list;
   };
 
-  const addJoinRequest = (request: { requestId: string; playerName: string }) => {
+  const addJoinRequest = (request: {
+    requestId: string;
+    playerName: string;
+  }) => {
     pendingJoinRequests.value.push(request);
   };
 
   const removeJoinRequest = (requestId: string) => {
-    pendingJoinRequests.value = pendingJoinRequests.value.filter(r => r.requestId !== requestId);
+    pendingJoinRequests.value = pendingJoinRequests.value.filter(
+      (r) => r.requestId !== requestId,
+    );
   };
 
-  const setJoinStatus = (status: 'idle' | 'pending' | 'approved' | 'rejected') => {
+  const setJoinStatus = (
+    status: "idle" | "pending" | "approved" | "rejected",
+  ) => {
     joinStatus.value = status;
   };
 
@@ -132,14 +151,15 @@ export const useGameStore = defineStore('game', () => {
     }
 
     if (playersClickedThisRound.value.size === players.value.length) {
-      if (currentRound.value < 3) {
+      if (currentRound.value < MAX_ROUNDS) {
         currentRound.value++;
         playersClickedThisRound.value = new Set();
         currentPlayerIndex.value = 0;
         isNextButtonBlocked.value = false;
       }
     } else {
-      currentPlayerIndex.value = (currentPlayerIndex.value + 1) % players.value.length;
+      currentPlayerIndex.value =
+        (currentPlayerIndex.value + 1) % players.value.length;
       isNextButtonBlocked.value = true;
     }
   };
@@ -164,12 +184,35 @@ export const useGameStore = defineStore('game', () => {
     selectedImpostorGuess.value = null;
   };
 
+  const submitPlayerWord = (playerId: string, word: string) => {
+    if (!playerWords.has(playerId)) {
+      playerWords.set(playerId, []);
+    }
+    playerWords.get(playerId)!.push(word);
+    currentPlayerWord.value = "";
+  };
+
+  const updatePlayerWords = (words: Record<string, string[]>) => {
+    playerWords.clear();
+    Object.entries(words).forEach(([playerId, wordList]) => {
+      playerWords.set(playerId, wordList);
+    });
+  };
+
+  const getCurrentPlayerWord = (): string => {
+    return currentPlayerWord.value;
+  };
+
+  const setCurrentPlayerWord = (word: string) => {
+    currentPlayerWord.value = word;
+  };
+
   const reset = () => {
-    gameId.value = '';
-    status.value = 'LOBBY';
+    gameId.value = "";
+    status.value = GameStatus.LOBBY;
     currentRound.value = 1;
-    category.value = '';
-    word.value = '';
+    category.value = "";
+    word.value = "";
     isImpostor.value = false;
     impostorId.value = null;
     players.value = [];
@@ -177,15 +220,23 @@ export const useGameStore = defineStore('game', () => {
     votes.value = null;
     mostVoted.value = null;
     finalScores.value = [];
-    myPlayerId.value = '';
-    myPlayerName.value = '';
+    myPlayerId.value = "";
+    myPlayerName.value = "";
     pendingJoinRequests.value = [];
-    joinStatus.value = 'idle';
+    joinStatus.value = "idle";
     currentPlayerIndex.value = 0;
     playersClickedThisRound.value = new Set();
     selectedImpostorGuess.value = null;
     isNextButtonBlocked.value = false;
     votedPlayersThisRound.value = new Set();
+    impostorDoneGuessing.value = false;
+    playerWords.clear();
+    currentPlayerWord.value = "";
+  };
+
+  const resetForNewGame = () => {
+    reset();
+    clearGameSession();
   };
 
   return {
@@ -212,6 +263,8 @@ export const useGameStore = defineStore('game', () => {
     isNextButtonBlocked,
     votedPlayersThisRound,
     impostorDoneGuessing,
+    playerWords,
+    currentPlayerWord,
     canShowShowImpostorButton,
     setGameStarted,
     setStatus,
@@ -238,6 +291,11 @@ export const useGameStore = defineStore('game', () => {
     unblockNextButton,
     selectImpostorGuess,
     clearImpostorGuess,
+    submitPlayerWord,
+    updatePlayerWords,
+    getCurrentPlayerWord,
+    setCurrentPlayerWord,
     reset,
+    resetForNewGame,
   };
 });

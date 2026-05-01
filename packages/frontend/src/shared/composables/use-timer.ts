@@ -1,12 +1,14 @@
-import { ref, onBeforeUnmount } from 'vue';
-import { ROUND_DURATION, VOTING_DURATION } from '../../shared/utils/constants.js';
+import { ref, onBeforeUnmount } from "vue";
+import { ROUND_DURATION, VOTING_DURATION } from "../utils/constants.js";
+import { GameStatus } from "../utils/game-status.js";
 
 export function useRoundTimer(status: string) {
   const timeRemaining = ref<number>(ROUND_DURATION);
-  let interval: NodeJS.Timeout | null = null;
+  let interval: ReturnType<typeof setInterval> | null = null;
 
   function startTimer() {
-    const duration = status === 'VOTING' ? VOTING_DURATION : ROUND_DURATION;
+    const duration =
+      status === GameStatus.VOTING ? VOTING_DURATION : ROUND_DURATION;
     timeRemaining.value = duration;
 
     interval = setInterval(() => {

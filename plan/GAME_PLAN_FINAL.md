@@ -3,17 +3,20 @@
 ## 1. Project Overview
 
 **Game Concept**: "Impostor" word-guessing game for 2-4 players
+
 - One player is the impostor (doesn't know the target word, only category hint)
 - Other players know the word and submit descriptions
 - 3 rounds of descriptions, then voting to identify the impostor
 - Impostor attempts to guess the word after being accused
 
 **Tech Stack**
+
 - Backend: Fastify + SQLite + Socket.io
 - Frontend: Vue 3 + Vite (feature-based, modular)
 - Architecture: Clean Architecture with Adapter/Repository pattern
 
 **Key Decisions** (from grilling session)
+
 - Games: **in-memory only** (GameManager singleton), deleted after completion
 - Static data (categories/words): **SQLite + dynamic admin API**
 - Service layers: **GameApplicationService** (gameplay) + **AdminGameService** (CRUD) separate
@@ -44,12 +47,14 @@ impostor/
 ```
 
 **Workspace Benefits:**
+
 - Single source of truth for shared types (if using `packages/shared`)
 - Unified dev/build/test scripts runnable from root (`npm run dev`, `npm run build`)
 - Easier dependency management across packages
 - Simplified deployment (build once, deploy both packages)
 
 **Root package.json** includes:
+
 ```json
 {
   "workspaces": ["packages/backend", "packages/frontend"],
@@ -175,32 +180,33 @@ CREATE INDEX idx_words_category_id ON words(category_id);
 ### 2.3 Core Types & Result Pattern
 
 **result.ts**
+
 ```typescript
-export type Result<T, E> = 
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 export class ResultError {
   constructor(
     readonly code: string,
-    readonly message: string
+    readonly message: string,
   ) {}
 }
 ```
 
 **game-status.ts**
+
 ```typescript
 export enum GameStatus {
-  LOBBY = 'LOBBY',
-  RUNNING = 'RUNNING',
-  VOTING = 'VOTING',
-  ENDED = 'ENDED'
+  LOBBY = "LOBBY",
+  RUNNING = "RUNNING",
+  VOTING = "VOTING",
+  ENDED = "ENDED",
 }
 ```
 
 ### 2.4 Core Domain Entities
 
 **game.ts**
+
 ```typescript
 export class Game {
   private id: string;
@@ -220,19 +226,34 @@ export class Game {
     this.createdAt = new Date();
   }
 
-  getId(): string { return this.id; }
-  getStatus(): GameStatus { return this.status; }
-  getCurrentRound(): number { return this.currentRound; }
-  getWordId(): string { return this.wordId; }
-  getImpostorId(): string | null { return this.impostorId; }
-  getPlayers(): Player[] { return Array.from(this.players.values()); }
+  getId(): string {
+    return this.id;
+  }
+  getStatus(): GameStatus {
+    return this.status;
+  }
+  getCurrentRound(): number {
+    return this.currentRound;
+  }
+  getWordId(): string {
+    return this.wordId;
+  }
+  getImpostorId(): string | null {
+    return this.impostorId;
+  }
+  getPlayers(): Player[] {
+    return Array.from(this.players.values());
+  }
 
   addPlayer(player: Player): Result<void, ResultError> {
     if (this.players.size >= 4) {
-      return { ok: false, error: new ResultError('GAME_FULL', 'Game is full') };
+      return { ok: false, error: new ResultError("GAME_FULL", "Game is full") };
     }
     if (this.status !== GameStatus.LOBBY) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Cannot join running game') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Cannot join running game"),
+      };
     }
     this.players.set(player.getId(), player);
     return { ok: true, value: undefined };
@@ -240,7 +261,10 @@ export class Game {
 
   startGame(): Result<void, ResultError> {
     if (this.players.size < 2) {
-      return { ok: false, error: new ResultError('NOT_ENOUGH_PLAYERS', 'Need at least 2 players') };
+      return {
+        ok: false,
+        error: new ResultError("NOT_ENOUGH_PLAYERS", "Need at least 2 players"),
+      };
     }
     const playerIds = Array.from(this.players.keys());
     const randomIdx = Math.floor(Math.random() * playerIds.length);
@@ -249,15 +273,34 @@ export class Game {
     return { ok: true, value: undefined };
   }
 
-  submitDescription(playerId: string, description: string): Result<void, ResultError> {
+  submitDescription(
+    playerId: string,
+    description: string,
+  ): Result<void, ResultError> {
     if (this.status !== GameStatus.RUNNING) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Game not running') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Game not running"),
+      };
     }
     if (!this.players.has(playerId)) {
-      return { ok: false, error: new ResultError('PLAYER_NOT_FOUND', 'Player not in game') };
+      return {
+        ok: false,
+        error: new ResultError("PLAYER_NOT_FOUND", "Player not in game"),
+      };
     }
-    if (playerId === this.impostorId && this.currentRound === 1 && this.descriptions.get(1)?.length === 0) {
-      return { ok: false, error: new ResultError('IMPOSTOR_CANNOT_SUBMIT_FIRST', 'Impostor must wait') };
+    if (
+      playerId === this.impostorId &&
+      this.currentRound === 1 &&
+      this.descriptions.get(1)?.length === 0
+    ) {
+      return {
+        ok: false,
+        error: new ResultError(
+          "IMPOSTOR_CANNOT_SUBMIT_FIRST",
+          "Impostor must wait",
+        ),
+      };
     }
 
     if (!this.descriptions.has(this.currentRound)) {
@@ -269,7 +312,7 @@ export class Game {
       this.id,
       this.currentRound,
       playerId,
-      description
+      description,
     );
     this.descriptions.get(this.currentRound)!.push(submission);
 
@@ -289,19 +332,31 @@ export class Game {
 
   private allPlayersSubmittedThisRound(): boolean {
     const roundSubs = this.descriptions.get(this.currentRound) ?? [];
-    const submittedIds = new Set(roundSubs.map(s => s.getPlayerId()));
+    const submittedIds = new Set(roundSubs.map((s) => s.getPlayerId()));
     return submittedIds.size === this.players.size;
   }
 
-  voteImpostor(playerId: string, votedForId: string): Result<void, ResultError> {
+  voteImpostor(
+    playerId: string,
+    votedForId: string,
+  ): Result<void, ResultError> {
     if (this.status !== GameStatus.VOTING) {
-      return { ok: false, error: new ResultError('NOT_VOTING', 'Not in voting phase') };
+      return {
+        ok: false,
+        error: new ResultError("NOT_VOTING", "Not in voting phase"),
+      };
     }
     if (!this.players.has(playerId) || !this.players.has(votedForId)) {
-      return { ok: false, error: new ResultError('INVALID_PLAYER', 'Invalid player') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_PLAYER", "Invalid player"),
+      };
     }
     if (this.votes.has(playerId)) {
-      return { ok: false, error: new ResultError('ALREADY_VOTED', 'Player already voted') };
+      return {
+        ok: false,
+        error: new ResultError("ALREADY_VOTED", "Player already voted"),
+      };
     }
 
     this.votes.set(playerId, votedForId);
@@ -316,7 +371,7 @@ export class Game {
 
   getVoteResults(): Map<string, number> {
     const voteMap = new Map<string, number>();
-    this.votes.forEach(votedForId => {
+    this.votes.forEach((votedForId) => {
       voteMap.set(votedForId, (voteMap.get(votedForId) ?? 0) + 1);
     });
     return voteMap;
@@ -325,12 +380,17 @@ export class Game {
   getMostVoted(): string | null {
     const voteMap = this.getVoteResults();
     if (voteMap.size === 0) return null;
-    return Array.from(voteMap.entries()).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    return Array.from(voteMap.entries()).reduce((a, b) =>
+      b[1] > a[1] ? b : a,
+    )[0];
   }
 
   guessWord(guess: string): Result<boolean, ResultError> {
     if (this.status !== GameStatus.ENDED) {
-      return { ok: false, error: new ResultError('INVALID_STATE', 'Cannot guess now') };
+      return {
+        ok: false,
+        error: new ResultError("INVALID_STATE", "Cannot guess now"),
+      };
     }
     this.impostorGuess = guess;
     const isCorrect = guess.toLowerCase() === this.getWord().toLowerCase();
@@ -339,12 +399,13 @@ export class Game {
 
   getWord(): string {
     // This would be fetched from WordRepository in use-case
-    return ''; // placeholder
+    return ""; // placeholder
   }
 }
 ```
 
 **player.ts**
+
 ```typescript
 export class Player {
   private id: string;
@@ -359,11 +420,21 @@ export class Player {
     this.name = name;
   }
 
-  getId(): string { return this.id; }
-  getName(): string { return this.name; }
-  getGameId(): string { return this.gameId; }
-  isTheImpostor(): boolean { return this.isImpostor; }
-  getScore(): number { return this.score; }
+  getId(): string {
+    return this.id;
+  }
+  getName(): string {
+    return this.name;
+  }
+  getGameId(): string {
+    return this.gameId;
+  }
+  isTheImpostor(): boolean {
+    return this.isImpostor;
+  }
+  getScore(): number {
+    return this.score;
+  }
 
   setImpostor(): void {
     this.isImpostor = true;
@@ -378,6 +449,7 @@ export class Player {
 ### 2.5 Repository Interfaces (Ports)
 
 **word.repository.ts**
+
 ```typescript
 export interface IWordRepository {
   getRandomWord(categoryId?: string): Promise<Result<Word, ResultError>>;
@@ -388,6 +460,7 @@ export interface IWordRepository {
 ```
 
 **category.repository.ts**
+
 ```typescript
 export interface ICategoryRepository {
   getAll(): Promise<Result<Category[], ResultError>>;
@@ -400,6 +473,7 @@ export interface ICategoryRepository {
 ### 2.6 GameManager (In-Memory Store)
 
 **game-manager.ts**
+
 ```typescript
 export class GameManager {
   private games: Map<string, Game> = new Map();
@@ -429,11 +503,12 @@ export class GameManager {
 ### 2.7 Use Cases (Examples)
 
 **create-game.use-case.ts**
+
 ```typescript
 export class CreateGameUseCase {
   constructor(
     private gameManager: GameManager,
-    private wordRepository: IWordRepository
+    private wordRepository: IWordRepository,
   ) {}
 
   async execute(): Promise<Result<string, ResultError>> {
@@ -452,14 +527,22 @@ export class CreateGameUseCase {
 ```
 
 **submit-description.use-case.ts**
+
 ```typescript
 export class SubmitDescriptionUseCase {
   constructor(private gameManager: GameManager) {}
 
-  async execute(gameId: string, playerId: string, description: string): Promise<Result<void, ResultError>> {
+  async execute(
+    gameId: string,
+    playerId: string,
+    description: string,
+  ): Promise<Result<void, ResultError>> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
 
     const result = game.submitDescription(playerId, description);
@@ -469,14 +552,22 @@ export class SubmitDescriptionUseCase {
 ```
 
 **vote-impostor.use-case.ts**
+
 ```typescript
 export class VoteImpostorUseCase {
   constructor(private gameManager: GameManager) {}
 
-  async execute(gameId: string, playerId: string, votedForId: string): Promise<Result<void, ResultError>> {
+  async execute(
+    gameId: string,
+    playerId: string,
+    votedForId: string,
+  ): Promise<Result<void, ResultError>> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
 
     return game.voteImpostor(playerId, votedForId);
@@ -485,6 +576,7 @@ export class VoteImpostorUseCase {
 ```
 
 **calculate-scores.use-case.ts**
+
 ```typescript
 export class CalculateScoresUseCase {
   execute(game: Game): Map<string, number> {
@@ -498,14 +590,14 @@ export class CalculateScoresUseCase {
     if (impostorVotes === 0) {
       // Impostor not caught: +2 points
       scores.set(impostorId!, 2);
-      allPlayers.forEach(p => {
+      allPlayers.forEach((p) => {
         if (p.getId() !== impostorId) {
           scores.set(p.getId(), 1); // Others: +1
         }
       });
     } else {
       // Impostor caught: voters get +2, non-voters get +0
-      allPlayers.forEach(p => {
+      allPlayers.forEach((p) => {
         const votes = voteMap.get(p.getId()) ?? 0;
         if (votes > 0) {
           scores.set(p.getId(), 2);
@@ -523,12 +615,13 @@ export class CalculateScoresUseCase {
 ### 2.8 GameOrchestrator
 
 **game.orchestrator.ts**
+
 ```typescript
 export class GameOrchestrator {
   constructor(
     private gameApplicationService: GameApplicationService,
     private gameManager: GameManager,
-    private socketGateway: SocketGateway
+    private socketGateway: SocketGateway,
   ) {}
 
   async createGame(): Promise<Result<string, ResultError>> {
@@ -539,14 +632,25 @@ export class GameOrchestrator {
     return result;
   }
 
-  async submitDescription(gameId: string, playerId: string, description: string): Promise<Result<void, ResultError>> {
-    const result = await this.gameApplicationService.submitDescription(gameId, playerId, description);
-    
+  async submitDescription(
+    gameId: string,
+    playerId: string,
+    description: string,
+  ): Promise<Result<void, ResultError>> {
+    const result = await this.gameApplicationService.submitDescription(
+      gameId,
+      playerId,
+      description,
+    );
+
     if (result.ok) {
       const game = this.gameManager.getGame(gameId);
       if (game) {
-        this.socketGateway.broadcastRoundSubmitted(gameId, game.getCurrentRound());
-        
+        this.socketGateway.broadcastRoundSubmitted(
+          gameId,
+          game.getCurrentRound(),
+        );
+
         // Check if round advanced
         if (game.getStatus() === GameStatus.VOTING) {
           this.socketGateway.broadcastVotingStarted(gameId);
@@ -557,14 +661,26 @@ export class GameOrchestrator {
     return result;
   }
 
-  async voteImpostor(gameId: string, playerId: string, votedForId: string): Promise<Result<void, ResultError>> {
-    const result = await this.gameApplicationService.voteImpostor(gameId, playerId, votedForId);
-    
+  async voteImpostor(
+    gameId: string,
+    playerId: string,
+    votedForId: string,
+  ): Promise<Result<void, ResultError>> {
+    const result = await this.gameApplicationService.voteImpostor(
+      gameId,
+      playerId,
+      votedForId,
+    );
+
     if (result.ok) {
       const game = this.gameManager.getGame(gameId);
       if (game && game.getStatus() === GameStatus.ENDED) {
         const voteResults = game.getVoteResults();
-        this.socketGateway.broadcastVotesRevealed(gameId, voteResults, game.getMostVoted());
+        this.socketGateway.broadcastVotesRevealed(
+          gameId,
+          voteResults,
+          game.getMostVoted(),
+        );
       }
     }
 
@@ -576,6 +692,7 @@ export class GameOrchestrator {
 ### 2.9 Application Service
 
 **game.application-service.ts**
+
 ```typescript
 export class GameApplicationService {
   constructor(
@@ -585,17 +702,23 @@ export class GameApplicationService {
     private submitDescriptionUseCase: SubmitDescriptionUseCase,
     private voteImpostorUseCase: VoteImpostorUseCase,
     private guessWordUseCase: GuessWordUseCase,
-    private calculateScoresUseCase: CalculateScoresUseCase
+    private calculateScoresUseCase: CalculateScoresUseCase,
   ) {}
 
   async createGame(): Promise<Result<string, ResultError>> {
     return this.createGameUseCase.execute();
   }
 
-  async joinGame(gameId: string, playerName: string): Promise<Result<string, ResultError>> {
+  async joinGame(
+    gameId: string,
+    playerName: string,
+  ): Promise<Result<string, ResultError>> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
 
     const playerId = `player_${Date.now()}`;
@@ -611,23 +734,40 @@ export class GameApplicationService {
   async startGame(gameId: string): Promise<Result<void, ResultError>> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
     return game.startGame();
   }
 
-  async submitDescription(gameId: string, playerId: string, description: string): Promise<Result<void, ResultError>> {
+  async submitDescription(
+    gameId: string,
+    playerId: string,
+    description: string,
+  ): Promise<Result<void, ResultError>> {
     return this.submitDescriptionUseCase.execute(gameId, playerId, description);
   }
 
-  async voteImpostor(gameId: string, playerId: string, votedForId: string): Promise<Result<void, ResultError>> {
+  async voteImpostor(
+    gameId: string,
+    playerId: string,
+    votedForId: string,
+  ): Promise<Result<void, ResultError>> {
     return this.voteImpostorUseCase.execute(gameId, playerId, votedForId);
   }
 
-  async guessWord(gameId: string, guess: string): Promise<Result<boolean, ResultError>> {
+  async guessWord(
+    gameId: string,
+    guess: string,
+  ): Promise<Result<boolean, ResultError>> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
     return game.guessWord(guess);
   }
@@ -635,7 +775,10 @@ export class GameApplicationService {
   calculateScores(gameId: string): Result<Map<string, number>, ResultError> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
     const scores = this.calculateScoresUseCase.execute(game);
     return { ok: true, value: scores };
@@ -644,7 +787,10 @@ export class GameApplicationService {
   getGameState(gameId: string): Result<GameStateDTO, ResultError> {
     const game = this.gameManager.getGame(gameId);
     if (!game) {
-      return { ok: false, error: new ResultError('GAME_NOT_FOUND', 'Game not found') };
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
     }
     // Map to DTO
     return { ok: true, value: {} as GameStateDTO };
@@ -655,6 +801,7 @@ export class GameApplicationService {
 ### 2.10 WebSocket Events
 
 **Event Types** (PascalCase)
+
 ```typescript
 export interface RoundSubmittedEvent {
   gameId: string;
@@ -689,24 +836,29 @@ export interface GameEndedEvent {
 ```
 
 **socket.gateway.ts**
+
 ```typescript
 export class SocketGateway {
   constructor(private io: Server) {}
 
   broadcastRoundSubmitted(gameId: string, round: number): void {
-    this.io.to(gameId).emit('RoundSubmitted', { gameId, round });
+    this.io.to(gameId).emit("RoundSubmitted", { gameId, round });
   }
 
   broadcastVotingStarted(gameId: string): void {
-    this.io.to(gameId).emit('VotingStarted', { gameId });
+    this.io.to(gameId).emit("VotingStarted", { gameId });
   }
 
-  broadcastVotesRevealed(gameId: string, voteMap: Map<string, number>, mostVoted: string): void {
-    this.io.to(gameId).emit('VotesRevealed', { gameId, voteMap, mostVoted });
+  broadcastVotesRevealed(
+    gameId: string,
+    voteMap: Map<string, number>,
+    mostVoted: string,
+  ): void {
+    this.io.to(gameId).emit("VotesRevealed", { gameId, voteMap, mostVoted });
   }
 
   broadcastGameEnded(gameId: string, scores: ScoreDTO[]): void {
-    this.io.to(gameId).emit('GameEnded', { gameId, scores });
+    this.io.to(gameId).emit("GameEnded", { gameId, scores });
   }
 }
 ```
@@ -796,6 +948,7 @@ frontend/
 ### 3.2 GameClientService (Frontend Orchestrator)
 
 **game-client.service.ts**
+
 ```typescript
 export class GameClientService {
   private static instance: GameClientService;
@@ -816,38 +969,38 @@ export class GameClientService {
   }
 
   private setupSocketListeners(): void {
-    this.socket?.on('GameStarted', (data) => {
+    this.socket?.on("GameStarted", (data) => {
       this.gameStore.setGameStarted(data);
     });
 
-    this.socket?.on('RoundSubmitted', (data) => {
+    this.socket?.on("RoundSubmitted", (data) => {
       this.gameStore.addRoundSubmissions(data.round, data.descriptions);
     });
 
-    this.socket?.on('VotingStarted', (data) => {
-      this.gameStore.setStatus('VOTING');
+    this.socket?.on("VotingStarted", (data) => {
+      this.gameStore.setStatus("VOTING");
     });
 
-    this.socket?.on('VotesRevealed', (data) => {
+    this.socket?.on("VotesRevealed", (data) => {
       this.gameStore.setVotes(data.voteMap, data.mostVoted);
     });
 
-    this.socket?.on('GameEnded', (data) => {
-      this.gameStore.setStatus('ENDED');
+    this.socket?.on("GameEnded", (data) => {
+      this.gameStore.setStatus("ENDED");
       this.gameStore.setFinalScores(data.scores);
     });
   }
 
   submitDescription(description: string): void {
-    this.socket?.emit('submitDescription', { description });
+    this.socket?.emit("submitDescription", { description });
   }
 
   voteImpostor(playerId: string): void {
-    this.socket?.emit('voteImpostor', { playerId });
+    this.socket?.emit("voteImpostor", { playerId });
   }
 
   guessWord(word: string): void {
-    this.socket?.emit('guessWord', { word });
+    this.socket?.emit("guessWord", { word });
   }
 }
 ```
@@ -855,13 +1008,14 @@ export class GameClientService {
 ### 3.3 Pinia Store
 
 **game.store.ts**
+
 ```typescript
-export const useGameStore = defineStore('game', () => {
-  const gameId = ref<string>('');
-  const status = ref<'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED'>('LOBBY');
+export const useGameStore = defineStore("game", () => {
+  const gameId = ref<string>("");
+  const status = ref<"LOBBY" | "RUNNING" | "VOTING" | "ENDED">("LOBBY");
   const currentRound = ref<number>(1);
-  const word = ref<string>('');
-  const category = ref<string>('');
+  const word = ref<string>("");
+  const category = ref<string>("");
   const isImpostor = ref<boolean>(false);
   const players = ref<PlayerDTO[]>([]);
   const descriptions = ref<Map<number, DescriptionDTO[]>>(new Map());
@@ -871,8 +1025,8 @@ export const useGameStore = defineStore('game', () => {
 
   const setGameStarted = (data: any) => {
     gameId.value = data.gameId;
-    status.value = 'RUNNING';
-    word.value = data.word ?? '';
+    status.value = "RUNNING";
+    word.value = data.word ?? "";
     category.value = data.category;
     isImpostor.value = data.isImpostor;
     players.value = data.players;
@@ -896,11 +1050,11 @@ export const useGameStore = defineStore('game', () => {
   };
 
   const reset = () => {
-    gameId.value = '';
-    status.value = 'LOBBY';
+    gameId.value = "";
+    status.value = "LOBBY";
     currentRound.value = 1;
-    word.value = '';
-    category.value = '';
+    word.value = "";
+    category.value = "";
     isImpostor.value = false;
     players.value = [];
     descriptions.value.clear();
@@ -910,9 +1064,23 @@ export const useGameStore = defineStore('game', () => {
   };
 
   return {
-    gameId, status, currentRound, word, category, isImpostor, players,
-    descriptions, votes, mostVoted, finalScores,
-    setGameStarted, setStatus, addRoundSubmissions, setVotes, setFinalScores, reset
+    gameId,
+    status,
+    currentRound,
+    word,
+    category,
+    isImpostor,
+    players,
+    descriptions,
+    votes,
+    mostVoted,
+    finalScores,
+    setGameStarted,
+    setStatus,
+    addRoundSubmissions,
+    setVotes,
+    setFinalScores,
+    reset,
   };
 });
 ```
@@ -920,10 +1088,11 @@ export const useGameStore = defineStore('game', () => {
 ### 3.4 Composables
 
 **use-game-state.ts**
+
 ```typescript
 export function useGameState() {
   const gameStore = useGameStore();
-  const gameClientService = inject<GameClientService>('gameClientService');
+  const gameClientService = inject<GameClientService>("gameClientService");
 
   const submitDescription = (description: string) => {
     gameClientService?.submitDescription(description);
@@ -949,7 +1118,7 @@ export function useGameState() {
     // Actions
     submitDescription,
     voteImpostor,
-    guessWord
+    guessWord,
   };
 }
 ```
@@ -1061,35 +1230,41 @@ guessWord(word)
 ## 8. Development Timeline
 
 **Phase 1: Backend Setup** (Days 1-2)
+
 - Fastify + Socket.io setup
 - SQLite schema + migrations
 - Core entities (Game, Player, Word, Category)
 - Result<T, E> type
 
 **Phase 2: Backend Use Cases & Services** (Days 2-3)
+
 - All use-cases
 - GameApplicationService + AdminGameService
 - GameManager
 - GameOrchestrator
 
 **Phase 3: Backend Repositories & Adapters** (Day 3)
+
 - SQLite adapters (WordRepository, CategoryRepository)
 - HTTP routes (admin CRUD)
 - SocketGateway setup
 
 **Phase 4: Frontend Setup & Lobby** (Days 3-4)
+
 - Vue 3 + Vite + Tailwind
 - Router
 - Lobby feature (join/create)
 - Pinia stores
 
 **Phase 5: Frontend Game Flow** (Days 4-5)
+
 - RoundPhase, VotingPhase, RevealPhase
 - GameClientService setup
 - Socket subscriptions
 - Real-time UI updates
 
 **Phase 6: Polish & Testing** (Days 5-6)
+
 - Integration tests (backend)
 - E2E tests
 - Bug fixes
@@ -1103,7 +1278,7 @@ guessWord(word)
 // DTO
 export interface GameStateDTO {
   id: string;
-  status: 'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED';
+  status: "LOBBY" | "RUNNING" | "VOTING" | "ENDED";
   currentRound: number;
   word?: string; // Only for non-impostor
   category: string;
@@ -1137,6 +1312,7 @@ export interface ScoreDTO {
 ## 10. Next Steps
 
 Ready to start building:
+
 1. **Backend project setup** (Fastify + TypeScript)
 2. **Core domain entities**
 3. **Repository implementations**

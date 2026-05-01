@@ -11,7 +11,9 @@ compatibility: AskUserQuestion, Bash, Read, Edit, Write
 ## Workflow
 
 ### Phase 1: Clarify Intent
+
 Ask user:
+
 - What exactly are we planning? (feature/bug fix/refactor/architecture?)
 - Why? (context, constraints, deadline?)
 - Scope? (what's in/out?)
@@ -20,7 +22,9 @@ Ask user:
 Use AskUserQuestion to gather these concisely. DON'T guess.
 
 ### Phase 2: Plan Building
+
 Ask targeted questions as you discover gaps:
+
 - Who's involved?
 - Dependencies?
 - Risks/blockers?
@@ -29,9 +33,11 @@ Ask targeted questions as you discover gaps:
 Build plan incrementally. Stop asking if user says "enough questions" or answers become clear.
 
 ### Phase 3: Output
+
 Save plan to location user specifies.
 
 **Plan structure:**
+
 ```
 # [Feature/Fix/Refactor Name]
 
@@ -55,6 +61,7 @@ Save plan to location user specifies.
 Keep it short. No fluff. Every line earns its place.
 
 ## Key Rules
+
 - Ask before assuming
 - Minimal text (1-2 lines per section)
 - Precise language (no vague words)

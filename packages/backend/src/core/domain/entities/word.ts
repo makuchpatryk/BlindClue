@@ -2,7 +2,7 @@ export class Word {
   constructor(
     private id: string,
     private categoryId: string,
-    private text: string
+    private text: string,
   ) {}
 
   getId(): string {

@@ -14,13 +14,19 @@
         :disabled="!newCategory || isAdding"
         class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
       >
-        {{ isAdding ? 'Adding...' : 'Add Category' }}
+        {{ isAdding ? "Adding..." : "Add Category" }}
       </button>
     </form>
 
-    <div v-if="isLoading" class="text-center text-gray-500">Loading categories...</div>
+    <div v-if="isLoading" class="text-center text-gray-500">
+      Loading categories...
+    </div>
     <div v-else class="space-y-2">
-      <div v-for="category in categories" :key="category.id" class="p-3 bg-gray-50 rounded flex justify-between items-center">
+      <div
+        v-for="category in categories"
+        :key="category.id"
+        class="p-3 bg-gray-50 rounded flex justify-between items-center"
+      >
         <span class="font-medium">{{ category.name }}</span>
       </div>
     </div>
@@ -30,11 +36,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useAdminService } from '../composables/use-admin-service.js';
+import { ref, onMounted } from "vue";
+import { useAdminService } from "../composables/use-admin-service.js";
 
-const { categories, isLoading, error, getCategories, createCategory } = useAdminService();
-const newCategory = ref('');
+const { categories, isLoading, error, getCategories, createCategory } =
+  useAdminService();
+const newCategory = ref("");
 const isAdding = ref(false);
 
 onMounted(() => {
@@ -47,7 +54,7 @@ async function addCategory() {
   isAdding.value = true;
   try {
     await createCategory(newCategory.value);
-    newCategory.value = '';
+    newCategory.value = "";
   } finally {
     isAdding.value = false;
   }

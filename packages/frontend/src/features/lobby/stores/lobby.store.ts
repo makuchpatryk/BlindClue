@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useLobbyStore = defineStore('lobby', () => {
-  const playerName = ref<string>('');
-  const gameCode = ref<string>('');
+export const useLobbyStore = defineStore("lobby", () => {
+  const playerName = ref<string>("");
+  const gameCode = ref<string>("");
   const isCreatingGame = ref<boolean>(false);
   const isJoiningGame = ref<boolean>(false);
   const error = ref<string | null>(null);
@@ -29,8 +29,8 @@ export const useLobbyStore = defineStore('lobby', () => {
   };
 
   const reset = () => {
-    playerName.value = '';
-    gameCode.value = '';
+    playerName.value = "";
+    gameCode.value = "";
     isCreatingGame.value = false;
     isJoiningGame.value = false;
     error.value = null;

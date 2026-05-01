@@ -1,6 +1,6 @@
 export interface GameStateDTO {
   id: string;
-  status: 'LOBBY' | 'RUNNING' | 'VOTING' | 'ENDED';
+  status: "LOBBY" | "RUNNING" | "VOTING" | "ENDED";
   currentRound: number;
   categoryId: string;
   impostorId?: string;

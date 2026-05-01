@@ -1,4 +1,4 @@
-import { Result, ResultError } from '../../../application/utils/result.js';
+import { Result, ResultError } from "../../../application/utils/result.js";
 
 export interface Category {
   id: string;

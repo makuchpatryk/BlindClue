@@ -1,4 +1,4 @@
-import { PlayerId } from '../value-objects/player-id.js';
+import { PlayerId } from "../value-objects/player-id.js";
 
 export class RoundSubmission {
   constructor(
@@ -6,7 +6,7 @@ export class RoundSubmission {
     private gameId: string,
     private round: number,
     private playerId: PlayerId,
-    private description: string
+    private description: string,
   ) {}
 
   getId(): string {

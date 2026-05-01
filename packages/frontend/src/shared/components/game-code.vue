@@ -6,27 +6,22 @@
       class="mt-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
       @click="copyToClipboard"
     >
-      {{ copied ? 'Copied!' : 'Copy' }}
+      {{ copied ? "Copied!" : "Copy" }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useClipboard } from "../composables/use-clipboard.js";
 
 interface Props {
   code: string;
 }
 
 const props = defineProps<Props>();
-
-const copied = ref(false);
+const { copied, copyToClipboard: copy } = useClipboard();
 
 function copyToClipboard() {
-  navigator.clipboard.writeText(props.code);
-  copied.value = true;
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+  copy(props.code);
 }
 </script>

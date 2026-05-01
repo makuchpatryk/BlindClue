@@ -11,6 +11,7 @@ Initialize the backend package with Fastify, Socket.io, SQLite, and TypeScript. 
 ## Completed ✅
 
 ### Project Init
+
 - [x] `packages/backend/package.json` with Fastify, Socket.io, better-sqlite3, typescript, tsx, vitest
 - [x] `packages/backend/tsconfig.json` extending root config
 - [x] `packages/backend/src/main.ts` (Fastify + Socket.io with DI setup)
@@ -19,12 +20,14 @@ Initialize the backend package with Fastify, Socket.io, SQLite, and TypeScript. 
 - [x] `vitest.config.ts` for testing
 
 ### Core Types ✅
+
 - [x] `src/application/utils/result.ts` — Result<T, E> pattern with ResultError
 - [x] `src/core/domain/value-objects/game-status.ts` — GameStatus enum
 - [x] `src/core/domain/value-objects/game-id.ts` — GameId with generation
 - [x] `src/core/domain/value-objects/player-id.ts` — PlayerId with generation
 
 ### Domain Entities ✅
+
 - [x] `src/core/domain/entities/game.ts` — Complete Game with all business logic
 - [x] `src/core/domain/entities/player.ts` — Player with score tracking
 - [x] `src/core/domain/entities/word.ts` — Word entity
@@ -32,12 +35,14 @@ Initialize the backend package with Fastify, Socket.io, SQLite, and TypeScript. 
 - [x] `src/core/domain/entities/round-submission.ts` — RoundSubmission entity
 
 ### Database ✅
+
 - [x] `src/infra/database/init.sql` — Categories + words schema with indexes
 - [x] `src/infra/database/seeds.sql` — 5 categories + 25 sample words
 - [x] `src/infra/adapters/persistence/sqlite/database.ts` — SQLite with auto-init & seed
 - [x] `packages/backend/data/` — Database directory created
 
 ### Exceptions ✅
+
 - [x] `src/core/domain/ports/exceptions/domain.exception.ts`
 - [x] `src/core/domain/ports/exceptions/game-not-found.exception.ts`
 - [x] `src/core/domain/ports/exceptions/game-full.exception.ts`

@@ -31,10 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useLobbyStore } from '../stores/lobby.store.js';
-import CreateGameForm from './create-game-form.vue';
-import JoinGameForm from './join-game-form.vue';
+import { ref, watch } from "vue";
+import { useLobbyStore } from "../stores/lobby.store.js";
+import CreateGameForm from "./create-game-form.vue";
+import JoinGameForm from "./join-game-form.vue";
 
 const lobbyStore = useLobbyStore();
 const playerName = ref<string>(lobbyStore.playerName);

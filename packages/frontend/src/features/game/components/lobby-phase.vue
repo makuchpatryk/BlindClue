@@ -1,20 +1,16 @@
 <template>
   <div class="space-y-4">
     <h2 class="text-2xl font-bold text-white">Waiting for players...</h2>
-    <div class="flex items-center gap-2">
-      <p class="text-gray-400">
-        Game Code:
-        <code class="font-mono font-bold text-blue-400">{{ gameStore.gameId }}</code>
-      </p>
-      <Button
-        :no-defaults="true"
+    <p class="text-gray-400">
+      Game Code:
+      <code
+        class="font-mono font-bold text-blue-400 cursor-pointer hover:text-blue-300 transition"
         @click="copyGameIdToClipboard"
-        class="p-1 text-gray-400 hover:text-blue-400 transition"
-        title="Copy game ID"
+        title="Click to copy game ID"
       >
-        📋
-      </Button>
-    </div>
+        {{ gameStore.gameId }}
+      </code>
+    </p>
     <div class="mt-4">
       <h3 class="font-semibold mb-2 text-gray-300">Players:</h3>
       <ul class="space-y-2">

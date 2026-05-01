@@ -40,11 +40,6 @@ export class GameClientService {
       gameStore.setStatus(GameStatus.VOTING);
     });
 
-    this.socket.on(SOCKET_EVENTS.VOTES_REVEALED, (data) => {
-      gameStore.setVotes(data.voteMap, data.mostVoted);
-      gameStore.setStatus(data.gameStatus);
-    });
-
     this.socket.on(SOCKET_EVENTS.GAME_ENDED, (data) => {
       gameStore.setStatus(GameStatus.ENDED);
       gameStore.setImpostorDoneGuessing(true);
@@ -96,10 +91,6 @@ export class GameClientService {
     this.socket.on(SOCKET_EVENTS.REJOIN_ERROR, () => {
       gameStore.setJoinStatus("rejected");
       clearGameSession();
-    });
-
-    this.socket.on(SOCKET_EVENTS.WORD_REVEALED, (data) => {
-      gameStore.setWord(data.word);
     });
 
     this.socket.on(SOCKET_EVENTS.PLAYER_TURN_ADVANCED, (data) => {

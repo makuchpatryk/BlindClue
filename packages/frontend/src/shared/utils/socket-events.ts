@@ -3,7 +3,6 @@ export const SOCKET_EVENTS = {
   GAME_STARTED: "GameStarted",
   ROUND_SUBMITTED: "RoundSubmitted",
   VOTING_STARTED: "VotingStarted",
-  VOTES_REVEALED: "VotesRevealed",
   GAME_ENDED: "GameEnded",
 
   // Player management
@@ -15,7 +14,6 @@ export const SOCKET_EVENTS = {
   REJOIN_ERROR: "rejoinError",
 
   // Game flow
-  WORD_REVEALED: "wordRevealed",
   PLAYER_TURN_ADVANCED: "PlayerTurnAdvanced",
   BUTTON_UNBLOCKED: "ButtonUnblocked",
   PLAYER_VOTED: "PlayerVoted",

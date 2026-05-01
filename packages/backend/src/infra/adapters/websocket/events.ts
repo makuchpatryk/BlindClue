@@ -7,13 +7,6 @@ export interface VotingStartedEvent {
   gameId: string;
 }
 
-export interface VotesRevealedEvent {
-  gameId: string;
-  voteMap: Record<string, number>;
-  mostVoted: string;
-  gameStatus: string;
-}
-
 export interface ImpostorGuessRequestEvent {
   gameId: string;
 }

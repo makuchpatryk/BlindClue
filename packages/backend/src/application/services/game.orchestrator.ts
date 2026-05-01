@@ -27,12 +27,6 @@ export interface SocketGateway {
   ): void;
   broadcastRoundSubmitted(gameId: string, round: number): void;
   broadcastVotingStarted(gameId: string): void;
-  broadcastVotesRevealed(
-    gameId: string,
-    voteMap: Map<string, number>,
-    mostVoted: string,
-    gameStatus: string,
-  ): void;
   broadcastGameEnded(gameId: string): void;
   broadcastImpostorDoneGuessing(gameId: string): void;
   broadcastPlayerWordSubmitted(
@@ -150,24 +144,6 @@ export class GameOrchestrator {
       playerId,
       votedForId,
     );
-
-    if (result.ok) {
-      const game = this.gameManager.getGame(gameId);
-      if (
-        game &&
-        (game.getStatus() === GameStatus.GUESSING ||
-          game.getStatus() === GameStatus.ENDED)
-      ) {
-        const voteResults = game.getVoteResults();
-        const mostVoted = game.getMostVoted();
-        this.socketGateway.broadcastVotesRevealed(
-          gameId,
-          voteResults,
-          mostVoted!,
-          game.getStatus(),
-        );
-      }
-    }
 
     return result;
   }

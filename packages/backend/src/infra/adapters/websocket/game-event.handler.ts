@@ -131,28 +131,7 @@ export class GameEventHandler {
 
     socket.on("startGame", async (data: { gameId: string }) => {
       const result = await this.gameOrchestrator.startGame(data.gameId);
-      if (result.ok) {
-        const game = this.gameManager.getGame(data.gameId);
-        if (game) {
-          const impostorId = game.getImpostorId();
-          const word = game.getWord();
-          if (impostorId && word) {
-            const impostorSocketId = Array.from(
-              this.socketToPlayer.entries(),
-            ).find(
-              ([_, player]) =>
-                player.playerId === impostorId && player.gameId === data.gameId,
-            )?.[0];
-            if (impostorSocketId) {
-              this.socketGateway.broadcastWordRevealed(
-                data.gameId,
-                impostorSocketId,
-                word,
-              );
-            }
-          }
-        }
-      } else {
+      if (!result.ok) {
         socket.emit("error", { error: result.error });
       }
     });
@@ -216,9 +195,6 @@ export class GameEventHandler {
           } else {
             console.log(`[guessWord] Guess processed successfully`);
           }
-
-          // Send the word to all players (including impostor who just guessed)
-          this.socketGateway.broadcastWordReveal(data.gameId, word);
         } else {
           console.error(`[guessWord] Failed to get word:`, wordResult.error);
         }
@@ -333,18 +309,6 @@ export class GameEventHandler {
 
     socket.on("allPlayersVoted", async (data: { gameId: string }) => {
       this.socketGateway.broadcastAllPlayersVoted(data.gameId);
-
-      // Send the word to all players (including impostor)
-      const game = this.gameManager.getGame(data.gameId);
-      if (game) {
-        const wordResult = await this.wordRepository.findById(game.getWordId());
-        if (wordResult.ok) {
-          this.socketGateway.broadcastWordReveal(
-            data.gameId,
-            wordResult.value.getText(),
-          );
-        }
-      }
     });
 
     socket.on("disconnect", () => {

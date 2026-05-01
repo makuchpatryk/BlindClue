@@ -2,7 +2,6 @@ import { Server } from "socket.io";
 import {
   RoundSubmittedEvent,
   VotingStartedEvent,
-  VotesRevealedEvent,
   GameEndedEvent,
   PlayerJoinedEvent,
   GameStartedEvent,
@@ -44,24 +43,6 @@ export class SocketGateway {
     this.io.to(gameId).emit("GameStarted", event);
   }
 
-  broadcastWordRevealed(
-    gameId: string,
-    impostorSocketId: string,
-    word: string,
-  ): void {
-    const room = this.io.sockets.adapter.rooms.get(gameId);
-    if (room) {
-      for (const socketId of room) {
-        if (socketId !== impostorSocketId) {
-          const socket = this.io.sockets.sockets.get(socketId);
-          if (socket) {
-            socket.emit("wordRevealed", { gameId, word });
-          }
-        }
-      }
-    }
-  }
-
   broadcastRoundSubmitted(gameId: string, round: number): void {
     const event: RoundSubmittedEvent = { gameId, round };
     this.io.to(gameId).emit("RoundSubmitted", event);
@@ -70,21 +51,6 @@ export class SocketGateway {
   broadcastVotingStarted(gameId: string): void {
     const event: VotingStartedEvent = { gameId };
     this.io.to(gameId).emit("VotingStarted", event);
-  }
-
-  broadcastVotesRevealed(
-    gameId: string,
-    voteMap: Map<string, number>,
-    mostVoted: string,
-    gameStatus: string,
-  ): void {
-    const event: VotesRevealedEvent = {
-      gameId,
-      voteMap: Object.fromEntries(voteMap),
-      mostVoted,
-      gameStatus,
-    };
-    this.io.to(gameId).emit("VotesRevealed", event);
   }
 
   broadcastGameEnded(gameId: string): void {
@@ -126,10 +92,6 @@ export class SocketGateway {
 
   broadcastAllPlayersVoted(gameId: string): void {
     this.io.to(gameId).emit("AllPlayersVoted", { gameId });
-  }
-
-  broadcastWordReveal(gameId: string, word: string): void {
-    this.io.to(gameId).emit("wordRevealed", { gameId, word });
   }
 
   broadcastImpostorDoneGuessing(gameId: string): void {

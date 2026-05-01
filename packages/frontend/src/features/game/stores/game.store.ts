@@ -9,6 +9,7 @@ export const useGameStore = defineStore("game", () => {
   const gameId = ref<string>("");
   const status = ref<GameStatus>(GameStatus.LOBBY);
   const currentRound = ref<number>(1);
+  const numberOfRounds = ref<number>(MAX_ROUNDS);
   const category = ref<string>("");
   const word = ref<string>("");
   const isImpostor = ref<boolean>(false);
@@ -39,7 +40,7 @@ export const useGameStore = defineStore("game", () => {
 
   const canShowShowImpostorButton = computed(() => {
     return (
-      currentRound.value === MAX_ROUNDS &&
+      currentRound.value === numberOfRounds.value &&
       playersClickedThisRound.value.size === players.value.length
     );
   });
@@ -49,12 +50,16 @@ export const useGameStore = defineStore("game", () => {
     category: string;
     impostorId: string;
     players: PlayerDTO[];
+    numberOfRounds?: number;
   }) => {
     gameId.value = data.gameId;
     status.value = GameStatus.RUNNING;
     category.value = data.category;
     impostorId.value = data.impostorId;
     players.value = data.players;
+    if (data.numberOfRounds) {
+      numberOfRounds.value = data.numberOfRounds;
+    }
     isImpostor.value = data.impostorId === myPlayerId.value;
   };
 
@@ -211,6 +216,7 @@ export const useGameStore = defineStore("game", () => {
     gameId.value = "";
     status.value = GameStatus.LOBBY;
     currentRound.value = 1;
+    numberOfRounds.value = MAX_ROUNDS;
     category.value = "";
     word.value = "";
     isImpostor.value = false;
@@ -243,6 +249,7 @@ export const useGameStore = defineStore("game", () => {
     gameId,
     status,
     currentRound,
+    numberOfRounds,
     category,
     word,
     isImpostor,

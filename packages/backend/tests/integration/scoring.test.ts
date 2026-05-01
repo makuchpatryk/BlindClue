@@ -54,9 +54,12 @@ describe("Scoring Logic", () => {
     const scores = calculateScoresUseCase.execute(game, false);
 
     expect(scores.get(impostorId!)).toBe(2); // Impostor not caught
-    expect(scores.get(player1.getId().value)).toBe(1); // Non-impostor
-    expect(scores.get(player2.getId().value)).toBe(1);
-    expect(scores.get(player3.getId().value)).toBe(1);
+    // Check non-impostors got 1 point
+    game.getPlayers().forEach((p) => {
+      if (p.getId().value !== impostorId) {
+        expect(scores.get(p.getId().value)).toBe(1);
+      }
+    });
   });
 
   it("impostor caught and guesses correctly gets +2", () => {
@@ -110,8 +113,11 @@ describe("Scoring Logic", () => {
     const scores = calculateScoresUseCase.execute(game, false);
 
     expect(scores.get(impostorId!)).toBe(1); // Caught and guessed wrong
-    expect(scores.get(player1.getId().value)).toBe(2); // Voted correctly
-    expect(scores.get(player2.getId().value)).toBe(2);
-    expect(scores.get(player3.getId().value)).toBe(2);
+    // Check all voters (including impostor voting for themselves) got 2 points
+    game.getPlayers().forEach((p) => {
+      if (p.getId().value !== impostorId) {
+        expect(scores.get(p.getId().value)).toBe(2);
+      }
+    });
   });
 });

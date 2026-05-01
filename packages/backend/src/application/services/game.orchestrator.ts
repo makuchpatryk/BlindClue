@@ -23,6 +23,7 @@ export interface SocketGateway {
     category: string,
     impostorId: string,
     players: Array<{ id: string; name: string }>,
+    numberOfRounds?: number,
   ): void;
   broadcastRoundSubmitted(gameId: string, round: number): void;
   broadcastVotingStarted(gameId: string): void;
@@ -30,6 +31,7 @@ export interface SocketGateway {
     gameId: string,
     voteMap: Map<string, number>,
     mostVoted: string,
+    gameStatus: string,
   ): void;
   broadcastGameEnded(
     gameId: string,
@@ -55,8 +57,10 @@ export class GameOrchestrator {
     this.gameManager = GameManager.getInstance();
   }
 
-  async createGame(): Promise<Result<string, ResultError>> {
-    const result = await this.gameApplicationService.createGame();
+  async createGame(
+    numberOfRounds: number = 3,
+  ): Promise<Result<string, ResultError>> {
+    const result = await this.gameApplicationService.createGame(numberOfRounds);
     if (result.ok) {
       this.socketGateway.broadcastGameCreated(result.value);
     }
@@ -104,6 +108,7 @@ export class GameOrchestrator {
           game.getCategoryName(),
           game.getImpostorId()!,
           players,
+          game.getNumberOfRounds(),
         );
       }
     }
@@ -151,13 +156,18 @@ export class GameOrchestrator {
 
     if (result.ok) {
       const game = this.gameManager.getGame(gameId);
-      if (game && game.getStatus() === GameStatus.ENDED) {
+      if (
+        game &&
+        (game.getStatus() === GameStatus.GUESSING ||
+          game.getStatus() === GameStatus.ENDED)
+      ) {
         const voteResults = game.getVoteResults();
         const mostVoted = game.getMostVoted();
         this.socketGateway.broadcastVotesRevealed(
           gameId,
           voteResults,
           mostVoted!,
+          game.getStatus(),
         );
       }
     }

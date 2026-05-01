@@ -28,6 +28,7 @@ export class GameClientService {
         category: data.category,
         impostorId: data.impostorId,
         players: data.players,
+        numberOfRounds: data.numberOfRounds,
       });
     });
 
@@ -41,6 +42,7 @@ export class GameClientService {
 
     this.socket.on(SOCKET_EVENTS.VOTES_REVEALED, (data) => {
       gameStore.setVotes(data.voteMap, data.mostVoted);
+      gameStore.setStatus(data.gameStatus);
     });
 
     this.socket.on(SOCKET_EVENTS.GAME_ENDED, (data) => {
@@ -87,6 +89,7 @@ export class GameClientService {
           category: data.category,
           impostorId: data.impostorId,
           players: data.players,
+          numberOfRounds: data.numberOfRounds,
         });
       gameStore.setJoinStatus("approved");
       saveGameSession(gameId, data.playerId);
@@ -116,7 +119,6 @@ export class GameClientService {
     });
 
     this.socket.on(SOCKET_EVENTS.ALL_PLAYERS_VOTED, (data) => {
-      gameStore.setStatus(GameStatus.ENDED);
       gameStore.setImpostorDoneGuessing(false);
     });
 

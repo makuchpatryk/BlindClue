@@ -98,7 +98,7 @@
         <div class="bg-gray-700 rounded-lg shadow p-6">
           <div class="text-center">
             <h3 class="text-sm font-semibold text-gray-400 mb-2">
-              ROUND {{ currentRound }}/{{ MAX_ROUNDS }}
+              ROUND {{ currentRound }}/{{ numberOfRounds }}
             </h3>
             <h2 class="text-3xl font-bold text-white mb-4">
               It's {{ currentPlayer?.name }}'s turn
@@ -118,7 +118,7 @@
 
             <div
               v-if="
-                currentRound < MAX_ROUNDS ||
+                currentRound < numberOfRounds ||
                 playersClickedThisRound.size < players.length
               "
               class="space-y-4"
@@ -190,7 +190,7 @@
       <div v-else-if="status === GameStatus.ENDED" class="space-y-4">
         <h2 class="text-2xl font-bold text-white mb-6">Game Over</h2>
 
-        <div v-if="!gameStore.impostorDoneGuessing" class="mb-4">
+        <div v-if="!gameStore.impostorDoneGuessing && votes && mostVoted === gameStore.impostorId" class="mb-4">
           <div v-if="isImpostor">
             <ImpostorGuessPhase />
           </div>
@@ -204,7 +204,7 @@
           </div>
         </div>
 
-        <div v-if="gameStore.impostorDoneGuessing" class="space-y-4">
+        <div v-if="gameStore.impostorDoneGuessing || (votes && mostVoted !== gameStore.impostorId)" class="space-y-4">
           <div class="bg-gray-700 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-300 mb-2">Most Voted</h3>
             <p class="text-xl text-white">
@@ -297,7 +297,7 @@ import {
   clearGameSession,
 } from "@/shared/utils/session-storage.js";
 import { useClipboard } from "@/shared/composables/use-clipboard.js";
-import { MAX_ROUNDS, MIN_PLAYERS } from "@/shared/utils/constants.js";
+import { MIN_PLAYERS } from "@/shared/utils/constants.js";
 import { usePlayerHelpers } from "../composables/use-player-helpers.js";
 import Button from "@/shared/components/button.vue";
 import VotingPhase from "../components/voting-phase.vue";
@@ -320,6 +320,7 @@ provide("gameClientService", gameClientService);
 
 const status = computed(() => gameStore.status);
 const currentRound = computed(() => gameStore.currentRound);
+const numberOfRounds = computed(() => gameStore.numberOfRounds);
 const category = computed(() => gameStore.category);
 const word = computed(() => gameStore.word);
 const isImpostor = computed(() => gameStore.isImpostor);
@@ -330,6 +331,7 @@ const joinStatus = computed(() => gameStore.joinStatus);
 const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
 const canStartGame = computed(() => players.value.length >= MIN_PLAYERS);
 const votes = computed(() => gameStore.votes);
+const mostVoted = computed(() => gameStore.mostVoted);
 const currentPlayer = computed(() => gameStore.currentPlayer);
 const canShowShowImpostorButton = computed(
   () => gameStore.canShowShowImpostorButton,
@@ -404,7 +406,7 @@ function handleNextPerson() {
   );
 
   if (
-    gameStore.currentRound === MAX_ROUNDS &&
+    gameStore.currentRound === gameStore.numberOfRounds &&
     gameStore.playersClickedThisRound.size === gameStore.players.length
   ) {
     gameStore.setStatus(GameStatus.VOTING);
@@ -414,6 +416,7 @@ function handleNextPerson() {
 
 function handleShowImpostor() {
   gameStore.setStatus(GameStatus.VOTING);
+  gameClientService.transitionToVoting(gameId);
 }
 
 function approveJoin(requestId: string) {

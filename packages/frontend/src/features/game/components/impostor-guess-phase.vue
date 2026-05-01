@@ -18,21 +18,9 @@
       </Button>
     </form>
 
-    <div v-else class="space-y-4">
-      <div
-        v-if="isCorrect"
-        class="p-4 bg-green-900 rounded border border-green-600"
-      >
-        <p class="text-green-400 font-bold text-lg">✓ Correct!</p>
-        <p class="text-green-300">You guessed the word right!</p>
-      </div>
-      <div v-else class="p-4 bg-red-900 rounded border border-red-600">
-        <p class="text-red-400 font-bold text-lg">✗ Wrong!</p>
-        <p class="text-red-300">
-          The word was:
-          <span class="font-bold text-red-200">{{ actualWord }}</span>
-        </p>
-      </div>
+    <div v-else class="p-4 bg-blue-900 rounded border border-blue-600">
+      <p class="text-blue-400 font-bold text-lg">Guess submitted!</p>
+      <p class="text-blue-300">Calculating final scores...</p>
     </div>
   </div>
 </template>

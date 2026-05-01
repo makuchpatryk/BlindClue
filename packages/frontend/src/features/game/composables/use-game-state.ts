@@ -7,6 +7,7 @@ export function useGameState() {
   const gameClientService = inject<GameClientService>("gameClientService");
 
   const currentRound = computed(() => gameStore.currentRound);
+  const numberOfRounds = computed(() => gameStore.numberOfRounds);
   const status = computed(() => gameStore.status);
   const players = computed(() => gameStore.players);
   const isImpostor = computed(() => gameStore.isImpostor);
@@ -43,6 +44,7 @@ export function useGameState() {
 
   return {
     currentRound,
+    numberOfRounds,
     status,
     players,
     isImpostor,

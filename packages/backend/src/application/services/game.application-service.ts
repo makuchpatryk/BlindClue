@@ -34,14 +34,16 @@ export class GameApplicationService {
     this.getGameStateUseCase = new GetGameStateUseCase();
   }
 
-  async createGame(): Promise<Result<string, ResultError>> {
-    const result = await this.createGameUseCase.execute();
+  async createGame(
+    numberOfRounds: number = 3,
+  ): Promise<Result<string, ResultError>> {
+    const result = await this.createGameUseCase.execute(numberOfRounds);
     if (!result.ok) {
       return result;
     }
 
     const { gameId, wordId, categoryId } = result.value;
-    const game = new Game(gameId, wordId, categoryId);
+    const game = new Game(gameId, wordId, categoryId, numberOfRounds);
     this.gameManager.createGame(gameId, game);
 
     return { ok: true, value: gameId };

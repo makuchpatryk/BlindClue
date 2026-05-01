@@ -32,11 +32,13 @@ export class SocketGateway {
     category: string,
     impostorId: string,
     players: any[],
+    numberOfRounds: number = 3,
   ): void {
     const event: GameStartedEvent = {
       gameId,
       category,
       impostorId,
+      numberOfRounds,
       players,
     };
     this.io.to(gameId).emit("GameStarted", event);
@@ -74,11 +76,13 @@ export class SocketGateway {
     gameId: string,
     voteMap: Map<string, number>,
     mostVoted: string,
+    gameStatus: string,
   ): void {
     const event: VotesRevealedEvent = {
       gameId,
       voteMap: Object.fromEntries(voteMap),
       mostVoted,
+      gameStatus,
     };
     this.io.to(gameId).emit("VotesRevealed", event);
   }

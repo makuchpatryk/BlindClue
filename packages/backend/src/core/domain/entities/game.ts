@@ -6,6 +6,7 @@ import { Result, ResultError } from "../../../application/utils/result.js";
 export class Game {
   private status: GameStatus = GameStatus.LOBBY;
   private currentRound: number = 1;
+  private numberOfRounds: number = 3;
   private impostorId: string | null = null;
   private players: Map<string, Player> = new Map();
   private descriptions: Map<number, RoundSubmission[]> = new Map();
@@ -20,8 +21,10 @@ export class Game {
     private id: string,
     private wordId: string,
     private categoryId: string,
+    numberOfRounds: number = 3,
   ) {
     this.createdAt = new Date();
+    this.numberOfRounds = numberOfRounds;
   }
 
   getId(): string {
@@ -34,6 +37,10 @@ export class Game {
 
   getCurrentRound(): number {
     return this.currentRound;
+  }
+
+  getNumberOfRounds(): number {
+    return this.numberOfRounds;
   }
 
   getWordId(): string {
@@ -111,7 +118,7 @@ export class Game {
     this.descriptions.get(this.currentRound)!.push(submission);
 
     if (this.allPlayersSubmittedThisRound()) {
-      if (this.currentRound < 3) {
+      if (this.currentRound < this.numberOfRounds) {
         this.currentRound++;
         this.descriptions.set(this.currentRound, []);
       } else {
@@ -154,10 +161,19 @@ export class Game {
     this.votes.set(playerId, votedForId);
 
     if (this.votes.size === this.players.size) {
-      this.status = GameStatus.ENDED;
+      const mostVoted = this.getMostVoted();
+      if (mostVoted === this.impostorId) {
+        this.status = GameStatus.GUESSING;
+      } else {
+        this.status = GameStatus.ENDED;
+      }
     }
 
     return { ok: true, value: undefined };
+  }
+
+  getVotes(): Map<string, string> {
+    return new Map(this.votes);
   }
 
   getVoteResults(): Map<string, number> {
@@ -184,13 +200,13 @@ export class Game {
   }
 
   guessWord(guess: string, word: string): Result<boolean, ResultError> {
-    // Allow guessing if votes have been submitted (status is ENDED) or if we have votes
-    if (this.votes.size === 0) {
+    if (this.status !== GameStatus.GUESSING) {
       return {
         ok: false,
-        error: new ResultError("INVALID_STATE", "Cannot guess before voting"),
+        error: new ResultError("INVALID_STATE", "Not in guessing phase"),
       };
     }
+
     this.impostorGuess = guess;
     const isCorrect = guess.toLowerCase() === word.toLowerCase();
     return { ok: true, value: isCorrect };

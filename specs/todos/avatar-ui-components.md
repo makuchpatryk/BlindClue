@@ -3,6 +3,7 @@
 **Parent**: add-player-avatars.md
 
 ## Create Avatar Selector Component
+
 - **File**: `packages/frontend/src/shared/components/avatar-selector.vue`
 - Display 8 avatar options in grid (4x2 or 2x4)
 - Use DiceBear API URLs for preview images
@@ -12,6 +13,7 @@
 - Prop: `modelValue` or `selectedAvatar` to show current selection
 
 ## Create Avatar Badge Component
+
 - **File**: `packages/frontend/src/shared/components/avatar-badge.vue`
 - Display single avatar as circular image
 - Props:
@@ -22,13 +24,16 @@
 - Handle image load errors gracefully
 
 ## Avatar Configuration
+
 Create utility or constant for avatar options:
+
 - **File**: `packages/frontend/src/shared/utils/avatar-config.ts` (optional)
 - 8 avatar IDs: avatar-001 through avatar-008
 - Generate DiceBear URLs
 - Export helper function: `getAvatarUrl(avatarId: string): string`
 
 ## Verification
+
 - Both components render without errors
 - Avatar selector shows all 8 options
 - Clicking avatar emits select event with correct ID

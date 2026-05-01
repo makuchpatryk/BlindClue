@@ -73,13 +73,17 @@ export async function registerRoutes(
   );
 
   // Game routes
-  fastify.post("/games", async (request, reply) => {
-    const result = await gameOrchestrator.createGame();
-    if (result.ok) {
-      return reply.send({ gameId: result.value });
-    }
-    return reply.status(400).send(result.error);
-  });
+  fastify.post<{ Body: { numberOfRounds?: number } }>(
+    "/games",
+    async (request, reply) => {
+      const { numberOfRounds = 3 } = request.body || {};
+      const result = await gameOrchestrator.createGame(numberOfRounds);
+      if (result.ok) {
+        return reply.send({ gameId: result.value });
+      }
+      return reply.status(400).send(result.error);
+    },
+  );
 
   fastify.get<{ Params: { gameId: string } }>(
     "/games/:gameId",

@@ -71,7 +71,7 @@ describe("Game Lifecycle", () => {
     expect(game.getStatus()).toBe(GameStatus.VOTING);
   });
 
-  it("should transition to ENDED after all votes", () => {
+  it("should transition to GUESSING or ENDED after all votes", () => {
     const player1 = new Player(PlayerId.generate(), "game_1", "Alice");
     const player2 = new Player(PlayerId.generate(), "game_1", "Bob");
 
@@ -79,12 +79,23 @@ describe("Game Lifecycle", () => {
     game.addPlayer(player2);
     game.startGame();
 
-    // Force to voting
-    game.voteImpostor(player1.getId().value, player2.getId().value);
+    const impostorId = game.getImpostorId()!;
+
+    // Complete 3 rounds to transition to VOTING
+    for (let r = 0; r < 3; r++) {
+      game.submitDescription(player1.getId().value, `desc_r${r + 1}_p1`);
+      game.submitDescription(player2.getId().value, `desc_r${r + 1}_p2`);
+    }
     expect(game.getStatus()).toBe(GameStatus.VOTING);
 
+    // Vote
+    game.voteImpostor(player1.getId().value, player2.getId().value);
     game.voteImpostor(player2.getId().value, player1.getId().value);
-    expect(game.getStatus()).toBe(GameStatus.ENDED);
+
+    // Status depends on who is impostor and got most votes
+    // With a tie, one will be selected as most voted
+    const status = game.getStatus();
+    expect([GameStatus.GUESSING, GameStatus.ENDED]).toContain(status);
   });
 
   it("should not allow more than 4 players", () => {
@@ -110,5 +121,76 @@ describe("Game Lifecycle", () => {
     const result = game.startGame();
     expect(result.ok).toBe(false);
     expect(result.error?.code).toBe("NOT_ENOUGH_PLAYERS");
+  });
+
+  it("should transition to GUESSING if impostor is most voted", () => {
+    const player1 = new Player(PlayerId.generate(), "game_1", "Alice");
+    const player2 = new Player(PlayerId.generate(), "game_1", "Bob");
+    const player3 = new Player(PlayerId.generate(), "game_1", "Charlie");
+
+    game.addPlayer(player1);
+    game.addPlayer(player2);
+    game.addPlayer(player3);
+    game.startGame();
+
+    const impostorId = game.getImpostorId()!;
+
+    // Complete 3 rounds to transition to VOTING
+    for (let r = 0; r < 3; r++) {
+      game.submitDescription(player1.getId().value, `desc_r${r + 1}_p1`);
+      game.submitDescription(player2.getId().value, `desc_r${r + 1}_p2`);
+      game.submitDescription(player3.getId().value, `desc_r${r + 1}_p3`);
+    }
+
+    // Setup votes so impostor gets most votes
+    game.voteImpostor(player1.getId().value, impostorId);
+    game.voteImpostor(player2.getId().value, impostorId);
+    game.voteImpostor(player3.getId().value, impostorId);
+
+    // Status should be GUESSING
+    expect(game.getStatus()).toBe(GameStatus.GUESSING);
+
+    // Impostor should be able to guess
+    const guessResult = game.guessWord("lion", "lion");
+    expect(guessResult.ok).toBe(true);
+    expect(guessResult.value).toBe(true);
+  });
+
+  it("should end game immediately if impostor not most voted", () => {
+    const player1 = new Player(PlayerId.generate(), "game_1", "Alice");
+    const player2 = new Player(PlayerId.generate(), "game_1", "Bob");
+    const player3 = new Player(PlayerId.generate(), "game_1", "Charlie");
+
+    game.addPlayer(player1);
+    game.addPlayer(player2);
+    game.addPlayer(player3);
+    game.startGame();
+
+    const impostorId = game.getImpostorId()!;
+    const otherPlayerId = [
+      player1.getId().value,
+      player2.getId().value,
+      player3.getId().value,
+    ].find((id) => id !== impostorId)!;
+
+    // Complete 3 rounds to transition to VOTING
+    for (let r = 0; r < 3; r++) {
+      game.submitDescription(player1.getId().value, `desc_r${r + 1}_p1`);
+      game.submitDescription(player2.getId().value, `desc_r${r + 1}_p2`);
+      game.submitDescription(player3.getId().value, `desc_r${r + 1}_p3`);
+    }
+
+    // Setup votes so someone else gets most votes
+    game.voteImpostor(player1.getId().value, otherPlayerId);
+    game.voteImpostor(player2.getId().value, otherPlayerId);
+    game.voteImpostor(player3.getId().value, impostorId);
+
+    // Status should be ENDED (not GUESSING)
+    expect(game.getStatus()).toBe(GameStatus.ENDED);
+
+    // Impostor should NOT be able to guess
+    const guessResult = game.guessWord("lion", "lion");
+    expect(guessResult.ok).toBe(false);
+    expect(guessResult.error?.code).toBe("INVALID_STATE");
   });
 });

@@ -4,6 +4,7 @@ export interface GameStateDTO {
   id: string;
   status: string;
   currentRound: number;
+  numberOfRounds: number;
   categoryId: string;
   impostorId: string | null;
   players: Array<{
@@ -19,6 +20,7 @@ export class GetGameStateUseCase {
       id: game.getId(),
       status: game.getStatus(),
       currentRound: game.getCurrentRound(),
+      numberOfRounds: game.getNumberOfRounds(),
       categoryId: game.getCategoryId(),
       impostorId: game.getImpostorId(),
       players: game.getPlayers().map((p) => ({

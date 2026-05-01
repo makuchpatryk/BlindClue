@@ -9,6 +9,7 @@ export function useGameFlow() {
   const isLobby = computed(() => gameStore.status === GameStatus.LOBBY);
   const isRunning = computed(() => gameStore.status === GameStatus.RUNNING);
   const isVoting = computed(() => gameStore.status === GameStatus.VOTING);
+  const isGuessing = computed(() => gameStore.status === GameStatus.GUESSING);
   const isEnded = computed(() => gameStore.status === GameStatus.ENDED);
 
   const canStartGame = computed(() => {
@@ -16,20 +17,28 @@ export function useGameFlow() {
   });
 
   const canSubmitDescription = computed(() => {
-    return isRunning.value && gameStore.currentRound <= 3;
+    return (
+      isRunning.value && gameStore.currentRound <= gameStore.numberOfRounds
+    );
   });
 
   const canVote = computed(() => {
     return isVoting.value;
   });
 
+  const canGuess = computed(() => {
+    return isGuessing.value;
+  });
+
   return {
     isLobby,
     isRunning,
     isVoting,
+    isGuessing,
     isEnded,
     canStartGame,
     canSubmitDescription,
     canVote,
+    canGuess,
   };
 }

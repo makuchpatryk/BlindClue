@@ -1,7 +1,9 @@
 <template>
   <div class="bg-gray-700 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold text-white">Round {{ currentRound }}/3</h2>
+      <h2 class="text-2xl font-bold text-white">
+        Round {{ currentRound }}/{{ numberOfRounds }}
+      </h2>
       <p class="text-lg font-semibold text-blue-400">
         Category: {{ category }}
       </p>
@@ -40,6 +42,12 @@
 <script setup lang="ts">
 import { useGameState } from "../composables/use-game-state.js";
 
-const { currentRound, category, isImpostor, players, impostorId } =
-  useGameState();
+const {
+  currentRound,
+  numberOfRounds,
+  category,
+  isImpostor,
+  players,
+  impostorId,
+} = useGameState();
 </script>

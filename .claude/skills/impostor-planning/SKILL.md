@@ -1,5 +1,5 @@
 ---
-name: planning
+name: impostor-planning
 description: Plan features, bugs, refactors, architecture. Use this whenever user says plan X, design X, let's plan, spec this out, how should we implement — any design/planning task. Ask clarifying questions first. Never guess. Provide precise recommendations.
 compatibility: AskUserQuestion, Bash, Read, Edit, Write
 ---

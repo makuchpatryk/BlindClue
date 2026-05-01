@@ -11,6 +11,7 @@ export interface VotesRevealedEvent {
   gameId: string;
   voteMap: Record<string, number>;
   mostVoted: string;
+  gameStatus: string;
 }
 
 export interface ImpostorGuessRequestEvent {
@@ -42,6 +43,7 @@ export interface GameStartedEvent {
   gameId: string;
   category: string;
   impostorId: string;
+  numberOfRounds: number;
   players: Array<{
     id: string;
     name: string;

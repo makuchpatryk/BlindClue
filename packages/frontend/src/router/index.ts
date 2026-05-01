@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import LobbyWaitingRoom from "@/features/lobby/components/lobby-waiting-room.vue";
+import LobbyWaitingRoom from "@/features/lobby/views/lobby-waiting-room.vue";
 
 const routes = [
   {
@@ -10,7 +10,7 @@ const routes = [
   {
     path: "/:gameId",
     name: "game",
-    component: () => import("../features/game/components/game-view.vue"),
+    component: () => import("../features/game/views/game-view.vue"),
   },
 ];
 

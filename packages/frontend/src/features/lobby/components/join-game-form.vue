@@ -13,13 +13,9 @@
           required
         />
       </div>
-      <button
-        type="submit"
-        :disabled="!gameCode || isJoining"
-        class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-      >
+      <Button type="submit" full-width :disabled="!gameCode || isJoining">
         {{ isJoining ? "Joining..." : "Join Game" }}
-      </button>
+      </Button>
       <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
     </form>
   </div>
@@ -31,6 +27,7 @@ import { useLobbyStore } from "../stores/lobby.store.js";
 import { useGameStore } from "@/features/game/stores/game.store.js";
 import { useRouter } from "vue-router";
 import { useFormSubmission } from "../composables/use-form-submission.js";
+import Button from "@/shared/components/button.vue";
 
 const router = useRouter();
 const lobbyStore = useLobbyStore();

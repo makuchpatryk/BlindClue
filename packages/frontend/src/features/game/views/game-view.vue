@@ -32,18 +32,20 @@
           {{ pendingJoinRequests[0].playerName }} wants to join
         </p>
         <div class="flex gap-3">
-          <button
+          <Button
+            variant="success"
+            class="flex-1"
             @click="approveJoin(pendingJoinRequests[0].requestId)"
-            class="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
             Allow
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
+            class="flex-1"
             @click="rejectJoin(pendingJoinRequests[0].requestId)"
-            class="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
             Deny
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -56,33 +58,31 @@
             Game Code:
             <code class="font-mono font-bold text-blue-400">{{ gameId }}</code>
           </p>
-          <button
+          <Button
+            :no-defaults="true"
             @click="copyGameIdToClipboard"
             class="p-1 text-gray-400 hover:text-blue-400 transition"
             title="Copy game ID"
           >
             📋
-          </button>
+          </Button>
         </div>
         <div class="mt-4">
           <h3 class="font-semibold mb-2 text-gray-300">Players:</h3>
           <ul class="space-y-2">
-            <li
-              v-for="player in players"
-              :key="player.id"
-              class="text-gray-400"
-            >
-              [{{ player.id.slice(0, 4).toUpperCase() }}] {{ player.name }}
+            <li v-for="p in players" :key="p.id" class="text-gray-400">
+              [{{ p.id.slice(0, 4).toUpperCase() }}] {{ p.name }}
             </li>
           </ul>
         </div>
-        <button
+        <Button
           v-if="canStartGame"
+          variant="success"
+          full-width
           @click="startGame"
-          class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           Start Game
-        </button>
+        </Button>
       </div>
 
       <div v-else-if="status === GameStatus.RUNNING" class="space-y-4">
@@ -133,14 +133,14 @@
                   class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-400"
                 />
               </div>
-              <button
+              <Button
+                full-width
                 @click="handleNextPerson"
                 :disabled="!isMyTurn || !playerWordInput.trim()"
-                class="w-full px-6 py-3 bg-blue-600 text-white text-lg font-bold rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 <span v-if="isMyTurn">Next Person</span>
                 <span v-else>Waiting for {{ currentPlayer?.name }}...</span>
-              </button>
+              </Button>
             </div>
 
             <div v-else class="space-y-4">
@@ -148,17 +148,18 @@
                 All rounds complete! Who is the impostor?
               </p>
               <PlayerSelectionList />
-              <button
+              <Button
+                variant="success"
+                full-width
                 @click="handleShowImpostor"
                 :disabled="!selectedImpostorGuess"
-                class="w-full px-6 py-3 bg-green-600 text-white text-lg font-bold rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {{
                   selectedImpostorGuess
                     ? "Show Impostor"
                     : "Select a player first"
                 }}
-              </button>
+              </Button>
             </div>
 
             <div
@@ -167,17 +168,13 @@
             >
               <h3 class="text-gray-300 font-semibold mb-3">Words Submitted:</h3>
               <div class="space-y-2">
-                <!-- @ts-ignore vue-tsc template context issue -->
-                <div
-                  v-for="p in players"
-                  :key="p.id"
-                  v-if="playerWords.has(p.id)"
-                  class="text-gray-200"
-                >
-                  <span class="font-semibold">{{ p.name }}:</span>
-                  <span class="text-gray-300 ml-2">{{
-                    playerWords.get(p.id)?.join(", ")
-                  }}</span>
+                <div v-for="p in players" :key="p.id">
+                  <span v-if="hasPlayerWord(p.id)" class="text-gray-200">
+                    <span class="font-semibold">{{ p.name }}:</span>
+                    <span class="text-gray-300 ml-2">{{
+                      playerWords.get(p.id)?.join(", ")
+                    }}</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -272,12 +269,14 @@
             </div>
           </div>
 
-          <button
+          <Button
+            variant="success"
+            full-width
             @click="$router.push('/')"
-            class="w-full mt-4 px-4 py-3 bg-green-600 text-white text-lg font-bold rounded hover:bg-green-700 transition"
+            class="mt-4 text-lg font-bold py-3"
           >
             Play Again
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -300,10 +299,11 @@ import {
 import { useClipboard } from "@/shared/composables/use-clipboard.js";
 import { MAX_ROUNDS, MIN_PLAYERS } from "@/shared/utils/constants.js";
 import { usePlayerHelpers } from "../composables/use-player-helpers.js";
-import VotingPhase from "./voting-phase.vue";
-import RevealPhase from "./reveal-phase.vue";
-import ImpostorGuessPhase from "./impostor-guess-phase.vue";
-import PlayerSelectionList from "./player-selection-list.vue";
+import Button from "@/shared/components/button.vue";
+import VotingPhase from "../components/voting-phase.vue";
+import RevealPhase from "../components/reveal-phase.vue";
+import ImpostorGuessPhase from "../components/impostor-guess-phase.vue";
+import PlayerSelectionList from "../components/player-selection-list.vue";
 
 const playerWordInput = ref<string>("");
 const { copyToClipboard: copyToClip } = useClipboard();
@@ -350,6 +350,9 @@ const playerWords = computed(() => gameStore.playerWords);
 const { getPlayerName, getMostVotedName, getMostVotedCount, getImpostorName } =
   usePlayerHelpers();
 
+function hasPlayerWord(id: string) {
+  return playerWords.value.has(id);
+}
 function startGame() {
   const socket = getSocket();
   socket.emit("startGame", { gameId });

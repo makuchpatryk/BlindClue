@@ -1,10 +1,11 @@
 <template>
   <div class="space-y-3">
-    <button
+    <Button
       v-for="player in players"
       :key="player.id"
-      @click="selectPlayer(player.id)"
       :disabled="disabled"
+      :no-defaults="true"
+      @click="selectPlayer(player.id)"
       :class="[
         'w-full p-4 text-left border-2 rounded font-semibold transition text-white',
         selectedPlayerId === player.id
@@ -27,7 +28,7 @@
           >
         </div>
       </div>
-    </button>
+    </Button>
   </div>
 </template>
 
@@ -35,6 +36,7 @@
 import { computed } from "vue";
 import { useGameStore } from "../stores/game.store.js";
 import { useGameState } from "../composables/use-game-state.js";
+import Button from "@/shared/components/button.vue";
 import type { PlayerDTO } from "@/shared/types/game.js";
 
 interface Props {

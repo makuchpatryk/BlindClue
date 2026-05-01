@@ -13,7 +13,7 @@
     "validate": "pnpm run validate:prettier && pnpm run validate:eslint && pnpm run validate:typescript",
     "validate:prettier": "prettier --check .",
     "validate:eslint": "eslint . --ext .ts,.tsx,.vue,.js,.jsx",
-    "validate:typescript": "pnpm -r run build",
+    "validate:typescript": "pnpm -r run type-check",
     "clean": "node scripts/clean.mjs",
     "clean:node-modules": "rimraf node_modules packages/*/node_modules",
     "clean:locks": "rimraf pnpm-lock.yaml",

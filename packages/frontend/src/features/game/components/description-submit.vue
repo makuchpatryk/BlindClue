@@ -9,13 +9,9 @@
         rows="4"
         :disabled="isSubmitting"
       />
-      <button
-        type="submit"
-        :disabled="!description || isSubmitting"
-        class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-      >
+      <Button type="submit" full-width :disabled="!description || isSubmitting">
         {{ isSubmitting ? "Submitting..." : "Submit Description" }}
-      </button>
+      </Button>
     </form>
   </div>
 </template>
@@ -23,6 +19,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useGameState } from "../composables/use-game-state.js";
+import Button from "@/shared/components/button.vue";
 
 const { submitDescription } = useGameState();
 const description = ref("");

@@ -9,13 +9,9 @@
         class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Enter category name"
       />
-      <button
-        type="submit"
-        :disabled="!newCategory || isAdding"
-        class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-      >
+      <Button type="submit" full-width :disabled="!newCategory || isAdding">
         {{ isAdding ? "Adding..." : "Add Category" }}
-      </button>
+      </Button>
     </form>
 
     <div v-if="isLoading" class="text-center text-gray-500">
@@ -38,6 +34,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useAdminService } from "../composables/use-admin-service.js";
+import Button from "@/shared/components/button.vue";
 
 const { categories, isLoading, error, getCategories, createCategory } =
   useAdminService();

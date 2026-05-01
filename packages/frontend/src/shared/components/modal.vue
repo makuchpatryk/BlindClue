@@ -7,25 +7,18 @@
       <h2 class="text-xl font-bold mb-4 text-white">{{ title }}</h2>
       <slot />
       <div class="mt-6 flex gap-2 justify-end">
-        <button
-          class="px-4 py-2 bg-gray-600 text-gray-200 rounded hover:bg-gray-700"
-          @click="$emit('close')"
-        >
-          Close
-        </button>
-        <button
-          v-if="confirmText"
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          @click="$emit('confirm')"
-        >
+        <Button variant="secondary" @click="$emit('close')"> Close </Button>
+        <Button v-if="confirmText" @click="$emit('confirm')">
           {{ confirmText }}
-        </button>
+        </Button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from "./button.vue";
+
 interface Props {
   isOpen: boolean;
   title: string;

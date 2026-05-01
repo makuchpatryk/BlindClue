@@ -10,21 +10,25 @@
     <PlayerSelectionList :disabled="isVoting" />
 
     <div v-if="selectedPlayerId" class="mt-6">
-      <button
+      <Button
+        variant="success"
+        full-width
         @click="vote"
         :disabled="isVoting"
-        class="w-full px-6 py-3 bg-green-600 text-white text-lg font-bold rounded hover:bg-green-700 disabled:opacity-50 transition"
+        class="text-lg font-bold py-3"
       >
         {{ isVoting ? "Voting..." : "Show Impostor" }}
-      </button>
+      </Button>
     </div>
     <div v-else class="mt-6">
-      <button
+      <Button
+        variant="secondary"
+        full-width
         disabled
-        class="w-full px-6 py-3 bg-gray-600 text-gray-400 text-lg font-bold rounded opacity-50 cursor-not-allowed"
+        class="text-lg font-bold py-3"
       >
         Select a player first
-      </button>
+      </Button>
       <p class="text-sm text-gray-400 text-center mt-2">
         Choose who you think the impostor is above
       </p>
@@ -38,6 +42,7 @@ import { useGameStore } from "../stores/game.store.js";
 import { useGameState } from "../composables/use-game-state.js";
 import { GameClientService } from "@/shared/services/game-client.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
+import Button from "@/shared/components/button.vue";
 import PlayerSelectionList from "./player-selection-list.vue";
 
 const { voteImpostor } = useGameState();

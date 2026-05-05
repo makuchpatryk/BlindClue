@@ -78,8 +78,7 @@ const joinStatus = computed(() => gameStore.joinStatus);
 const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
 
 function startGame() {
-  const socket = getSocket();
-  socket.emit("startGame", { gameId });
+  gameClientService.startGame(gameId);
 }
 
 function copyGameIdToClipboard() {

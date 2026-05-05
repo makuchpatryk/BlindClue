@@ -9,15 +9,6 @@ export enum JoinStatus {
 
 export type GameStore = ReturnType<typeof useGameStore>;
 
-export interface GameStateDTO {
-  id: string;
-  status: "LOBBY" | "RUNNING" | "VOTING" | "ENDED";
-  currentRound: number;
-  categoryId: string;
-  impostorId?: string;
-  players: PlayerDTO[];
-}
-
 export interface PlayerDTO {
   id: string;
   name: string;

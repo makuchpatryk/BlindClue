@@ -190,10 +190,6 @@ export class GameClientService {
     });
   }
 
-  unblockButton(gameId: string): void {
-    this.socket.emit("unblockButton", { gameId });
-  }
-
   transitionToVoting(gameId: string): void {
     this.socket.emit("transitionToVoting", { gameId });
   }

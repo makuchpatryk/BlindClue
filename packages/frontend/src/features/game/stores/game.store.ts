@@ -59,15 +59,10 @@ export interface GameStore {
   resetVotedPlayers: () => void;
   setImpostorDoneGuessing: (done: boolean) => void;
   advancePlayerTurn: (currentPlayerId: string) => void;
-  hasPlayerClickedThisRound: (playerId: string) => boolean;
-  unblockNextButton: () => void;
   resetRoundClicks: () => void;
   selectImpostorGuess: (playerId: string) => void;
-  clearImpostorGuess: () => void;
   submitPlayerWord: (playerId: string, word: string) => void;
   updatePlayerWords: (words: Record<string, string[]>) => void;
-  getCurrentPlayerWord: () => string;
-  setCurrentPlayerWord: (word: string) => void;
   setStatus: (forceState?: GameStatus) => void;
   reset: () => void;
   resetForNewGame: () => void;
@@ -226,24 +221,12 @@ export const useGameStore = defineStore("game", (): GameStore => {
     }
   };
 
-  const hasPlayerClickedThisRound = (playerId: string) => {
-    return playersClickedThisRound.value.has(playerId);
-  };
-
-  const unblockNextButton = () => {
-    isNextButtonBlocked.value = false;
-  };
-
   const resetRoundClicks = () => {
     playersClickedThisRound.value = new Set();
   };
 
   const selectImpostorGuess = (playerId: string) => {
     selectedImpostorGuess.value = playerId;
-  };
-
-  const clearImpostorGuess = () => {
-    selectedImpostorGuess.value = null;
   };
 
   const submitPlayerWord = (playerId: string, word: string) => {
@@ -259,14 +242,6 @@ export const useGameStore = defineStore("game", (): GameStore => {
     Object.entries(words).forEach(([playerId, wordList]) => {
       playerWords.set(playerId, wordList);
     });
-  };
-
-  const getCurrentPlayerWord = (): string => {
-    return currentPlayerWord.value;
-  };
-
-  const setCurrentPlayerWord = (word: string) => {
-    currentPlayerWord.value = word;
   };
 
   const reset = () => {
@@ -390,14 +365,9 @@ export const useGameStore = defineStore("game", (): GameStore => {
     setImpostorDoneGuessing,
     advancePlayerTurn,
     resetRoundClicks,
-    hasPlayerClickedThisRound,
-    unblockNextButton,
     selectImpostorGuess,
-    clearImpostorGuess,
     submitPlayerWord,
     updatePlayerWords,
-    getCurrentPlayerWord,
-    setCurrentPlayerWord,
     reset,
     resetForNewGame,
   };

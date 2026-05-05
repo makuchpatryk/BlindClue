@@ -16,9 +16,18 @@ Tasks should be managed in the `specs/` directory with the following structure:
 
 1. Create a new task → save to `specs/todos/`
 2. Work on the task
-3. Once complete → move to `specs/completed/`
+3. Once complete → run validation checks
+4. Move task to `specs/completed/`
 
 This keeps active work organized and provides a clear history of completed items.
+
+### Validation Before Completion
+
+Before marking a task as done:
+
+1. Run `pnpm validate` to check code quality
+2. Verify nothing is broken
+3. Only then move task to `specs/completed/`
 
 ## Package Manager
 

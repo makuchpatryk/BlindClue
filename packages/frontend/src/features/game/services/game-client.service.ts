@@ -1,6 +1,9 @@
 import { Socket } from "socket.io-client";
 import { GameStatus } from "@/shared/utils/game-status.js";
-import { saveGameSession, clearGameSession } from "@/shared/utils/session-storage.js";
+import {
+  saveGameSession,
+  clearGameSession,
+} from "@/shared/utils/session-storage.js";
 import { SOCKET_EVENTS } from "@/shared/utils/socket-events.js";
 import { IMPOSTOR_DONE_GUESSING_DELAY } from "@/shared/utils/constants.js";
 import { JoinStatus, type GameStore } from "@/shared/types/game.js";
@@ -8,7 +11,10 @@ import { JoinStatus, type GameStore } from "@/shared/types/game.js";
 export class GameClientService {
   private static instance: GameClientService;
 
-  private constructor(private socket: Socket, private gameStore: GameStore) {
+  private constructor(
+    private socket: Socket,
+    private gameStore: GameStore,
+  ) {
     this.setupSocketListeners();
   }
 
@@ -20,7 +26,6 @@ export class GameClientService {
   }
 
   private setupSocketListeners(): void {
-
     this.socket.on(SOCKET_EVENTS.GAME_STARTED, (data) => {
       this.gameStore.setGameStarted({
         gameId: data.gameId,

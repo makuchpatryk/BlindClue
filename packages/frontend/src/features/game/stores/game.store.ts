@@ -44,10 +44,7 @@ export interface GameStore {
   setVotes: (voteMap: Record<string, number>, mostVotedId: string) => void;
   setMyPlayer: (id: string, name: string) => void;
   setPlayers: (list: PlayerDTO[]) => void;
-  addJoinRequest: (request: {
-    requestId: string;
-    playerName: string;
-  }) => void;
+  addJoinRequest: (request: { requestId: string; playerName: string }) => void;
   removeJoinRequest: (requestId: string) => void;
   setJoinStatus: (status: JoinStatus) => void;
   setWord: (wordText: string) => void;
@@ -279,7 +276,7 @@ export const useGameStore = defineStore("game", (): GameStore => {
   function setStatus(forceState?: GameStatus): void {
     let nextStatus: GameStatus | null = null;
 
-    if(forceState) status.value = forceState;
+    if (forceState) status.value = forceState;
 
     const currentStatus = status.value;
 
@@ -287,8 +284,8 @@ export const useGameStore = defineStore("game", (): GameStore => {
       case GameStatus.RUNNING:
         // Transition to VOTING when all rounds done and all players submitted
         if (
-            currentRound.value === numberOfRounds.value &&
-            playersClickedThisRound.value.size === players.value.length
+          currentRound.value === numberOfRounds.value &&
+          playersClickedThisRound.value.size === players.value.length
         ) {
           nextStatus = GameStatus.VOTING;
         }
@@ -296,13 +293,13 @@ export const useGameStore = defineStore("game", (): GameStore => {
 
       case GameStatus.VOTING:
         // Transition to GUESSING when all players voted
-          if( votedPlayersThisRound.value.size === players.value.length) {
-            if (mostVoted.value === impostorId.value) {
-              nextStatus = GameStatus.GUESSING;
-            } else {
-              nextStatus = GameStatus.ENDED;
-            }
+        if (votedPlayersThisRound.value.size === players.value.length) {
+          if (mostVoted.value === impostorId.value) {
+            nextStatus = GameStatus.GUESSING;
+          } else {
+            nextStatus = GameStatus.ENDED;
           }
+        }
         break;
 
       case GameStatus.GUESSING:

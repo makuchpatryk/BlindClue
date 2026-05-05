@@ -115,7 +115,7 @@ function handleNextPerson(word: string) {
     gameStore.currentRound === gameStore.numberOfRounds &&
     gameStore.playersClickedThisRound.size === gameStore.players.length
   ) {
-    handleShowImpostor()
+    handleShowImpostor();
   }
 }
 

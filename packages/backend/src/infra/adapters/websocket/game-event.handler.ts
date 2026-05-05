@@ -251,7 +251,11 @@ export class GameEventHandler {
         };
 
         const gameStatus = game.getStatus();
-        if (gameStatus === "VOTING" || gameStatus === "ENDED" || gameStatus === "GUESSING") {
+        if (
+          gameStatus === "VOTING" ||
+          gameStatus === "ENDED" ||
+          gameStatus === "GUESSING"
+        ) {
           rejoinData.voteResults = Object.fromEntries(game.getVoteResults());
           rejoinData.mostVotedId = game.getMostVoted();
           rejoinData.word = game.getWord();

@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-2xl font-bold mb-6">Manage Categories</h2>
+    <Heading :level="2" class="text-gray-900">Manage Categories</Heading>
 
     <form @submit.prevent="addCategory" class="mb-6 space-y-4">
       <input
@@ -35,6 +35,7 @@
 import { ref, onMounted } from "vue";
 import { useAdminService } from "../composables/use-admin-service.js";
 import Button from "@/shared/components/button.vue";
+import Heading from "@/shared/components/heading.vue";
 
 const { categories, isLoading, error, getCategories, createCategory } =
   useAdminService();

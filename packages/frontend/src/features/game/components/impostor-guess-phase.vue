@@ -1,15 +1,16 @@
 <template>
-  <div class="bg-gray-700 rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4 text-white">Impostor's Turn to Guess</h3>
+  <Card>
+    <template #header>
+      <Heading :level="3">Impostor's Turn to Guess</Heading>
+    </template>
     <p class="text-gray-400 mb-6">
       Impostor, what do you think the word is? (One chance)
     </p>
 
     <form v-if="!hasGuessed" @submit.prevent="submit" class="space-y-4">
-      <input
+      <Input
         v-model="guess"
         type="text"
-        class="w-full px-4 py-2 border border-gray-600 rounded bg-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Enter your guess..."
         :disabled="isGuessing"
       />
@@ -18,16 +19,18 @@
       </Button>
     </form>
 
-    <div v-else class="p-4 bg-blue-900 rounded border border-blue-600">
-      <p class="text-blue-400 font-bold text-lg">Guess submitted!</p>
-    </div>
-  </div>
+    <Alert v-else variant="info"> Guess submitted! </Alert>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
+import Input from "@/shared/components/input.vue";
+import Alert from "@/shared/components/alert.vue";
 
 const { gameStore, guessWord } = useGameFacade();
 const guess = ref("");

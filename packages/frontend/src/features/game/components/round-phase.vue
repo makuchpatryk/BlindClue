@@ -1,22 +1,22 @@
 <template>
-  <div class="bg-gray-700 rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold text-white">
-        Round {{ currentRound }}/{{ numberOfRounds }}
-      </h2>
-      <p class="text-lg font-semibold text-blue-400">
-        Category: {{ category }}
-      </p>
-    </div>
+  <Card>
+    <template #header>
+      <div class="flex justify-between items-center">
+        <Heading :level="2" class="mb-0">
+          Round {{ currentRound }}/{{ numberOfRounds }}
+        </Heading>
+        <p class="text-lg font-semibold text-blue-400">
+          Category: {{ category }}
+        </p>
+      </div>
+    </template>
 
-    <div class="mb-6 p-4 bg-blue-900 rounded">
-      <p v-if="!isImpostor" class="text-lg text-blue-200">
-        You know the word. Give a description!
-      </p>
-      <p v-else class="text-lg text-red-400">
-        You are the Impostor. Listen and figure out the word.
-      </p>
-    </div>
+    <Alert v-if="!isImpostor" variant="info" class="mb-6">
+      You know the word. Give a description!
+    </Alert>
+    <Alert v-else variant="error" class="mb-6">
+      You are the Impostor. Listen and figure out the word.
+    </Alert>
 
     <div class="space-y-4">
       <h3 class="font-semibold text-gray-300">Players in this round:</h3>
@@ -36,12 +36,15 @@
         </li>
       </ul>
     </div>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
+import Alert from "@/shared/components/alert.vue";
 
 const { gameStore } = useGameFacade();
 

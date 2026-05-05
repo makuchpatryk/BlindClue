@@ -3,34 +3,30 @@
     v-if="show && pendingRequest"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
-    <div class="bg-gray-800 rounded-lg p-8 max-w-sm w-full">
-      <h2 class="text-2xl font-bold mb-4 text-white">Join Request</h2>
+    <Card class="max-w-sm w-full">
+      <template #header>
+        <Heading :level="2" class="mb-0">Join Request</Heading>
+      </template>
       <p class="text-lg mb-6 text-gray-300">
         {{ pendingRequest.playerName }} wants to join
       </p>
       <div class="flex gap-3">
-        <Button
-          variant="success"
-          class="flex-1"
-          @click="approveRequest"
-        >
+        <Button variant="success" class="flex-1" @click="approveRequest">
           Allow
         </Button>
-        <Button
-          variant="danger"
-          class="flex-1"
-          @click="rejectRequest"
-        >
+        <Button variant="danger" class="flex-1" @click="rejectRequest">
           Deny
         </Button>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import Button from "@/shared/components/button.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
 
 interface PendingRequest {
   requestId: string;

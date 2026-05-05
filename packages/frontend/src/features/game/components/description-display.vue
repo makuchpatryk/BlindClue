@@ -1,30 +1,29 @@
 <template>
-  <div class="bg-gray-700 rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4 text-white">
-      Round {{ round }} Descriptions
-    </h3>
-    <div
-      v-if="roundDescriptions.length === 0"
-      class="text-gray-400 text-center py-4"
-    >
+  <Card>
+    <template #header>
+      <Heading :level="3">Round {{ round }} Descriptions</Heading>
+    </template>
+    <EmptyState v-if="roundDescriptions.length === 0">
       Waiting for descriptions...
-    </div>
+    </EmptyState>
     <div v-else class="space-y-4">
-      <div
+      <PlayerInfo
         v-for="desc in roundDescriptions"
         :key="desc.id"
-        class="p-4 bg-gray-600 rounded"
-      >
-        <p class="font-semibold text-gray-200">{{ desc.playerName }}</p>
-        <p class="text-gray-300 mt-2">{{ desc.text }}</p>
-      </div>
+        :player-name="desc.playerName"
+        :text="desc.text"
+      />
     </div>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
+import EmptyState from "@/shared/components/empty-state.vue";
+import PlayerInfo from "@/shared/components/player-info.vue";
 
 interface Props {
   round: number;

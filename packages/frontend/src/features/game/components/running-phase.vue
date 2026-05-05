@@ -1,22 +1,20 @@
 <template>
   <div class="space-y-4">
-    <div
-      v-if="isImpostor"
-      class="bg-red-900 border-2 border-red-600 rounded-lg p-4 mb-4"
-    >
-      <p class="text-red-200 font-bold text-center text-lg">
-        🎭 YOU ARE THE IMPOSTOR
-      </p>
-    </div>
+    <Alert v-if="isImpostor" variant="error" class="text-center">
+      🎭 YOU ARE THE IMPOSTOR
+    </Alert>
 
-    <div class="bg-gray-700 rounded-lg shadow p-6">
+    <Card>
       <div class="text-center">
-        <h3 class="text-sm font-semibold text-gray-400 mb-2">
-          ROUND {{ currentRound }}/{{ numberOfRounds }}
-        </h3>
-        <h2 class="text-3xl font-bold text-white mb-4">
-          It's {{ currentPlayer?.name }}'s turn
-        </h2>
+        <div class="mb-6">
+          <p class="text-sm font-semibold text-gray-400 mb-2">
+            ROUND {{ currentRound }}/{{ numberOfRounds }}
+          </p>
+          <Heading :level="2" class="mb-4">
+            It's {{ currentPlayer?.name }}'s turn
+          </Heading>
+        </div>
+
         <div class="bg-gray-800 rounded p-4 mb-6 space-y-3">
           <p class="text-gray-300 text-lg">
             Category:
@@ -37,16 +35,14 @@
           "
           class="space-y-4"
         >
-          <div v-if="isMyTurn" class="bg-gray-600 rounded-lg p-4">
-            <label class="block text-gray-300 mb-2">Write a word:</label>
-            <input
+          <FormField v-if="isMyTurn" label="Write a word:">
+            <Input
               v-model="playerWordInput"
               type="text"
               placeholder="Enter your word..."
               autofocus
-              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-400"
             />
-          </div>
+          </FormField>
           <Button
             full-width
             @click="handleNextPerson"
@@ -69,9 +65,7 @@
             :disabled="!selectedImpostorGuess"
           >
             {{
-              selectedImpostorGuess
-                ? "Show Impostor"
-                : "Select a player first"
+              selectedImpostorGuess ? "Show Impostor" : "Select a player first"
             }}
           </Button>
         </div>
@@ -93,7 +87,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 
@@ -101,6 +95,11 @@
 import { computed, ref } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
+import FormField from "@/shared/components/form-field.vue";
+import Input from "@/shared/components/input.vue";
+import Alert from "@/shared/components/alert.vue";
 import PlayerSelectionList from "./player-selection-list.vue";
 
 const { gameStore } = useGameFacade();
@@ -118,10 +117,14 @@ const word = computed(() => gameStore.word);
 const isImpostor = computed(() => gameStore.isImpostor);
 const players = computed(() => gameStore.players);
 const currentPlayer = computed(() => gameStore.currentPlayer);
-const isMyTurn = computed(() => currentPlayer.value?.id === gameStore.myPlayerId);
+const isMyTurn = computed(
+  () => currentPlayer.value?.id === gameStore.myPlayerId,
+);
 const selectedImpostorGuess = computed(() => gameStore.selectedImpostorGuess);
 const playerWords = computed(() => gameStore.playerWords);
-const playersClickedThisRound = computed(() => gameStore.playersClickedThisRound);
+const playersClickedThisRound = computed(
+  () => gameStore.playersClickedThisRound,
+);
 
 function hasPlayerWord(id: string) {
   return playerWords.value.has(id);

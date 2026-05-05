@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-2xl font-bold text-white">Waiting for players...</h2>
+    <Heading :level="2">Waiting for players...</Heading>
     <p class="text-gray-400">
       Game Code:
       <code
@@ -19,12 +19,7 @@
         </li>
       </ul>
     </div>
-    <Button
-      v-if="canStartGame"
-      variant="success"
-      full-width
-      @click="startGame"
-    >
+    <Button v-if="canStartGame" variant="success" full-width @click="startGame">
       Start Game
     </Button>
   </div>
@@ -35,6 +30,7 @@ import { computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import { MIN_PLAYERS } from "@/shared/utils/constants.js";
 import Button from "@/shared/components/button.vue";
+import Heading from "@/shared/components/heading.vue";
 
 const { gameStore } = useGameFacade();
 

@@ -1,6 +1,8 @@
 <template>
-  <div class="bg-gray-700 rounded-lg shadow p-6">
-    <h3 class="text-xl font-bold mb-4 text-white">Submit Your Description</h3>
+  <Card>
+    <template #header>
+      <Heading :level="3">Submit Your Description</Heading>
+    </template>
     <form @submit.prevent="submit" class="space-y-4">
       <textarea
         v-model="description"
@@ -13,13 +15,15 @@
         {{ isSubmitting ? "Submitting..." : "Submit Description" }}
       </Button>
     </form>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
 
 const { submitDescription } = useGameFacade();
 const description = ref("");

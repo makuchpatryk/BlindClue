@@ -1,25 +1,28 @@
 <template>
   <div class="max-w-2xl mx-auto p-6">
     <div class="mb-6">
-      <input
+      <Input
         v-model="playerName"
         type="text"
         placeholder="Your name"
-        class="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         @change="lobbyStore.setPlayerName(playerName)"
       />
     </div>
 
     <div class="grid md:grid-cols-2 gap-6">
-      <div class="bg-gray-800 rounded-lg shadow p-6">
-        <h2 class="text-2xl font-bold mb-4 text-white">Create Game</h2>
+      <Card>
+        <template #header>
+          <Heading :level="2" class="mb-0">Create Game</Heading>
+        </template>
         <CreateGameForm />
-      </div>
+      </Card>
 
-      <div class="bg-gray-800 rounded-lg shadow p-6">
-        <h2 class="text-2xl font-bold mb-4 text-white">Join Game</h2>
+      <Card>
+        <template #header>
+          <Heading :level="2" class="mb-0">Join Game</Heading>
+        </template>
         <JoinGameForm />
-      </div>
+      </Card>
     </div>
 
     <div class="mt-8 text-center text-gray-400">
@@ -33,6 +36,9 @@ import { ref, watch } from "vue";
 import { useLobbyStore } from "../stores/lobby.store.js";
 import CreateGameForm from "../components/create-game-form.vue";
 import JoinGameForm from "../components/join-game-form.vue";
+import Input from "@/shared/components/input.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
 
 const lobbyStore = useLobbyStore();
 const playerName = ref<string>(lobbyStore.playerName);

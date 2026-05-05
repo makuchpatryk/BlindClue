@@ -1,8 +1,12 @@
 <template>
-  <div class="bg-gray-700 rounded-lg shadow p-6">
-    <h3 class="text-2xl font-bold mb-4 text-white text-center">
-      Who is the impostor?
-    </h3>
+  <Card>
+    <template #header>
+      <div class="text-center">
+        <Heading :level="3" class="mb-0 text-center"
+          >Who is the impostor?</Heading
+        >
+      </div>
+    </template>
     <p class="text-gray-400 mb-6 text-center">
       Select a player and confirm your vote
     </p>
@@ -33,7 +37,7 @@
         Choose who you think the impostor is above
       </p>
     </div>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
@@ -42,6 +46,8 @@ import { useGameFacade } from "../composables/use-game-facade.js";
 import { GameClientService } from "@/features/game/services/game-client.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import Button from "@/shared/components/button.vue";
+import Card from "@/shared/components/card.vue";
+import Heading from "@/shared/components/heading.vue";
 import PlayerSelectionList from "./player-selection-list.vue";
 
 const { gameStore, voteImpostor } = useGameFacade();
@@ -63,8 +69,8 @@ async function vote() {
     voteImpostor(selectedPlayerId.value);
 
     if (gameStore.votedPlayersThisRound.size === gameStore.players.length) {
-        gameStore.setStatus();
-        gameClientService?.allPlayersVoted(gameStore.gameId);
+      gameStore.setStatus();
+      gameClientService?.allPlayersVoted(gameStore.gameId);
     }
   } finally {
     isVoting.value = false;

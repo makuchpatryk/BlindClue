@@ -1,45 +1,27 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-2xl font-bold text-white mb-6">Game Over</h2>
+    <Heading :level="2">Game Over</Heading>
 
     <div class="space-y-4">
-      <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-300 mb-2">Most Voted</h3>
-        <p class="text-xl text-white">
-          Players voted for:
-          <span class="font-bold text-yellow-400">{{
-            getMostVotedName()
-          }}</span>
-          <span class="text-gray-400 ml-2"
-            >({{ getMostVotedCount() }} votes)</span
-          >
-        </p>
-      </div>
+      <InfoBox title="Most Voted" value-color="yellow-400">
+        <span>{{ getMostVotedName() }}</span>
+        <span class="text-gray-400 ml-2"
+          >({{ getMostVotedCount() }} votes)</span
+        >
+      </InfoBox>
 
-      <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-300 mb-2">
-          The Impostor Was
-        </h3>
-        <p class="text-xl text-white">
-          <span class="font-bold text-red-400">{{
-            getImpostorName()
-          }}</span>
-        </p>
-      </div>
+      <InfoBox title="The Impostor Was" value-color="red-400">
+        {{ getImpostorName() }}
+      </InfoBox>
 
-      <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-300 mb-2">
-          The Word Was
-        </h3>
-        <p class="text-xl text-white">
-          <span class="font-bold text-green-400">{{ word }}</span>
-        </p>
-      </div>
+      <InfoBox title="The Word Was" value-color="green-400">
+        {{ word }}
+      </InfoBox>
 
-      <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-300 mb-4">
-          Vote Results
-        </h3>
+      <Card>
+        <template #header>
+          <Heading :level="3" variant="secondary">Vote Results</Heading>
+        </template>
         <div class="space-y-2">
           <div
             v-for="[playerId, voteCount] in votes"
@@ -52,7 +34,7 @@
             >
           </div>
         </div>
-      </div>
+      </Card>
 
       <Button
         variant="success"
@@ -71,6 +53,9 @@ import { computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import { usePlayerHelpers } from "../composables/use-player-helpers.js";
 import Button from "@/shared/components/button.vue";
+import Heading from "@/shared/components/heading.vue";
+import InfoBox from "@/shared/components/info-box.vue";
+import Card from "@/shared/components/card.vue";
 
 const { gameStore } = useGameFacade();
 const { getPlayerName, getMostVotedName, getMostVotedCount, getImpostorName } =

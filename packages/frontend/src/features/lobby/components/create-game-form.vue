@@ -1,18 +1,9 @@
 <template>
   <div class="max-w-md mx-auto p-6 bg-gray-800 rounded-lg shadow">
     <form @submit.prevent="createGame" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">
-          Number of Rounds
-        </label>
-        <input
-          v-model.number="numberOfRounds"
-          type="number"
-          min="1"
-          max="10"
-          class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-400"
-        />
-      </div>
+      <FormField label="Number of Rounds">
+        <Input v-model.number="numberOfRounds" type="number" />
+      </FormField>
       <Button type="submit" full-width :disabled="isCreating">
         {{ isCreating ? "Creating..." : "Create Game" }}
       </Button>
@@ -29,6 +20,8 @@ import { useRouter } from "vue-router";
 import { API_BASE_URL } from "@/shared/utils/constants.js";
 import { useFormSubmission } from "../composables/use-form-submission.js";
 import Button from "@/shared/components/button.vue";
+import FormField from "@/shared/components/form-field.vue";
+import Input from "@/shared/components/input.vue";
 
 const router = useRouter();
 const lobbyStore = useLobbyStore();

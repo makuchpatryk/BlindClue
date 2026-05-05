@@ -1,3 +1,14 @@
+import type { useGameStore } from "@/features/game/stores/game.store.js";
+
+export enum JoinStatus {
+  IDLE = "idle",
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}
+
+export type GameStore = ReturnType<typeof useGameStore>;
+
 export interface GameStateDTO {
   id: string;
   status: "LOBBY" | "RUNNING" | "VOTING" | "ENDED";

@@ -18,10 +18,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useGameState } from "../composables/use-game-state.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 
-const { submitDescription } = useGameState();
+const { submitDescription } = useGameFacade();
 const description = ref("");
 const isSubmitting = ref(false);
 

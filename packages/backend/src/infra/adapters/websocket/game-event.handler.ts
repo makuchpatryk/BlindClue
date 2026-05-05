@@ -241,13 +241,23 @@ export class GameEventHandler {
           id: p.getId().value,
           name: p.getName(),
         }));
-        socket.emit("rejoinSuccess", {
+        const rejoinData: any = {
           playerId: data.playerId,
           players,
           status: game.getStatus(),
           category: game.getCategoryName(),
           impostorId: game.getImpostorId(),
-        });
+          numberOfRounds: game.getNumberOfRounds(),
+        };
+
+        const gameStatus = game.getStatus();
+        if (gameStatus === "VOTING" || gameStatus === "ENDED" || gameStatus === "GUESSING") {
+          rejoinData.voteResults = Object.fromEntries(game.getVoteResults());
+          rejoinData.mostVotedId = game.getMostVoted();
+          rejoinData.word = game.getWord();
+        }
+
+        socket.emit("rejoinSuccess", rejoinData);
       },
     );
 
@@ -308,7 +318,19 @@ export class GameEventHandler {
     });
 
     socket.on("allPlayersVoted", async (data: { gameId: string }) => {
-      this.socketGateway.broadcastAllPlayersVoted(data.gameId);
+      const game = this.gameManager.getGame(data.gameId);
+      if (game) {
+        const voteResults = game.getVoteResults();
+        const voteResultsObj = Object.fromEntries(voteResults);
+        const mostVotedId = game.getMostVoted();
+        const word = game.getWord();
+        this.socketGateway.broadcastAllPlayersVoted(
+          data.gameId,
+          voteResultsObj,
+          mostVotedId,
+          word,
+        );
+      }
     });
 
     socket.on("disconnect", () => {

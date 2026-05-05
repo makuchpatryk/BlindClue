@@ -29,15 +29,6 @@
 
       <div class="bg-gray-700 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-gray-300 mb-2">
-          Category Revealed
-        </h3>
-        <p class="text-xl text-white">
-          <span class="font-bold text-blue-400">{{ category }}</span>
-        </p>
-      </div>
-
-      <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-300 mb-2">
           The Word Was
         </h3>
         <p class="text-xl text-white">
@@ -77,11 +68,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import { usePlayerHelpers } from "../composables/use-player-helpers.js";
 import Button from "@/shared/components/button.vue";
 
-const gameStore = useGameStore();
+const { gameStore } = useGameFacade();
 const { getPlayerName, getMostVotedName, getMostVotedCount, getImpostorName } =
   usePlayerHelpers();
 

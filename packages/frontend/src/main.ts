@@ -3,7 +3,8 @@ import { createPinia } from "pinia";
 import { router } from "./router/index.js";
 import App from "./App.vue";
 import { getSocket } from "./shared/utils/socket.js";
-import { GameClientService } from "./shared/services/game-client.service.js";
+import { GameClientService } from "./features/game/services/game-client.service.js";
+import { useGameStore } from "./features/game/stores/game.store.js";
 import "./shared/styles/index.css";
 
 const app = createApp(App);
@@ -17,7 +18,8 @@ app.use(router);
 
 // Initialize Socket.io and GameClientService
 const socket = getSocket();
-const gameClientService = GameClientService.getInstance(socket);
+const gameStore = useGameStore();
+const gameClientService = GameClientService.getInstance(socket, gameStore);
 app.provide("gameClientService", gameClientService);
 
 app.mount("#app");

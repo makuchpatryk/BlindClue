@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameState } from "../composables/use-game-state.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 
 interface Props {
   round: number;
@@ -32,9 +32,9 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { descriptions } = useGameState();
+const { gameStore } = useGameFacade();
 
 const roundDescriptions = computed(() => {
-  return Array.from(descriptions.value.get(props.round) || []);
+  return Array.from(gameStore.descriptions.get(props.round) || []);
 });
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <CopiedSnackbar :show="showCopiedSnackbar" />
-    <JoinWaitingModal :show="joinStatus === 'pending'" />
+    <JoinWaitingModal :show="joinStatus === JoinStatus.PENDING" />
     <JoinApprovalModal
       :show="pendingJoinRequests.length > 0"
       :pending-request="pendingJoinRequests[0] || null"
@@ -40,11 +40,12 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import { useLobbyStore } from "@/features/lobby/stores/lobby.store.js";
 import { getSocket } from "@/shared/utils/socket.js";
-import { GameClientService } from "@/shared/services/game-client.service.js";
+import { GameClientService } from "@/features/game/services/game-client.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
+import { JoinStatus } from "@/shared/types/game.js";
 import {
   getGameSession,
   clearGameSession,
@@ -64,12 +65,12 @@ const showCopiedSnackbar = ref(false);
 
 const route = useRoute();
 const router = useRouter();
-const gameStore = useGameStore();
+const { gameStore } = useGameFacade();
 const lobbyStore = useLobbyStore();
 const gameId = route.params.gameId as string;
 
 const socket = getSocket();
-const gameClientService = GameClientService.getInstance(socket);
+const gameClientService = GameClientService.getInstance(socket, gameStore);
 provide("gameClientService", gameClientService);
 
 const status = computed(() => gameStore.status);
@@ -125,15 +126,11 @@ function handleShowImpostor() {
 }
 
 function approveJoin(requestId: string) {
-  const socket = getSocket();
-  const gameClientService = GameClientService.getInstance(socket);
   gameClientService.approveJoin(requestId, gameId);
   gameStore.removeJoinRequest(requestId);
 }
 
 function rejectJoin(requestId: string) {
-  const socket = getSocket();
-  const gameClientService = GameClientService.getInstance(socket);
   gameClientService.rejectJoin(requestId);
   gameStore.removeJoinRequest(requestId);
 }
@@ -147,7 +144,7 @@ onMounted(async () => {
 
   const session = getGameSession();
   if (session && session.gameId === gameId) {
-    gameStore.setJoinStatus("pending");
+    gameStore.setJoinStatus(JoinStatus.PENDING);
     gameClientService.rejoinGame(gameId, session.playerId);
     return;
   } else if (session) {
@@ -156,7 +153,7 @@ onMounted(async () => {
 
   const playerName = lobbyStore.playerName;
   if (playerName.trim()) {
-    gameStore.setJoinStatus("pending");
+    gameStore.setJoinStatus(JoinStatus.PENDING);
     gameClientService.requestJoin(gameId, playerName);
   }
 });

@@ -34,8 +34,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameStore } from "../stores/game.store.js";
-import { useGameState } from "../composables/use-game-state.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 import type { PlayerDTO } from "@/shared/types/game.js";
 
@@ -45,10 +44,10 @@ interface Props {
 
 defineProps<Props>();
 
-const gameStore = useGameStore();
-const { players } = useGameState();
+const { gameStore } = useGameFacade();
 
 const selectedPlayerId = computed(() => gameStore.selectedImpostorGuess);
+const players = computed(() => gameStore.players);
 
 function selectPlayer(playerId: string) {
   gameStore.selectImpostorGuess(playerId);

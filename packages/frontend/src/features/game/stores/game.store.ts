@@ -1,11 +1,79 @@
 import { defineStore } from "pinia";
-import { ref, computed, reactive } from "vue";
-import { PlayerDTO } from "@/shared/types/game.js";
+import { ref, computed, reactive, Ref, ComputedRef } from "vue";
+import { PlayerDTO, JoinStatus } from "@/shared/types/game.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import { MAX_ROUNDS } from "@/shared/utils/constants.js";
 import { clearGameSession } from "@/shared/utils/session-storage.js";
 
-export const useGameStore = defineStore("game", () => {
+export interface GameStore {
+  gameId: Ref<string>;
+  status: Ref<GameStatus>;
+  currentRound: Ref<number>;
+  numberOfRounds: Ref<number>;
+  category: Ref<string>;
+  word: Ref<string>;
+  isImpostor: Ref<boolean>;
+  impostorId: Ref<string | null>;
+  players: Ref<PlayerDTO[]>;
+  descriptions: Map<number, any[]>;
+  votes: Ref<Map<string, number> | null>;
+  mostVoted: Ref<string | null>;
+  myPlayerId: Ref<string>;
+  myPlayerName: Ref<string>;
+  pendingJoinRequests: Ref<Array<{ requestId: string; playerName: string }>>;
+  joinStatus: Ref<JoinStatus>;
+  currentPlayer: ComputedRef<PlayerDTO | null>;
+  currentPlayerIndex: Ref<number>;
+  playersClickedThisRound: Ref<Set<string>>;
+  selectedImpostorGuess: Ref<string | null>;
+  isNextButtonBlocked: Ref<boolean>;
+  votedPlayersThisRound: Ref<Set<string>>;
+  impostorDoneGuessing: Ref<boolean>;
+  playerWords: Map<string, string[]>;
+  currentPlayerWord: Ref<string>;
+  canShowShowImpostorButton: ComputedRef<boolean>;
+  setGameStarted: (data: {
+    gameId: string;
+    category: string;
+    impostorId: string;
+    players: PlayerDTO[];
+    numberOfRounds?: number;
+  }) => void;
+  setRoundSubmitted: (round: number, descs?: any[]) => void;
+  addPlayer: (player: PlayerDTO) => void;
+  setVotes: (voteMap: Record<string, number>, mostVotedId: string) => void;
+  setMyPlayer: (id: string, name: string) => void;
+  setPlayers: (list: PlayerDTO[]) => void;
+  addJoinRequest: (request: {
+    requestId: string;
+    playerName: string;
+  }) => void;
+  removeJoinRequest: (requestId: string) => void;
+  setJoinStatus: (status: JoinStatus) => void;
+  setWord: (wordText: string) => void;
+  setCurrentPlayerIndex: (index: number) => void;
+  setPlayersClicked: (players: string[]) => void;
+  setNextButtonBlocked: (blocked: boolean) => void;
+  addVotedPlayer: (playerId: string) => void;
+  hasPlayerVoted: (playerId: string) => boolean;
+  resetVotedPlayers: () => void;
+  setImpostorDoneGuessing: (done: boolean) => void;
+  advancePlayerTurn: (currentPlayerId: string) => void;
+  hasPlayerClickedThisRound: (playerId: string) => boolean;
+  unblockNextButton: () => void;
+  resetRoundClicks: () => void;
+  selectImpostorGuess: (playerId: string) => void;
+  clearImpostorGuess: () => void;
+  submitPlayerWord: (playerId: string, word: string) => void;
+  updatePlayerWords: (words: Record<string, string[]>) => void;
+  getCurrentPlayerWord: () => string;
+  setCurrentPlayerWord: (word: string) => void;
+  setStatus: (forceState?: GameStatus) => void;
+  reset: () => void;
+  resetForNewGame: () => void;
+}
+
+export const useGameStore = defineStore("game", (): GameStore => {
   const gameId = ref<string>("");
   const status = ref<GameStatus>(GameStatus.LOBBY);
   const currentRound = ref<number>(1);
@@ -23,7 +91,7 @@ export const useGameStore = defineStore("game", () => {
   const pendingJoinRequests = ref<
     Array<{ requestId: string; playerName: string }>
   >([]);
-  const joinStatus = ref<"idle" | "pending" | "approved" | "rejected">("idle");
+  const joinStatus = ref<JoinStatus>(JoinStatus.IDLE);
   const currentPlayerIndex = ref<number>(0);
   const playersClickedThisRound = ref<Set<string>>(new Set());
   const selectedImpostorGuess = ref<string | null>(null);
@@ -103,9 +171,7 @@ export const useGameStore = defineStore("game", () => {
     );
   };
 
-  const setJoinStatus = (
-    status: "idle" | "pending" | "approved" | "rejected",
-  ) => {
+  const setJoinStatus = (status: JoinStatus) => {
     joinStatus.value = status;
   };
 
@@ -219,7 +285,7 @@ export const useGameStore = defineStore("game", () => {
     myPlayerId.value = "";
     myPlayerName.value = "";
     pendingJoinRequests.value = [];
-    joinStatus.value = "idle";
+    joinStatus.value = JoinStatus.IDLE;
     currentPlayerIndex.value = 0;
     playersClickedThisRound.value = new Set();
     selectedImpostorGuess.value = null;
@@ -255,11 +321,13 @@ export const useGameStore = defineStore("game", () => {
 
       case GameStatus.VOTING:
         // Transition to GUESSING when all players voted
-        if (
-            votedPlayersThisRound.value.size === players.value.length
-        ) {
-          nextStatus = GameStatus.GUESSING;
-        }
+          if( votedPlayersThisRound.value.size === players.value.length) {
+            if (mostVoted.value === impostorId.value) {
+              nextStatus = GameStatus.GUESSING;
+            } else {
+              nextStatus = GameStatus.ENDED;
+            }
+          }
         break;
 
       case GameStatus.GUESSING:

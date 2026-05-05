@@ -26,12 +26,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useGameState } from "../composables/use-game-state.js";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 
-const { guessWord } = useGameState();
-const gameStore = useGameStore();
+const { gameStore, guessWord } = useGameFacade();
 const guess = ref("");
 const isGuessing = ref(false);
 const hasGuessed = ref(false);

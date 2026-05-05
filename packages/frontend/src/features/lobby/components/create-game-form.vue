@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useLobbyStore } from "../stores/lobby.store.js";
-import { useGameStore } from "@/features/game/stores/game.store.js";
+import { useGameFacade } from "@/features/game/composables/use-game-facade.js";
 import { useRouter } from "vue-router";
 import { API_BASE_URL } from "@/shared/utils/constants.js";
 import { useFormSubmission } from "../composables/use-form-submission.js";
@@ -32,7 +32,7 @@ import Button from "@/shared/components/button.vue";
 
 const router = useRouter();
 const lobbyStore = useLobbyStore();
-const gameStore = useGameStore();
+const { gameStore } = useGameFacade();
 const numberOfRounds = ref<number>(lobbyStore.numberOfRounds);
 const {
   isLoading: isCreating,

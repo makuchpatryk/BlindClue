@@ -99,11 +99,11 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 import PlayerSelectionList from "./player-selection-list.vue";
 
-const gameStore = useGameStore();
+const { gameStore } = useGameFacade();
 const playerWordInput = ref<string>("");
 
 const emit = defineEmits<{

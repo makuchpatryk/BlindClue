@@ -40,14 +40,15 @@
 </template>
 
 <script setup lang="ts">
-import { useGameState } from "../composables/use-game-state.js";
+import { computed } from "vue";
+import { useGameFacade } from "../composables/use-game-facade.js";
 
-const {
-  currentRound,
-  numberOfRounds,
-  category,
-  isImpostor,
-  players,
-  impostorId,
-} = useGameState();
+const { gameStore } = useGameFacade();
+
+const currentRound = computed(() => gameStore.currentRound);
+const numberOfRounds = computed(() => gameStore.numberOfRounds);
+const category = computed(() => gameStore.category);
+const isImpostor = computed(() => gameStore.isImpostor);
+const players = computed(() => gameStore.players);
+const impostorId = computed(() => gameStore.impostorId);
 </script>

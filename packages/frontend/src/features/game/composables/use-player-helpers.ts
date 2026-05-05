@@ -1,8 +1,8 @@
 import { computed } from "vue";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "./use-game-facade.js";
 
 export function usePlayerHelpers() {
-  const gameStore = useGameStore();
+  const { gameStore } = useGameFacade();
   const players = computed(() => gameStore.players);
 
   const getPlayerName = (playerId: string): string => {

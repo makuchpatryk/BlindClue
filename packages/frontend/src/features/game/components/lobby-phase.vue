@@ -32,11 +32,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameStore } from "../stores/game.store.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
 import { MIN_PLAYERS } from "@/shared/utils/constants.js";
 import Button from "@/shared/components/button.vue";
 
-const gameStore = useGameStore();
+const { gameStore } = useGameFacade();
 
 const emit = defineEmits<{
   copyGameId: [];

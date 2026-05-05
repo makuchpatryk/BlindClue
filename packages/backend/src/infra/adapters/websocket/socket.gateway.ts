@@ -90,8 +90,18 @@ export class SocketGateway {
     this.io.to(gameId).emit("PlayerVoted", { gameId, playerId });
   }
 
-  broadcastAllPlayersVoted(gameId: string): void {
-    this.io.to(gameId).emit("AllPlayersVoted", { gameId });
+  broadcastAllPlayersVoted(
+    gameId: string,
+    voteResults: Record<string, number>,
+    mostVotedId: string | null,
+    word: string,
+  ): void {
+    this.io.to(gameId).emit("AllPlayersVoted", {
+      gameId,
+      voteResults,
+      mostVotedId,
+      word,
+    });
   }
 
   broadcastImpostorDoneGuessing(gameId: string): void {

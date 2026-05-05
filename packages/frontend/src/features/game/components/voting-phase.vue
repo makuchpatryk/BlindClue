@@ -38,15 +38,13 @@
 
 <script setup lang="ts">
 import { ref, computed, inject } from "vue";
-import { useGameStore } from "../stores/game.store.js";
-import { useGameState } from "../composables/use-game-state.js";
-import { GameClientService } from "@/shared/services/game-client.service.js";
+import { useGameFacade } from "../composables/use-game-facade.js";
+import { GameClientService } from "@/features/game/services/game-client.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import Button from "@/shared/components/button.vue";
 import PlayerSelectionList from "./player-selection-list.vue";
 
-const { voteImpostor } = useGameState();
-const gameStore = useGameStore();
+const { gameStore, voteImpostor } = useGameFacade();
 const gameClientService = inject<GameClientService>("gameClientService");
 const isVoting = ref(false);
 

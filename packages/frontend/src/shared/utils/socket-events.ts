@@ -18,6 +18,8 @@ export const SOCKET_EVENTS = {
   BUTTON_UNBLOCKED: "ButtonUnblocked",
   PLAYER_VOTED: "PlayerVoted",
   ALL_PLAYERS_VOTED: "AllPlayersVoted",
+  IMPOSTOR_GUESS_REQUEST: "ImpostorGuessRequest",
+  GUESS_RESULT: "GuessResult",
   IMPOSTOR_DONE_GUESSING: "impostorDoneGuessing",
   PLAYER_WORD_SUBMITTED: "PlayerWordSubmitted",
 

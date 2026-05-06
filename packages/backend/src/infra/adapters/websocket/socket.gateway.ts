@@ -32,6 +32,7 @@ export class SocketGateway {
     impostorId: string,
     players: any[],
     numberOfRounds: number = 3,
+    word?: string,
   ): void {
     const event: GameStartedEvent = {
       gameId,
@@ -39,6 +40,7 @@ export class SocketGateway {
       impostorId,
       numberOfRounds,
       players,
+      word,
     };
     this.io.to(gameId).emit("GameStarted", event);
   }
@@ -113,5 +115,28 @@ export class SocketGateway {
     playerWords: Record<string, string[]>,
   ): void {
     this.io.to(gameId).emit("PlayerWordSubmitted", { gameId, playerWords });
+  }
+
+  broadcastImpostorGuessRequest(
+    gameId: string,
+    voteResults: Record<string, number>,
+    mostVotedId: string | null,
+    word: string,
+  ): void {
+    this.io.to(gameId).emit("ImpostorGuessRequest", {
+      gameId,
+      voteResults,
+      mostVotedId,
+      word,
+    });
+  }
+
+  broadcastGuessResult(
+    gameId: string,
+    guess: string,
+    isCorrect: boolean,
+    word: string,
+  ): void {
+    this.io.to(gameId).emit("GuessResult", { gameId, guess, isCorrect, word });
   }
 }

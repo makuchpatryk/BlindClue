@@ -328,12 +328,25 @@ export class GameEventHandler {
         const voteResultsObj = Object.fromEntries(voteResults);
         const mostVotedId = game.getMostVoted();
         const word = game.getWord();
-        this.socketGateway.broadcastAllPlayersVoted(
-          data.gameId,
-          voteResultsObj,
-          mostVotedId,
-          word,
-        );
+
+        const GameStatus = (
+          await import("../../../core/domain/value-objects/game-status.js")
+        ).GameStatus;
+        if (game.getStatus() === GameStatus.GUESSING) {
+          this.socketGateway.broadcastImpostorGuessRequest(
+            data.gameId,
+            voteResultsObj,
+            mostVotedId,
+            word,
+          );
+        } else {
+          this.socketGateway.broadcastAllPlayersVoted(
+            data.gameId,
+            voteResultsObj,
+            mostVotedId,
+            word,
+          );
+        }
       }
     });
 

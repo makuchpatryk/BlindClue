@@ -208,7 +208,7 @@ export class Game {
     }
 
     this.impostorGuess = guess;
-    const isCorrect = guess.toLowerCase() === word.toLowerCase();
+    const isCorrect = guess.toLowerCase().trim() === word.toLowerCase().trim();
     return { ok: true, value: isCorrect };
   }
 

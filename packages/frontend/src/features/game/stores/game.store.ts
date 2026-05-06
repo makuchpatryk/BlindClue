@@ -35,6 +35,9 @@ export interface GameStore {
   isNextButtonBlocked: Ref<boolean>;
   votedPlayersThisRound: Ref<Set<string>>;
   impostorDoneGuessing: Ref<boolean>;
+  impostorGuess: Ref<string | null>;
+  guessResult: Ref<boolean | null>;
+  guessPhaseActive: Ref<boolean>;
   playerWords: Map<string, string[]>;
   currentPlayerWord: Ref<string>;
   canShowShowImpostorButton: ComputedRef<boolean>;
@@ -61,6 +64,9 @@ export interface GameStore {
   hasPlayerVoted: (playerId: string) => boolean;
   resetVotedPlayers: () => void;
   setImpostorDoneGuessing: (done: boolean) => void;
+  setGuessPhaseActive: (active: boolean) => void;
+  setImpostorGuess: (guess: string) => void;
+  setGuessResult: (isCorrect: boolean) => void;
   advancePlayerTurn: (currentPlayerId: string) => void;
   resetRoundClicks: () => void;
   selectImpostorGuess: (playerId: string) => void;
@@ -97,6 +103,9 @@ export const useGameStore = defineStore("game", (): GameStore => {
   const isNextButtonBlocked = ref<boolean>(false);
   const votedPlayersThisRound = ref<Set<string>>(new Set());
   const impostorDoneGuessing = ref<boolean>(false);
+  const impostorGuess = ref<string | null>(null);
+  const guessResult = ref<boolean | null>(null);
+  const guessPhaseActive = ref<boolean>(false);
   const playerWords = reactive<Map<string, string[]>>(new Map());
   const currentPlayerWord = ref<string>("");
 
@@ -208,6 +217,18 @@ export const useGameStore = defineStore("game", (): GameStore => {
     impostorDoneGuessing.value = done;
   };
 
+  const setGuessPhaseActive = (active: boolean) => {
+    guessPhaseActive.value = active;
+  };
+
+  const setImpostorGuess = (guess: string) => {
+    impostorGuess.value = guess;
+  };
+
+  const setGuessResult = (isCorrect: boolean) => {
+    guessResult.value = isCorrect;
+  };
+
   const advancePlayerTurn = (currentPlayerId: string) => {
     if (!playersClickedThisRound.value.has(currentPlayerId)) {
       playersClickedThisRound.value.add(currentPlayerId);
@@ -273,6 +294,9 @@ export const useGameStore = defineStore("game", (): GameStore => {
     isNextButtonBlocked.value = false;
     votedPlayersThisRound.value = new Set();
     impostorDoneGuessing.value = false;
+    impostorGuess.value = null;
+    guessResult.value = null;
+    guessPhaseActive.value = false;
     playerWords.clear();
     currentPlayerWord.value = "";
   };
@@ -351,6 +375,9 @@ export const useGameStore = defineStore("game", (): GameStore => {
     isNextButtonBlocked,
     votedPlayersThisRound,
     impostorDoneGuessing,
+    impostorGuess,
+    guessResult,
+    guessPhaseActive,
     playerWords,
     currentPlayerWord,
     canShowShowImpostorButton,
@@ -372,6 +399,9 @@ export const useGameStore = defineStore("game", (): GameStore => {
     hasPlayerVoted,
     resetVotedPlayers,
     setImpostorDoneGuessing,
+    setGuessPhaseActive,
+    setImpostorGuess,
+    setGuessResult,
     advancePlayerTurn,
     resetRoundClicks,
     selectImpostorGuess,

@@ -36,6 +36,7 @@ export interface GameStartedEvent {
     id: string;
     name: string;
   }>;
+  word?: string;
 }
 
 export interface GameCreatedEvent {

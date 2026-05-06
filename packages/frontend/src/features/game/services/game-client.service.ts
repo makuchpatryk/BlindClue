@@ -34,6 +34,9 @@ export class GameClientService {
         players: data.players,
         numberOfRounds: data.numberOfRounds,
       });
+      if (data.word) {
+        this.gameStore.setWord(data.word);
+      }
     });
 
     this.socket.on(SOCKET_EVENTS.ROUND_SUBMITTED, (data) => {
@@ -64,7 +67,7 @@ export class GameClientService {
     });
 
     this.socket.on(SOCKET_EVENTS.JOIN_GAME_SUCCESS, (data) => {
-      const myPlayer = data.players.find((p) => p.id === data.playerId);
+      const myPlayer = data.players.find((p: any) => p.id === data.playerId);
       this.gameStore.setMyPlayer(data.playerId, myPlayer?.name || "");
       this.gameStore.setPlayers(data.players);
       this.gameStore.setJoinStatus(JoinStatus.APPROVED);
@@ -78,7 +81,7 @@ export class GameClientService {
 
     this.socket.on(SOCKET_EVENTS.REJOIN_SUCCESS, (data) => {
       const gameId = data.gameId || this.gameStore.gameId;
-      const myPlayer = data.players.find((p) => p.id === data.playerId);
+      const myPlayer = data.players.find((p: any) => p.id === data.playerId);
       this.gameStore.setMyPlayer(data.playerId, myPlayer?.name || "");
       this.gameStore.setPlayers(data.players);
       this.gameStore.setStatus(data.status);
@@ -128,6 +131,25 @@ export class GameClientService {
       }
       this.gameStore.setImpostorDoneGuessing(false);
       this.gameStore.setStatus();
+    });
+
+    this.socket.on(SOCKET_EVENTS.IMPOSTOR_GUESS_REQUEST, (data) => {
+      if (data.voteResults && data.mostVotedId) {
+        this.gameStore.setVotes(data.voteResults, data.mostVotedId);
+      }
+      if (data.word) {
+        this.gameStore.setWord(data.word);
+      }
+      this.gameStore.setGuessPhaseActive(true);
+      this.gameStore.setStatus(GameStatus.GUESSING);
+    });
+
+    this.socket.on(SOCKET_EVENTS.GUESS_RESULT, (data) => {
+      this.gameStore.setImpostorGuess(data.guess);
+      this.gameStore.setGuessResult(data.isCorrect);
+      setTimeout(() => {
+        this.gameStore.setImpostorDoneGuessing(true);
+      }, IMPOSTOR_DONE_GUESSING_DELAY);
     });
 
     this.socket.on(SOCKET_EVENTS.IMPOSTOR_DONE_GUESSING, () => {

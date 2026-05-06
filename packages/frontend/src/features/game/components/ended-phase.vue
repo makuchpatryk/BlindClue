@@ -18,6 +18,14 @@
         {{ word }}
       </InfoBox>
 
+      <InfoBox
+        v-if="impostorGuess !== null"
+        :title="`Impostor Guessed: ${impostorGuess}`"
+        :value-color="guessResult ? 'green-400' : 'red-400'"
+      >
+        <span>{{ guessResult ? "✓ Correct!" : "✗ Wrong" }}</span>
+      </InfoBox>
+
       <Card>
         <template #header>
           <Heading :level="3" variant="secondary">Vote Results</Heading>
@@ -68,6 +76,8 @@ const emit = defineEmits<{
 const category = computed(() => gameStore.category);
 const word = computed(() => gameStore.word);
 const votes = computed(() => gameStore.votes);
+const impostorGuess = computed(() => gameStore.impostorGuess);
+const guessResult = computed(() => gameStore.guessResult);
 
 function playAgain() {
   emit("playAgain");

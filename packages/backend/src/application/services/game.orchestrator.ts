@@ -24,6 +24,7 @@ export interface SocketGateway {
     impostorId: string,
     players: Array<{ id: string; name: string }>,
     numberOfRounds?: number,
+    word?: string,
   ): void;
   broadcastRoundSubmitted(gameId: string, round: number): void;
   broadcastVotingStarted(gameId: string): void;
@@ -32,6 +33,18 @@ export interface SocketGateway {
   broadcastPlayerWordSubmitted(
     gameId: string,
     playerWords: Record<string, string[]>,
+  ): void;
+  broadcastImpostorGuessRequest(
+    gameId: string,
+    voteResults: Record<string, number>,
+    mostVotedId: string | null,
+    word: string,
+  ): void;
+  broadcastGuessResult(
+    gameId: string,
+    guess: string,
+    isCorrect: boolean,
+    word: string,
   ): void;
   sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void;
 }
@@ -100,6 +113,7 @@ export class GameOrchestrator {
           game.getImpostorId()!,
           players,
           game.getNumberOfRounds(),
+          game.getWord(),
         );
       }
     }
@@ -153,28 +167,27 @@ export class GameOrchestrator {
     guess: string,
     word: string,
   ): Promise<Result<boolean, ResultError>> {
-    console.log(`[Orchestrator] guessWord called for game ${gameId}`);
     const result = await this.gameApplicationService.guessWord(
       gameId,
       guess,
       word,
     );
-    console.log(`[Orchestrator] guessWord result:`, result);
 
     if (result.ok) {
+      console.log(
+        `[Orchestrator.guessWord] guess="${guess}", word="${word}", isCorrect=${result.value}`,
+      );
       const game = this.gameManager.getGame(gameId);
       if (game) {
-        console.log(`[Orchestrator] Broadcasting GameEnded to all players...`);
+        this.socketGateway.broadcastGuessResult(
+          gameId,
+          guess,
+          result.value,
+          word,
+        );
         this.socketGateway.broadcastGameEnded(gameId);
-        console.log(`[Orchestrator] Broadcasting impostorDoneGuessing...`);
-        this.socketGateway.broadcastImpostorDoneGuessing(gameId);
-        console.log(`[Orchestrator] Deleting game...`);
         this.gameManager.deleteGame(gameId);
-      } else {
-        console.error(`[Orchestrator] Game not found after guessWord`);
       }
-    } else {
-      console.error(`[Orchestrator] guessWord failed:`, result.error);
     }
 
     return result;

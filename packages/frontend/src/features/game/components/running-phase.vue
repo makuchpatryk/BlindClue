@@ -8,7 +8,8 @@
       <div class="text-center">
         <div class="mb-6">
           <p class="text-sm font-semibold text-gray-400 mb-2">
-            ROUND {{ currentRound }}/{{ numberOfRounds }}
+            {{ myPlayerName }} • GAME #{{ roundNumber }} • ROUND
+            {{ currentRound }}/{{ numberOfRounds }}
           </p>
           <Heading :level="2" class="mb-4">
             It's {{ currentPlayer?.name }}'s turn
@@ -41,6 +42,7 @@
               type="text"
               placeholder="Enter your word..."
               autofocus
+              @keydown.enter="handleNextPerson"
             />
           </FormField>
           <Button
@@ -117,6 +119,8 @@ const word = computed(() => gameStore.word);
 const isImpostor = computed(() => gameStore.isImpostor);
 const players = computed(() => gameStore.players);
 const currentPlayer = computed(() => gameStore.currentPlayer);
+const myPlayerName = computed(() => gameStore.myPlayerName);
+const roundNumber = computed(() => gameStore.roundNumber);
 const isMyTurn = computed(
   () => currentPlayer.value?.id === gameStore.myPlayerId,
 );

@@ -1,0 +1,5 @@
+{
+  "env": {
+    "PATH": "/home/patryk/.nvm/versions/node/v22.14.0/bin:/home/patryk/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin"
+  }
+}

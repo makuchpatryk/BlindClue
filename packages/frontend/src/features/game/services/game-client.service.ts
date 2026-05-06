@@ -64,7 +64,8 @@ export class GameClientService {
     });
 
     this.socket.on(SOCKET_EVENTS.JOIN_GAME_SUCCESS, (data) => {
-      this.gameStore.setMyPlayer(data.playerId, "");
+      const myPlayer = data.players.find((p) => p.id === data.playerId);
+      this.gameStore.setMyPlayer(data.playerId, myPlayer?.name || "");
       this.gameStore.setPlayers(data.players);
       this.gameStore.setJoinStatus(JoinStatus.APPROVED);
       saveGameSession(this.gameStore.gameId, data.playerId);
@@ -77,7 +78,8 @@ export class GameClientService {
 
     this.socket.on(SOCKET_EVENTS.REJOIN_SUCCESS, (data) => {
       const gameId = data.gameId || this.gameStore.gameId;
-      this.gameStore.setMyPlayer(data.playerId, "");
+      const myPlayer = data.players.find((p) => p.id === data.playerId);
+      this.gameStore.setMyPlayer(data.playerId, myPlayer?.name || "");
       this.gameStore.setPlayers(data.players);
       this.gameStore.setStatus(data.status);
       if (data.category)

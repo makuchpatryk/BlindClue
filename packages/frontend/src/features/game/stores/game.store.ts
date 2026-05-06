@@ -3,7 +3,12 @@ import { ref, computed, reactive, Ref, ComputedRef } from "vue";
 import { PlayerDTO, JoinStatus } from "@/shared/types/game.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import { MAX_ROUNDS } from "@/shared/utils/constants.js";
-import { clearGameSession } from "@/shared/utils/session-storage.js";
+import {
+  clearGameSession,
+  getRoundNumber,
+  saveRoundNumber,
+  clearRoundNumber,
+} from "@/shared/utils/session-storage.js";
 
 export interface GameStore {
   gameId: Ref<string>;
@@ -20,6 +25,7 @@ export interface GameStore {
   mostVoted: Ref<string | null>;
   myPlayerId: Ref<string>;
   myPlayerName: Ref<string>;
+  roundNumber: Ref<number>;
   pendingJoinRequests: Ref<Array<{ requestId: string; playerName: string }>>;
   joinStatus: Ref<JoinStatus>;
   currentPlayer: ComputedRef<PlayerDTO | null>;
@@ -80,6 +86,7 @@ export const useGameStore = defineStore("game", (): GameStore => {
   const mostVoted = ref<string | null>(null);
   const myPlayerId = ref<string>("");
   const myPlayerName = ref<string>("");
+  const roundNumber = ref<number>(getRoundNumber());
   const pendingJoinRequests = ref<
     Array<{ requestId: string; playerName: string }>
   >([]);
@@ -120,6 +127,8 @@ export const useGameStore = defineStore("game", (): GameStore => {
       numberOfRounds.value = data.numberOfRounds;
     }
     isImpostor.value = data.impostorId === myPlayerId.value;
+    roundNumber.value++;
+    saveRoundNumber(roundNumber.value);
   };
 
   const setRoundSubmitted = (round: number, descs?: any[]) => {
@@ -271,6 +280,8 @@ export const useGameStore = defineStore("game", (): GameStore => {
   const resetForNewGame = () => {
     reset();
     clearGameSession();
+    clearRoundNumber();
+    roundNumber.value = 1;
   };
 
   function setStatus(forceState?: GameStatus): void {
@@ -330,6 +341,7 @@ export const useGameStore = defineStore("game", (): GameStore => {
     mostVoted,
     myPlayerId,
     myPlayerName,
+    roundNumber,
     pendingJoinRequests,
     joinStatus,
     currentPlayer,

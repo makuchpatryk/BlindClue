@@ -1,6 +1,7 @@
 import { getStorageAdapter } from "../../core/storage/storage.adapter";
 
 const SESSION_KEY = "game_session";
+const ROUND_NUMBER_KEY = "game_round_number";
 
 interface GameSession {
   gameId: string;
@@ -26,4 +27,20 @@ export function getGameSession(): GameSession | null {
 export function clearGameSession(): void {
   const storage = getStorageAdapter();
   storage.removeItem(SESSION_KEY);
+}
+
+export function saveRoundNumber(roundNumber: number): void {
+  const storage = getStorageAdapter();
+  storage.setItem(ROUND_NUMBER_KEY, roundNumber.toString());
+}
+
+export function getRoundNumber(): number {
+  const storage = getStorageAdapter();
+  const value = storage.getItem(ROUND_NUMBER_KEY);
+  return value ? parseInt(value, 10) : 1;
+}
+
+export function clearRoundNumber(): void {
+  const storage = getStorageAdapter();
+  storage.removeItem(ROUND_NUMBER_KEY);
 }

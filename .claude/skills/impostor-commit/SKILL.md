@@ -8,7 +8,7 @@ description: Auto-commit staged changes with a generated Conventional Commits me
 Automatically commit staged changes with a generated message.
 
 Workflow:
-1. Read staged changes (`git diff --staged`)
+1. Read changes (`git status`)
 2. Generate Conventional Commits message based on what changed
 3. Run `git commit`
 

@@ -1,6 +1,7 @@
 export const SOCKET_EVENTS = {
   // Game state
   GAME_STARTED: "GameStarted",
+  GAME_RESTARTED: "GameRestarted",
   ROUND_SUBMITTED: "RoundSubmitted",
   VOTING_STARTED: "VotingStarted",
   GAME_ENDED: "GameEnded",

@@ -74,6 +74,7 @@ export interface GameStore {
   updatePlayerWords: (words: Record<string, string[]>) => void;
   setStatus: (forceState?: GameStatus) => void;
   reset: () => void;
+  resetGameProgress: () => void;
   resetForNewGame: () => void;
 }
 
@@ -301,6 +302,31 @@ export const useGameStore = defineStore("game", (): GameStore => {
     currentPlayerWord.value = "";
   };
 
+  const resetGameProgress = () => {
+    status.value = GameStatus.LOBBY;
+    currentRound.value = 1;
+    category.value = "";
+    word.value = "";
+    isImpostor.value = false;
+    impostorId.value = null;
+    descriptions.clear();
+    votes.value = null;
+    mostVoted.value = null;
+    pendingJoinRequests.value = [];
+    joinStatus.value = JoinStatus.IDLE;
+    currentPlayerIndex.value = 0;
+    playersClickedThisRound.value = new Set();
+    selectedImpostorGuess.value = null;
+    isNextButtonBlocked.value = false;
+    votedPlayersThisRound.value = new Set();
+    impostorDoneGuessing.value = false;
+    impostorGuess.value = null;
+    guessResult.value = null;
+    guessPhaseActive.value = false;
+    playerWords.clear();
+    currentPlayerWord.value = "";
+  };
+
   const resetForNewGame = () => {
     reset();
     clearGameSession();
@@ -408,6 +434,7 @@ export const useGameStore = defineStore("game", (): GameStore => {
     submitPlayerWord,
     updatePlayerWords,
     reset,
+    resetGameProgress,
     resetForNewGame,
   };
 });

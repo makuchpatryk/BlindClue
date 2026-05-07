@@ -39,6 +39,20 @@ export class GameClientService {
       }
     });
 
+    this.socket.on(SOCKET_EVENTS.GAME_RESTARTED, (data) => {
+      this.gameStore.resetGameProgress();
+      this.gameStore.setGameStarted({
+        gameId: data.gameId,
+        category: data.category,
+        impostorId: data.impostorId,
+        players: data.players,
+        numberOfRounds: data.numberOfRounds,
+      });
+      if (data.word) {
+        this.gameStore.setWord(data.word);
+      }
+    });
+
     this.socket.on(SOCKET_EVENTS.ROUND_SUBMITTED, (data) => {
       this.gameStore.setRoundSubmitted(data.round, data.descriptions);
     });
@@ -201,6 +215,10 @@ export class GameClientService {
 
   startGame(gameId: string): void {
     this.socket.emit("startGame", { gameId });
+  }
+
+  restartGame(gameId: string): void {
+    this.socket.emit("restartGame", { gameId });
   }
 
   advanceTurn(

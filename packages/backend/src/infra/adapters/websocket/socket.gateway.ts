@@ -60,6 +60,25 @@ export class SocketGateway {
     this.io.to(gameId).emit("GameEnded", event);
   }
 
+  broadcastGameRestarted(
+    gameId: string,
+    category: string,
+    impostorId: string,
+    players: any[],
+    numberOfRounds: number = 3,
+    word?: string,
+  ): void {
+    const event: GameStartedEvent = {
+      gameId,
+      category,
+      impostorId,
+      numberOfRounds,
+      players,
+      word,
+    };
+    this.io.to(gameId).emit("GameRestarted", event);
+  }
+
   sendJoinRequestToHost(hostSocketId: string, event: JoinRequestEvent): void {
     this.io.to(hostSocketId).emit("JoinRequest", event);
   }

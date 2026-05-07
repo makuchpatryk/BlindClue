@@ -253,4 +253,23 @@ export class Game {
     });
     return result;
   }
+
+  resetGameState(): void {
+    this.status = GameStatus.LOBBY;
+    this.currentRound = 1;
+    this.impostorId = null;
+    this.descriptions.clear();
+    this.votes.clear();
+    this.impostorGuess = null;
+    this.word = "";
+    this.playerWords.clear();
+  }
+
+  setWordId(wordId: string): void {
+    this.wordId = wordId;
+  }
+
+  setCategoryId(categoryId: string): void {
+    this.categoryId = categoryId;
+  }
 }

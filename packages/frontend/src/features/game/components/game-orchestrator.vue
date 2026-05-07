@@ -21,7 +21,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, provide, ref } from "vue";
-import { useRouter } from "vue-router";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import { useLobbyStore } from "@/features/lobby/stores/lobby.store.js";
 import { getSocket } from "@/shared/utils/socket.js";
@@ -49,7 +48,6 @@ const props = defineProps<{
 const { copyToClipboard: copyToClip } = useClipboard();
 const showCopiedSnackbar = ref(false);
 
-const router = useRouter();
 const { gameStore } = useGameFacade();
 const lobbyStore = useLobbyStore();
 
@@ -182,7 +180,7 @@ function rejectJoin(requestId: string) {
 }
 
 function playAgain() {
-  router.push("/");
+  gameClientService.restartGame(props.gameId);
 }
 
 onMounted(async () => {

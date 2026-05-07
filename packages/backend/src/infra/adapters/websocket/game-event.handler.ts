@@ -136,6 +136,13 @@ export class GameEventHandler {
       }
     });
 
+    socket.on("restartGame", async (data: { gameId: string }) => {
+      const result = await this.gameOrchestrator.restartGame(data.gameId);
+      if (!result.ok) {
+        socket.emit("error", { error: result.error });
+      }
+    });
+
     socket.on(
       "submitDescription",
       async (data: {

@@ -29,6 +29,14 @@ export interface SocketGateway {
   broadcastRoundSubmitted(gameId: string, round: number): void;
   broadcastVotingStarted(gameId: string): void;
   broadcastGameEnded(gameId: string): void;
+  broadcastGameRestarted(
+    gameId: string,
+    category: string,
+    impostorId: string,
+    players: Array<{ id: string; name: string }>,
+    numberOfRounds?: number,
+    word?: string,
+  ): void;
   broadcastImpostorDoneGuessing(gameId: string): void;
   broadcastPlayerWordSubmitted(
     gameId: string,
@@ -218,5 +226,52 @@ export class GameOrchestrator {
       );
     }
     return result;
+  }
+
+  async restartGame(gameId: string): Promise<Result<void, ResultError>> {
+    const game = this.gameManager.getGame(gameId);
+    if (!game) {
+      return {
+        ok: false,
+        error: new ResultError("GAME_NOT_FOUND", "Game not found"),
+      };
+    }
+
+    const wordResult = await this.wordRepository.getRandomWord();
+    if (!wordResult.ok) {
+      return wordResult;
+    }
+
+    const newWord = wordResult.value;
+    game.setWordId(newWord.getId());
+    game.setCategoryId(newWord.getCategoryId());
+    game.resetGameState();
+
+    const startResult = game.startGame();
+    if (!startResult.ok) {
+      return startResult;
+    }
+
+    const categoryResult = await this.categoryRepository.findById(
+      newWord.getCategoryId(),
+    );
+    if (categoryResult.ok) {
+      game.setCategoryName(categoryResult.value.name);
+    }
+    game.setWord(newWord.getText());
+
+    const players = game
+      .getPlayers()
+      .map((p) => ({ id: p.getId().value, name: p.getName() }));
+    this.socketGateway.broadcastGameRestarted(
+      gameId,
+      game.getCategoryName(),
+      game.getImpostorId()!,
+      players,
+      game.getNumberOfRounds(),
+      game.getWord(),
+    );
+
+    return { ok: true, value: undefined };
   }
 }

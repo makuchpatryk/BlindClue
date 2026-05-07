@@ -108,8 +108,57 @@ packages/frontend/src/
 2. Minimal implementation to pass (green)
 3. Refactor component if needed, tests still pass
 
+## Progress
+
+### Phase 1: Setup ✅ COMPLETE
+- [x] Installed vitest, @testing-library/vue, jsdom, @vue/test-utils
+- [x] Configured vitest.config.ts (already existed)
+- [x] Created test infrastructure:
+  - `src/__tests__/setup.ts` — pinia + global test setup
+  - `src/__tests__/helpers.ts` — mount utilities, mock factories
+  - `src/__tests__/mocks/socket.mock.ts` — socket.io mocking
+  - `src/__tests__/mocks/store.mock.ts` — store mocking
+- [x] Added test scripts to package.json (test, test:ui, test:coverage)
+
+### Phase 2: Core Components — IN PROGRESS
+Completed:
+- [x] **useGameFacade composable** (6 tests passing)
+  - Submit description with valid game/player
+  - Submit description with no service/player
+  - Vote for impostor
+  - Guess word
+  - Return game store reference
+  
+- [x] **game-orchestrator.vue** (8 tests passing)
+  - Render correct phase based on status (lobby → running → voting → guessing → ended)
+  - Show join waiting modal
+  - Show join approval modal
+  - Request join on mount
+  - Rejoin logic for same game
+  - Clear session on game ID mismatch
+
+- [x] **player-selection-list.vue** (6 tests)
+  - Render all players
+  - Select player on click
+  - Show selection checkmark
+  - Show voted player checkmark
+  - Handle disabled state
+  - Handle empty list
+
+**Current: 20 tests passing**
+
+### Phase 3: Forms & Shared — TODO
+- create-game-form.vue
+- join-game-form.vue
+- Shared components (button, input, modal, card, alert)
+
+### Phase 4: Features & Admin — TODO
+- Admin components (manage-categories, manage-words)
+- Feature components (copied-snackbar, description-display, etc.)
+
 ## Next Steps
-1. Confirm phases/priority
-2. Install dependencies
-3. Create vitest config + test setup
-4. Start Phase 2, test by test
+1. Test running/voting/guessing/ended phase components
+2. Test form components (create/join game)
+3. Test shared UI components
+4. Test admin components
+5. Run `pnpm test:coverage` for full coverage report

@@ -98,7 +98,6 @@ export class GameClientService {
       const myPlayer = data.players.find((p: any) => p.id === data.playerId);
       this.gameStore.setMyPlayer(data.playerId, myPlayer?.name || "");
       this.gameStore.setPlayers(data.players);
-      this.gameStore.setStatus(data.status);
       if (data.category)
         this.gameStore.setGameStarted({
           gameId,
@@ -113,6 +112,7 @@ export class GameClientService {
       if (data.word) {
         this.gameStore.setWord(data.word);
       }
+      this.gameStore.setStatus(data.status);
       this.gameStore.setJoinStatus(JoinStatus.APPROVED);
       saveGameSession(gameId, data.playerId);
     });

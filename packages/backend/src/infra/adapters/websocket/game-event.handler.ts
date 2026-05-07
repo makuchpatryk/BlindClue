@@ -259,13 +259,20 @@ export class GameEventHandler {
 
         const gameStatus = game.getStatus();
         if (
+          gameStatus === "RUNNING" ||
+          gameStatus === "VOTING" ||
+          gameStatus === "ENDED" ||
+          gameStatus === "GUESSING"
+        ) {
+          rejoinData.word = game.getWord();
+        }
+        if (
           gameStatus === "VOTING" ||
           gameStatus === "ENDED" ||
           gameStatus === "GUESSING"
         ) {
           rejoinData.voteResults = Object.fromEntries(game.getVoteResults());
           rejoinData.mostVotedId = game.getMostVoted();
-          rejoinData.word = game.getWord();
         }
 
         socket.emit("rejoinSuccess", rejoinData);

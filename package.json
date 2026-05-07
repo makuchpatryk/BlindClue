@@ -4,7 +4,7 @@
   "description": "Impostor - multiplayer word-guessing game",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@8.0.0",
+  "packageManager": "pnpm@11.0.8",
   "scripts": {
     "dev": "pnpm -r run dev",
     "build": "pnpm -r run build",

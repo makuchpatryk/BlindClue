@@ -1,2 +1,34 @@
 packages:
   - "packages/*"
+allowBuilds:
+  esbuild: true
+  sqlite3: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - esbuild@0.24.3
+  - '@eslint/plugin-kit@0.3.4'
+  - tar@7.5.7
+  - fastify@5.7.3
+  - fastify@5.7.2
+  - tar@7.5.3
+  - tar@7.5.8
+  - '@tootallnate/once@3.0.1'
+  - tar@7.5.10
+  - tar@7.5.11
+  - tar@7.5.4
+  - fastify@5.8.3
+  - vite@6.4.2
+overrides:
+  '@eslint/plugin-kit@<0.3.4': ^0.3.4
+  '@tootallnate/once@<3.0.1': ^3.0.1
+  esbuild@<=0.24.2: ^0.24.3
+  fastify@<5.7.2: ^5.7.2
+  fastify@<=5.7.2: ^5.7.3
+  fastify@<=5.8.2: ^5.8.3
+  tar@<7.5.7: ^7.5.7
+  tar@<7.5.8: ^7.5.8
+  tar@<=7.5.10: ^7.5.11
+  tar@<=7.5.2: ^7.5.3
+  tar@<=7.5.3: ^7.5.4
+  tar@<=7.5.9: ^7.5.10
+  vite@<=6.4.1: ^6.4.2

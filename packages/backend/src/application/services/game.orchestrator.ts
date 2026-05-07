@@ -194,7 +194,6 @@ export class GameOrchestrator {
           word,
         );
         this.socketGateway.broadcastGameEnded(gameId);
-        this.gameManager.deleteGame(gameId);
       }
     }
 

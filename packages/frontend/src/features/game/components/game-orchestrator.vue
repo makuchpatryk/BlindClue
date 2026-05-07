@@ -1,37 +1,19 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <CopiedSnackbar :show="showCopiedSnackbar" />
-    <JoinWaitingModal :show="joinStatus === JoinStatus.PENDING" />
+    <JoinWaitingModal :show="gameStore.joinStatus === JoinStatus.PENDING" />
     <JoinApprovalModal
-      :show="pendingJoinRequests.length > 0"
-      :pending-request="pendingJoinRequests[0] || null"
+      :show="gameStore.pendingJoinRequests.length > 0"
+      :pending-request="gameStore.pendingJoinRequests[0] || null"
       @approve="approveJoin"
       @reject="rejectJoin"
     />
 
     <div class="bg-gray-800 rounded-lg shadow p-6 text-gray-100">
-      <LobbyPhase
-        v-if="status === GameStatus.LOBBY"
-        @copy-game-id="copyGameIdToClipboard"
-        @start-game="startGame"
-      />
-
-      <RunningPhase
-        v-else-if="status === GameStatus.RUNNING"
-        @next-person="handleNextPerson"
-        @show-impostor="handleShowImpostor"
-      />
-
-      <VotingPhase v-else-if="status === GameStatus.VOTING" />
-
-      <GuessingPhase
-        v-else-if="status === GameStatus.GUESSING"
-        :is-impostor="isImpostor"
-      />
-
-      <EndedPhase
-        v-else-if="status === GameStatus.ENDED"
-        @play-again="playAgain"
+      <component
+        :is="phaseConfig.component"
+        v-bind="phaseConfig.props"
+        v-on="phaseConfig.listeners"
       />
     </div>
   </div>
@@ -51,20 +33,18 @@ import {
   clearGameSession,
 } from "@/shared/utils/session-storage.js";
 import { useClipboard } from "@/shared/composables/use-clipboard.js";
-import LobbyPhase from "./lobby-phase.vue";
-import RunningPhase from "./running-phase.vue";
-import VotingPhase from "./voting-phase.vue";
-import GuessingPhase from "./guessing-phase.vue";
-import EndedPhase from "./ended-phase.vue";
+import LobbyPhase from "./phases/lobby-phase.vue";
+import RunningPhase from "./phases/running-phase.vue";
+import VotingPhase from "./phases/voting-phase.vue";
+import GuessingPhase from "./phases/guessing-phase.vue";
+import EndedPhase from "./phases/ended-phase.vue";
 import CopiedSnackbar from "./copied-snackbar.vue";
 import JoinWaitingModal from "./join-waiting-modal.vue";
 import JoinApprovalModal from "./join-approval-modal.vue";
 
-interface Props {
+const props = defineProps<{
   gameId: string;
-}
-
-const props = defineProps<Props>();
+}>();
 
 const { copyToClipboard: copyToClip } = useClipboard();
 const showCopiedSnackbar = ref(false);
@@ -77,11 +57,72 @@ const socket = getSocket();
 const gameClientService = GameClientService.getInstance(socket, gameStore);
 provide("gameClientService", gameClientService);
 
-const status = computed(() => gameStore.status);
-const joinStatus = computed(() => gameStore.joinStatus);
-const pendingJoinRequests = computed(() => gameStore.pendingJoinRequests);
-const isImpostor = computed(() => gameStore.isImpostor);
-const currentPlayer = computed(() => gameStore.currentPlayer);
+interface PhaseConfig {
+  component: any;
+  props: Record<string, any>;
+  listeners: Record<string, (...args: any[]) => void>;
+}
+
+function createLobbyPhase(): PhaseConfig {
+  return {
+    component: LobbyPhase,
+    props: {},
+    listeners: {
+      copyGameId: copyGameIdToClipboard,
+      startGame: startGame,
+    },
+  };
+}
+
+function createRunningPhase(): PhaseConfig {
+  return {
+    component: RunningPhase,
+    props: {},
+    listeners: {
+      nextPerson: handleNextPerson,
+      showImpostor: handleShowImpostor,
+    },
+  };
+}
+
+function createVotingPhase(): PhaseConfig {
+  return {
+    component: VotingPhase,
+    props: {},
+    listeners: {},
+  };
+}
+
+function createGuessingPhase(): PhaseConfig {
+  return {
+    component: GuessingPhase,
+    props: { isImpostor: gameStore.isImpostor },
+    listeners: {},
+  };
+}
+
+function createEndedPhase(): PhaseConfig {
+  return {
+    component: EndedPhase,
+    props: {},
+    listeners: {
+      playAgain,
+    },
+  };
+}
+
+const phaseStrategies: Record<GameStatus, () => PhaseConfig> = {
+  [GameStatus.LOBBY]: createLobbyPhase,
+  [GameStatus.RUNNING]: createRunningPhase,
+  [GameStatus.VOTING]: createVotingPhase,
+  [GameStatus.GUESSING]: createGuessingPhase,
+  [GameStatus.ENDED]: createEndedPhase,
+};
+
+const phaseConfig = computed<PhaseConfig>(() => {
+  const strategyFactory = phaseStrategies[gameStore.status];
+  return strategyFactory();
+});
 
 function startGame() {
   gameClientService.startGame(props.gameId);
@@ -96,7 +137,7 @@ function copyGameIdToClipboard() {
 }
 
 function handleNextPerson(word: string) {
-  const player = currentPlayer.value;
+  const player = gameStore.currentPlayer;
   if (!player) return;
 
   const playerId = player.id;

@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 import Card from "@/shared/components/card.vue";
 import Heading from "@/shared/components/heading.vue";

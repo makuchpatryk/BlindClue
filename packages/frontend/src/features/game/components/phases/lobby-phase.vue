@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
 import { MIN_PLAYERS } from "@/shared/utils/constants.js";
 import Button from "@/shared/components/button.vue";
 import Heading from "@/shared/components/heading.vue";

@@ -58,8 +58,8 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
-import { usePlayerHelpers } from "../composables/use-player-helpers.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
+import { usePlayerHelpers } from "../../composables/use-player-helpers.js";
 import Button from "@/shared/components/button.vue";
 import Heading from "@/shared/components/heading.vue";
 import InfoBox from "@/shared/components/info-box.vue";

@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
 import Card from "@/shared/components/card.vue";
 import Heading from "@/shared/components/heading.vue";
 import Alert from "@/shared/components/alert.vue";

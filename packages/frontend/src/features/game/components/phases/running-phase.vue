@@ -95,14 +95,14 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 import Card from "@/shared/components/card.vue";
 import Heading from "@/shared/components/heading.vue";
 import FormField from "@/shared/components/form-field.vue";
 import Input from "@/shared/components/input.vue";
 import Alert from "@/shared/components/alert.vue";
-import PlayerSelectionList from "./player-selection-list.vue";
+import PlayerSelectionList from "../player-selection-list.vue";
 
 const { gameStore } = useGameFacade();
 const playerWordInput = ref<string>("");

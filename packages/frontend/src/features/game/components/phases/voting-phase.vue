@@ -42,13 +42,13 @@
 
 <script setup lang="ts">
 import { ref, computed, inject } from "vue";
-import { useGameFacade } from "../composables/use-game-facade.js";
+import { useGameFacade } from "../../composables/use-game-facade.js";
 import { GameClientService } from "@/features/game/services/game-client.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import Button from "@/shared/components/button.vue";
 import Card from "@/shared/components/card.vue";
 import Heading from "@/shared/components/heading.vue";
-import PlayerSelectionList from "./player-selection-list.vue";
+import PlayerSelectionList from "../player-selection-list.vue";
 
 const { gameStore, voteImpostor } = useGameFacade();
 const gameClientService = inject<GameClientService>("gameClientService");

@@ -25,7 +25,7 @@ vi.mock("@/shared/components/heading.vue", () => ({
 vi.mock("@/shared/components/info-box.vue", () => ({
   default: {
     name: "InfoBox",
-    template: "<div><slot/></div>",
+    template: "<div><h3>{{ title }}</h3><slot/></div>",
     props: ["title", "valueColor"],
   },
 }));
@@ -37,33 +37,23 @@ vi.mock("@/shared/components/card.vue", () => ({
   },
 }));
 
-vi.mock("@/features/game/composables/use-game-facade.js", () => ({
-  useGameFacade: () => ({
-    gameStore: {
-      category: "Animals",
-      word: "dog",
-      votes: new Map([
-        ["p1", 3],
-        ["p2", 2],
-      ]),
-      impostorGuess: "cat",
-      guessResult: false,
-    },
-  }),
-}));
-
-vi.mock("@/features/game/composables/use-player-helpers.js", () => ({
-  usePlayerHelpers: () => ({
-    getPlayerName: vi.fn((id) => (id === "p1" ? "Alice" : "Bob")),
-    getMostVotedName: vi.fn(() => "Alice"),
-    getMostVotedCount: vi.fn(() => 3),
-    getImpostorName: vi.fn(() => "Bob"),
-  }),
-}));
 
 describe("EndedPhase", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    const gameStore = useGameStore();
+    gameStore.setPlayers([
+      { id: "p1", name: "Alice" },
+      { id: "p2", name: "Bob" },
+    ]);
+    gameStore.votes = new Map([
+      ["p1", 3],
+      ["p2", 2],
+    ]);
+    gameStore.impostorId = "p2";
+    gameStore.setWord("dog");
+    gameStore.impostorGuess = "cat";
+    gameStore.guessResult = false;
   });
 
   it("should render game over heading", () => {

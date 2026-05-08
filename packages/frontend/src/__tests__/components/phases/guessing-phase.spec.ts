@@ -119,9 +119,8 @@ describe("GuessingPhase", () => {
     const input = wrapper.find("input");
     await input.setValue("cat");
 
-    const buttons = wrapper.findAll("button");
-    const submitButton = buttons.find((b) => b.text().includes("Submit"));
-    await submitButton?.trigger("click");
+    const form = wrapper.find("form");
+    await form.trigger("submit");
 
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("Guess submitted!");

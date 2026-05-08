@@ -8,7 +8,7 @@ import { useGameStore } from "@/features/game/stores/game.store";
 vi.mock("@/shared/components/button.vue", () => ({
   default: {
     name: "Button",
-    template: "<button @click=\"$emit('click')\"><slot /></button>",
+    template: "<button :disabled=\"disabled\" @click=\"$emit('click')\"><slot /></button>",
     props: ["disabled", "noDefaults", "class"],
   },
 }));

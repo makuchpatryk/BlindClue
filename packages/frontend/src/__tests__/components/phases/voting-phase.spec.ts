@@ -15,7 +15,7 @@ vi.mock("@/shared/components/button.vue", () => ({
 }));
 
 vi.mock("@/shared/components/card.vue", () => ({
-  default: { name: "Card", template: "<div><slot/></div>" },
+  default: { name: "Card", template: '<div><slot name="header"></slot><slot/></div>' },
 }));
 
 vi.mock("@/shared/components/heading.vue", () => ({
@@ -30,22 +30,6 @@ vi.mock("@/features/game/components/player-selection-list.vue", () => ({
   },
 }));
 
-vi.mock("@/features/game/composables/use-game-facade.js", () => ({
-  useGameFacade: () => ({
-    gameStore: {
-      selectedImpostorGuess: null,
-      players: [
-        { id: "p1", name: "Alice" },
-        { id: "p2", name: "Bob" },
-      ],
-      myPlayerId: "p1",
-      gameId: "game-123",
-      votedPlayersThisRound: new Set(),
-    },
-    voteImpostor: vi.fn(),
-  }),
-}));
-
 vi.mock("@/shared/utils/game-status.js", () => ({
   GameStatus: { VOTING: "VOTING" },
 }));
@@ -53,6 +37,13 @@ vi.mock("@/shared/utils/game-status.js", () => ({
 describe("VotingPhase", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    const gameStore = useGameStore();
+    gameStore.setPlayers([
+      { id: "p1", name: "Alice" },
+      { id: "p2", name: "Bob" },
+    ]);
+    gameStore.myPlayerId = "p1";
+    gameStore.gameId = "game-123";
   });
 
   it("should render voting prompt", () => {

@@ -25,7 +25,7 @@ vi.mock("@/shared/components/heading.vue", () => ({
 vi.mock("@/shared/components/form-field.vue", () => ({
   default: {
     name: "FormField",
-    template: "<div><slot/></div>",
+    template: "<div><label>{{ label }}</label><slot/></div>",
     props: ["label"],
   },
 }));

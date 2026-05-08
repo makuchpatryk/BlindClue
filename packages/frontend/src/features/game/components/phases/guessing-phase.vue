@@ -16,7 +16,7 @@
             placeholder="Enter your guess..."
             :disabled="isGuessing"
           />
-          <Button type="submit" full-width :disabled="!guess || isGuessing">
+          <Button type="submit" full-width :disabled="!isGuessValid || isGuessing">
             {{ isGuessing ? "Submitting..." : "Submit Guess" }}
           </Button>
         </form>
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useGameFacade } from "../../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
 import Card from "@/shared/components/card.vue";
@@ -54,6 +54,8 @@ const { gameStore, guessWord } = useGameFacade();
 const guess = ref("");
 const isGuessing = ref(false);
 const hasGuessed = ref(false);
+
+const isGuessValid = computed(() => guess.value.trim().length > 0);
 
 async function submit() {
   if (!guess.value.trim()) return;

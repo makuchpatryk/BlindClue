@@ -92,14 +92,21 @@ vi.mock("@/features/game/services/game-client.service.ts", () => ({
 }));
 
 describe("GameOrchestrator", () => {
+  const createMountOptions = (props: any = {}) => ({
+    props: { gameId: "game-123", ...props },
+    global: {
+      provide: {
+        gameClientService: null,
+      },
+    },
+  });
+
   beforeEach(() => {
     setActivePinia(createPinia());
   });
 
   it("should render lobby phase initially", () => {
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     expect(wrapper.text()).toContain("Lobby Phase");
   });
@@ -116,9 +123,7 @@ describe("GameOrchestrator", () => {
       ],
     });
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("Running Phase");
@@ -137,9 +142,7 @@ describe("GameOrchestrator", () => {
     });
     gameStore.setStatus(GameStatus.VOTING);
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("Voting Phase");
@@ -149,9 +152,7 @@ describe("GameOrchestrator", () => {
     const gameStore = useGameStore();
     gameStore.setJoinStatus(JoinStatus.PENDING);
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("Waiting...");
@@ -164,9 +165,7 @@ describe("GameOrchestrator", () => {
       playerName: "Charlie",
     });
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("Approve Join");
@@ -176,9 +175,7 @@ describe("GameOrchestrator", () => {
     const lobbyStore = useLobbyStore();
     lobbyStore.setPlayerName("Alice");
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
 
@@ -194,9 +191,7 @@ describe("GameOrchestrator", () => {
       playerId: "player-1",
     } as any);
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
 
@@ -215,9 +210,7 @@ describe("GameOrchestrator", () => {
     const lobbyStore = useLobbyStore();
     lobbyStore.setPlayerName("Alice");
 
-    const wrapper = mount(GameOrchestrator, {
-      props: { gameId: "game-123" },
-    });
+    const wrapper = mount(GameOrchestrator, createMountOptions());
 
     await wrapper.vm.$nextTick();
 

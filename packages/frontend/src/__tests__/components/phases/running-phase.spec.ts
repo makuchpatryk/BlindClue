@@ -82,6 +82,14 @@ vi.mock("@/features/game/composables/use-game-facade.js", () => ({
 }));
 
 describe("RunningPhase", () => {
+  const mountOptions = {
+    global: {
+      provide: {
+        gameClientService: null,
+      },
+    },
+  };
+
   beforeEach(() => {
     setActivePinia(createPinia());
     mockGameStore.isImpostor = false;
@@ -98,14 +106,14 @@ describe("RunningPhase", () => {
   it("should show impostor alert when player is impostor", () => {
     mockGameStore.isImpostor = true;
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).toContain("YOU ARE THE IMPOSTOR");
   });
 
   it("should show category hidden for non-impostor", () => {
     mockGameStore.isImpostor = false;
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).toContain("???");
   });
 
@@ -113,7 +121,7 @@ describe("RunningPhase", () => {
     mockGameStore.isImpostor = true;
     mockGameStore.category = "Animals";
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).toContain("Animals");
   });
 
@@ -121,7 +129,7 @@ describe("RunningPhase", () => {
     mockGameStore.isImpostor = false;
     mockGameStore.word = "dog";
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).toContain("dog");
   });
 
@@ -129,7 +137,7 @@ describe("RunningPhase", () => {
     mockGameStore.isImpostor = true;
     mockGameStore.word = "dog";
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).not.toContain("dog");
   });
 
@@ -138,14 +146,14 @@ describe("RunningPhase", () => {
     mockGameStore.currentPlayer = { id: "p1", name: "Alice" };
     mockGameStore.myPlayerId = "p1";
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.find("input").exists()).toBe(true);
   });
 
   it("should show round information", () => {
     mockGameStore.isImpostor = false;
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     expect(wrapper.text()).toContain("ROUND");
   });
 
@@ -154,7 +162,7 @@ describe("RunningPhase", () => {
     mockGameStore.currentPlayer = { id: "p1", name: "Alice" };
     mockGameStore.myPlayerId = "p1";
 
-    const wrapper = mount(RunningPhase);
+    const wrapper = mount(RunningPhase, mountOptions);
     const buttons = wrapper.findAll("button");
 
     expect(buttons[0].attributes("disabled")).toBeDefined();

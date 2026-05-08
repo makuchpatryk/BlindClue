@@ -16,7 +16,11 @@
             placeholder="Enter your guess..."
             :disabled="isGuessing"
           />
-          <Button type="submit" full-width :disabled="!isGuessValid || isGuessing">
+          <Button
+            type="submit"
+            full-width
+            :disabled="!isGuessValid || isGuessing"
+          >
             {{ isGuessing ? "Submitting..." : "Submit Guess" }}
           </Button>
         </form>

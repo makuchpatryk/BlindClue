@@ -17,12 +17,20 @@ vi.mock("@/shared/components/heading.vue", () => ({
 }));
 
 describe("LobbyPhase", () => {
+  const mountOptions = {
+    global: {
+      provide: {
+        gameClientService: null,
+      },
+    },
+  };
+
   beforeEach(() => {
     setActivePinia(createPinia());
   });
 
   it("should render waiting text", () => {
-    const wrapper = mount(LobbyPhase);
+    const wrapper = mount(LobbyPhase, mountOptions);
     expect(wrapper.text()).toContain("Waiting for players...");
   });
 
@@ -30,7 +38,7 @@ describe("LobbyPhase", () => {
     const gameStore = useGameStore();
     gameStore.addPlayer({ id: "player-1", name: "Alice" });
 
-    const wrapper = mount(LobbyPhase);
+    const wrapper = mount(LobbyPhase, mountOptions);
     expect(wrapper.text()).toContain("Players:");
   });
 
@@ -40,12 +48,12 @@ describe("LobbyPhase", () => {
     gameStore.addPlayer({ id: "p2", name: "B" });
     gameStore.addPlayer({ id: "p3", name: "C" });
 
-    const wrapper = mount(LobbyPhase);
+    const wrapper = mount(LobbyPhase, mountOptions);
     expect(wrapper.findAll("button").length).toBeGreaterThan(0);
   });
 
   it("should emit events on button click", async () => {
-    const wrapper = mount(LobbyPhase);
+    const wrapper = mount(LobbyPhase, mountOptions);
     const code = wrapper.find("code");
 
     await code.trigger("click");

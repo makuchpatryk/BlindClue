@@ -11,9 +11,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@fastify/cors": "^9.0.0",
+    "@fastify/cors": "^11.2.0",
     "dotenv": "^16.3.1",
-    "fastify": "^4.29.1",
+    "fastify": "^5.8.5",
     "socket.io": "^4.7.0",
     "sqlite3": "^5.1.7"
   },

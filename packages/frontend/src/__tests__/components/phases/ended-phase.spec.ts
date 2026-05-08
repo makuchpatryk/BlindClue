@@ -37,8 +37,15 @@ vi.mock("@/shared/components/card.vue", () => ({
   },
 }));
 
-
 describe("EndedPhase", () => {
+  const mountOptions = {
+    global: {
+      provide: {
+        gameClientService: null,
+      },
+    },
+  };
+
   beforeEach(() => {
     setActivePinia(createPinia());
     const gameStore = useGameStore();
@@ -57,17 +64,17 @@ describe("EndedPhase", () => {
   });
 
   it("should render game over heading", () => {
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Game Over");
   });
 
   it("should display most voted player", () => {
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Most Voted");
   });
 
   it("should display impostor name", () => {
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("The Impostor Was");
   });
 
@@ -75,7 +82,7 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.setWord("dog");
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("dog");
   });
 
@@ -83,7 +90,7 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.impostorGuess = "cat";
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("cat");
   });
 
@@ -92,7 +99,7 @@ describe("EndedPhase", () => {
     gameStore.impostorGuess = "dog";
     gameStore.guessResult = true;
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Correct!");
   });
 
@@ -101,7 +108,7 @@ describe("EndedPhase", () => {
     gameStore.impostorGuess = "cat";
     gameStore.guessResult = false;
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Wrong");
   });
 
@@ -109,17 +116,17 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.votes = new Map([["p1", 3]]);
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Vote Results");
   });
 
   it("should show play again button", () => {
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("Play Again");
   });
 
   it("should emit playAgain event on button click", async () => {
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     const buttons = wrapper.findAll("button");
 
     const playAgainButton = buttons.find((b) =>
@@ -134,7 +141,7 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.votes = new Map([["p1", 1]]);
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("1 vote");
   });
 
@@ -142,7 +149,7 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.votes = new Map([["p1", 3]]);
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).toContain("votes");
   });
 
@@ -150,7 +157,7 @@ describe("EndedPhase", () => {
     const gameStore = useGameStore();
     gameStore.impostorGuess = null;
 
-    const wrapper = mount(EndedPhase);
+    const wrapper = mount(EndedPhase, mountOptions);
     expect(wrapper.text()).not.toContain("Impostor Guessed");
   });
 });

@@ -15,7 +15,10 @@ vi.mock("@/shared/components/button.vue", () => ({
 }));
 
 vi.mock("@/shared/components/card.vue", () => ({
-  default: { name: "Card", template: '<div><slot name="header"></slot><slot/></div>' },
+  default: {
+    name: "Card",
+    template: '<div><slot name="header"></slot><slot/></div>',
+  },
 }));
 
 vi.mock("@/shared/components/heading.vue", () => ({
@@ -46,13 +49,21 @@ describe("VotingPhase", () => {
     gameStore.gameId = "game-123";
   });
 
+  const mountOptions = {
+    global: {
+      provide: {
+        gameClientService: null,
+      },
+    },
+  };
+
   it("should render voting prompt", () => {
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     expect(wrapper.text()).toContain("Who is the impostor?");
   });
 
   it("should render player selection list", () => {
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     expect(wrapper.text()).toContain("Players");
   });
 
@@ -60,7 +71,7 @@ describe("VotingPhase", () => {
     const gameStore = useGameStore();
     gameStore.selectedImpostorGuess = null;
 
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     const buttons = wrapper.findAll("button");
 
     const selectButton = buttons.find((b) =>
@@ -73,7 +84,7 @@ describe("VotingPhase", () => {
     const gameStore = useGameStore();
     gameStore.selectedImpostorGuess = "p2";
 
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     const buttons = wrapper.findAll("button");
 
     const voteButton = buttons.find((b) => b.text().includes("Show Impostor"));
@@ -84,7 +95,7 @@ describe("VotingPhase", () => {
     const gameStore = useGameStore();
     gameStore.selectedImpostorGuess = "p2";
 
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     const selections = wrapper.findAll('[data-testid="player-selection-list"]');
 
     // Player selection list should be disabled during voting
@@ -95,7 +106,7 @@ describe("VotingPhase", () => {
     const gameStore = useGameStore();
     gameStore.selectedImpostorGuess = "p2";
 
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     const buttons = wrapper.findAll("button");
 
     const voteButton = buttons.find((b) => b.text().includes("Show Impostor"));
@@ -103,7 +114,7 @@ describe("VotingPhase", () => {
   });
 
   it("should render instruction text for player selection", () => {
-    const wrapper = mount(VotingPhase);
+    const wrapper = mount(VotingPhase, mountOptions);
     expect(wrapper.text()).toContain("Select a player and confirm your vote");
   });
 });

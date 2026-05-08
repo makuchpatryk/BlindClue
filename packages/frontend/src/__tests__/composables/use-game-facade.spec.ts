@@ -72,7 +72,13 @@ describe("useGameFacade", () => {
     });
     gameStore.setMyPlayer("player-1", "Alice");
 
-    const wrapper = mount(TestComponent);
+    const wrapper = mount(TestComponent, {
+      global: {
+        provide: {
+          gameClientService: null,
+        },
+      },
+    });
     expect(() => wrapper.vm.submitDescription("desc")).not.toThrow();
   });
 

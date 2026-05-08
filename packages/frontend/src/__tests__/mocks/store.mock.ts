@@ -1,17 +1,17 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 export const createMockGameStore = () => ({
-  gameId: 'test-game-123',
-  playerId: 'test-player-456',
-  status: 'WAITING' as const,
-  phase: 'WAITING' as const,
+  gameId: "test-game-123",
+  playerId: "test-player-456",
+  status: "WAITING" as const,
+  phase: "WAITING" as const,
   players: [],
   currentPlayer: null as string | null,
   descriptions: {} as Record<string, string>,
   votes: {} as Record<string, string>,
   guesses: {} as Record<string, string>,
-  word: 'test-word',
-  category: 'test-category',
+  word: "test-word",
+  category: "test-category",
   setGameId: vi.fn(),
   setPlayerId: vi.fn(),
   setStatus: vi.fn(),

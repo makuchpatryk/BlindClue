@@ -8,6 +8,7 @@ description: Auto-commit staged changes with a generated Conventional Commits me
 Automatically commit staged changes with a generated message.
 
 Workflow:
+
 1. Read changes (`git status`)
 2. Generate Conventional Commits message based on what changed
 3. Run `git commit`
@@ -19,6 +20,7 @@ Message format: `type(scope): short description`
 **Description:** Imperative present tense, ≤50 chars total
 
 Examples:
+
 - `fix(game-logic): restore word on rejoin`
 - `feat(frontend): add vitest config`
 - `test: add password validation`

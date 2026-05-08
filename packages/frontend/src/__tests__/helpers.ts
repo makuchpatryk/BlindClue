@@ -1,7 +1,7 @@
-import { mount, VueWrapper } from '@vue/test-utils';
-import { createPinia, setActivePinia } from 'pinia';
-import { vi } from 'vitest';
-import type { Component } from 'vue';
+import { mount, VueWrapper } from "@vue/test-utils";
+import { createPinia, setActivePinia } from "pinia";
+import { vi } from "vitest";
+import type { Component } from "vue";
 
 export interface MountOptions {
   props?: Record<string, any>;
@@ -14,7 +14,10 @@ export function createTestPinia() {
   return createPinia();
 }
 
-export function mountComponent(component: Component, options: MountOptions = {}) {
+export function mountComponent(
+  component: Component,
+  options: MountOptions = {},
+) {
   const pinia = createTestPinia();
   setActivePinia(pinia);
 
@@ -42,17 +45,17 @@ export function mockSocketIO() {
 
 export function mockGameStore() {
   return {
-    gameId: '',
-    playerId: '',
-    status: 'WAITING',
-    phase: 'WAITING',
+    gameId: "",
+    playerId: "",
+    status: "WAITING",
+    phase: "WAITING",
     players: [],
     currentPlayer: null,
     descriptions: {},
     votes: {},
     guesses: {},
-    word: '',
-    category: '',
+    word: "",
+    category: "",
     setGameId: vi.fn(),
     setPlayerId: vi.fn(),
     setStatus: vi.fn(),

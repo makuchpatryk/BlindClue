@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useGameFacade } from '@/features/game/composables/use-game-facade';
-import { useGameStore } from '@/features/game/stores/game.store';
-import { createPinia, setActivePinia } from 'pinia';
-import { defineComponent, h } from 'vue';
-import { mount } from '@vue/test-utils';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { useGameFacade } from "@/features/game/composables/use-game-facade";
+import { useGameStore } from "@/features/game/stores/game.store";
+import { createPinia, setActivePinia } from "pinia";
+import { defineComponent, h } from "vue";
+import { mount } from "@vue/test-utils";
 
-describe('useGameFacade', () => {
+describe("useGameFacade", () => {
   const mockGameClientService = {
     submitDescription: vi.fn(),
     voteImpostor: vi.fn(),
@@ -16,7 +16,7 @@ describe('useGameFacade', () => {
     setup() {
       return useGameFacade();
     },
-    render: () => h('div'),
+    render: () => h("div"),
   });
 
   beforeEach(() => {
@@ -34,105 +34,104 @@ describe('useGameFacade', () => {
     });
   }
 
-  it('should return game store', () => {
+  it("should return game store", () => {
     const wrapper = mountWithService();
     expect(wrapper.vm.gameStore).toBeDefined();
   });
 
-  it('should submit description when game and player exist', () => {
+  it("should submit description when game and player exist", () => {
     const gameStore = useGameStore();
     gameStore.setGameStarted({
-      gameId: 'game-123',
-      category: 'Animals',
-      impostorId: 'player-2',
+      gameId: "game-123",
+      category: "Animals",
+      impostorId: "player-2",
       players: [
-        { id: 'player-1', name: 'Alice' },
-        { id: 'player-2', name: 'Bob' },
+        { id: "player-1", name: "Alice" },
+        { id: "player-2", name: "Bob" },
       ],
     });
-    gameStore.setMyPlayer('player-1', 'Alice');
+    gameStore.setMyPlayer("player-1", "Alice");
 
     const wrapper = mountWithService();
-    wrapper.vm.submitDescription('A description');
+    wrapper.vm.submitDescription("A description");
 
     expect(mockGameClientService.submitDescription).toHaveBeenCalledWith(
-      'game-123',
-      'player-1',
-      'A description',
+      "game-123",
+      "player-1",
+      "A description",
     );
   });
 
-  it('should not submit description if service unavailable', () => {
+  it("should not submit description if service unavailable", () => {
     const gameStore = useGameStore();
     gameStore.setGameStarted({
-      gameId: 'game-123',
-      category: 'Animals',
-      impostorId: 'player-2',
-      players: [
-        { id: 'player-1', name: 'Alice' },
-      ],
+      gameId: "game-123",
+      category: "Animals",
+      impostorId: "player-2",
+      players: [{ id: "player-1", name: "Alice" }],
     });
-    gameStore.setMyPlayer('player-1', 'Alice');
+    gameStore.setMyPlayer("player-1", "Alice");
 
     const wrapper = mount(TestComponent);
-    expect(() => wrapper.vm.submitDescription('desc')).not.toThrow();
+    expect(() => wrapper.vm.submitDescription("desc")).not.toThrow();
   });
 
-  it('should not submit description if player ID missing', () => {
+  it("should not submit description if player ID missing", () => {
     const gameStore = useGameStore();
     gameStore.setGameStarted({
-      gameId: 'game-123',
-      category: 'Animals',
-      impostorId: 'player-2',
-      players: [
-        { id: 'player-1', name: 'Alice' },
-      ],
+      gameId: "game-123",
+      category: "Animals",
+      impostorId: "player-2",
+      players: [{ id: "player-1", name: "Alice" }],
     });
 
     const wrapper = mountWithService();
-    wrapper.vm.submitDescription('desc');
+    wrapper.vm.submitDescription("desc");
 
     expect(mockGameClientService.submitDescription).not.toHaveBeenCalled();
   });
 
-  it('should vote for impostor', () => {
+  it("should vote for impostor", () => {
     const gameStore = useGameStore();
     gameStore.setGameStarted({
-      gameId: 'game-123',
-      category: 'Animals',
-      impostorId: 'player-2',
+      gameId: "game-123",
+      category: "Animals",
+      impostorId: "player-2",
       players: [
-        { id: 'player-1', name: 'Alice' },
-        { id: 'player-2', name: 'Bob' },
+        { id: "player-1", name: "Alice" },
+        { id: "player-2", name: "Bob" },
       ],
     });
-    gameStore.setMyPlayer('player-1', 'Alice');
+    gameStore.setMyPlayer("player-1", "Alice");
 
     const wrapper = mountWithService();
-    wrapper.vm.voteImpostor('player-2');
+    wrapper.vm.voteImpostor("player-2");
 
     expect(mockGameClientService.voteImpostor).toHaveBeenCalledWith(
-      'game-123',
-      'player-1',
-      'player-2',
+      "game-123",
+      "player-1",
+      "player-2",
     );
   });
 
-  it('should guess word', () => {
+  it("should guess word", () => {
     const gameStore = useGameStore();
     gameStore.setGameStarted({
-      gameId: 'game-123',
-      category: 'Animals',
-      impostorId: 'player-2',
+      gameId: "game-123",
+      category: "Animals",
+      impostorId: "player-2",
       players: [
-        { id: 'player-1', name: 'Alice' },
-        { id: 'player-2', name: 'Bob' },
+        { id: "player-1", name: "Alice" },
+        { id: "player-2", name: "Bob" },
       ],
     });
 
     const wrapper = mountWithService();
-    wrapper.vm.guessWord('dog');
+    wrapper.vm.guessWord("dog");
 
-    expect(mockGameClientService.guessWord).toHaveBeenCalledWith('game-123', 'dog');
+    expect(mockGameClientService.guessWord).toHaveBeenCalledWith(
+      "game-123",
+      "dog",
+    );
   });
 });

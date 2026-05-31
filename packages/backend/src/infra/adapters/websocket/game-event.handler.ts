@@ -7,6 +7,7 @@ import { SocketGateway } from "./socket.gateway.js";
 interface PendingRequest {
   socket: Socket;
   playerName: string;
+  avatar?: string;
 }
 
 interface SocketPlayer {
@@ -38,7 +39,7 @@ export class GameEventHandler {
   register(socket: Socket): void {
     socket.on(
       "requestJoin",
-      async (data: { gameId: string; playerName: string }) => {
+      async (data: { gameId: string; playerName: string; avatar?: string }) => {
         const requestId = this.generateRequestId();
         const game = this.gameManager.getGame(data.gameId);
 
@@ -48,6 +49,7 @@ export class GameEventHandler {
           const result = await this.gameOrchestrator.joinGame(
             data.gameId,
             data.playerName,
+            data.avatar,
           );
           if (result.ok) {
             this.hostSockets.set(data.gameId, socket.id);
@@ -61,6 +63,7 @@ export class GameEventHandler {
               game?.getPlayers().map((p) => ({
                 id: p.getId().value,
                 name: p.getName(),
+                avatar: p.getAvatar(),
               })) ?? [];
             socket.emit("joinGameSuccess", { playerId: result.value, players });
           } else {
@@ -71,6 +74,7 @@ export class GameEventHandler {
           this.pendingRequests.set(requestId, {
             socket,
             playerName: data.playerName,
+            avatar: data.avatar,
           });
           const hostSocketId = this.hostSockets.get(data.gameId);
           if (hostSocketId) {
@@ -78,6 +82,7 @@ export class GameEventHandler {
               gameId: data.gameId,
               requestId,
               playerName: data.playerName,
+              avatar: data.avatar,
             });
           }
         }
@@ -93,6 +98,7 @@ export class GameEventHandler {
           const result = await this.gameOrchestrator.joinGame(
             data.gameId,
             pendingRequest.playerName,
+            pendingRequest.avatar,
           );
           if (result.ok) {
             this.socketToPlayer.set(pendingRequest.socket.id, {
@@ -104,6 +110,7 @@ export class GameEventHandler {
               game?.getPlayers().map((p) => ({
                 id: p.getId().value,
                 name: p.getName(),
+                avatar: p.getAvatar(),
               })) ?? [];
             pendingRequest.socket.emit("joinGameSuccess", {
               playerId: result.value,
@@ -247,6 +254,7 @@ export class GameEventHandler {
         const players = game.getPlayers().map((p) => ({
           id: p.getId().value,
           name: p.getName(),
+          avatar: p.getAvatar(),
         }));
         const rejoinData: any = {
           playerId: data.playerId,

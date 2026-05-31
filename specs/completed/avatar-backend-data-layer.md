@@ -32,8 +32,9 @@
 ### 5. Update Socket Event Handler
 
 - **File**: `packages/backend/src/infra/adapters/websocket/game-event.handler.ts`
-- Extract avatar from `requestJoin` socket data
-- Pass avatar to `joinGame` method in orchestrator
+- Extract avatar from socket data in join/rejoin handlers
+- Pass avatar to GameOrchestrator's joinGame method
+- Verify socket event payload structure matches actual implementation
 
 ## Verification
 

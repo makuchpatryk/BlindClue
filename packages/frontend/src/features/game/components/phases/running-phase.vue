@@ -7,11 +7,15 @@
     <Card>
       <div class="text-center">
         <div class="mb-6">
-          <p class="text-sm font-semibold text-gray-400 mb-2">
-            {{ myPlayerName }} • GAME #{{ roundNumber }} • ROUND
-            {{ currentRound }}/{{ numberOfRounds }}
-          </p>
-          <Heading :level="2" class="mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <AvatarBadge :avatar="getMyAvatar()" size="small" />
+            <p class="text-sm font-semibold text-gray-400">
+              {{ myPlayerName }} • GAME #{{ roundNumber }} • ROUND
+              {{ currentRound }}/{{ numberOfRounds }}
+            </p>
+          </div>
+          <Heading :level="2" class="mb-4 flex items-center justify-center gap-2">
+            <AvatarBadge :avatar="currentPlayer?.avatar" size="medium" />
             It's {{ currentPlayer?.name }}'s turn
           </Heading>
         </div>
@@ -78,7 +82,8 @@
         >
           <h3 class="text-gray-300 font-semibold mb-3">Words Submitted:</h3>
           <div class="space-y-2">
-            <div v-for="p in players" :key="p.id">
+            <div v-for="p in players" :key="p.id" class="flex items-center gap-2">
+              <AvatarBadge :avatar="p.avatar" size="small" />
               <span v-if="hasPlayerWord(p.id)" class="text-gray-200">
                 <span class="font-semibold">{{ p.name }}:</span>
                 <span class="text-gray-300 ml-2">{{
@@ -102,6 +107,7 @@ import Heading from "@/shared/components/heading.vue";
 import FormField from "@/shared/components/form-field.vue";
 import Input from "@/shared/components/input.vue";
 import Alert from "@/shared/components/alert.vue";
+import AvatarBadge from "@/shared/components/avatar-badge.vue";
 import PlayerSelectionList from "../player-selection-list.vue";
 
 const { gameStore } = useGameFacade();
@@ -142,5 +148,9 @@ function handleNextPerson() {
 
 function handleShowImpostor() {
   emit("showImpostor");
+}
+
+function getMyAvatar(): string | undefined {
+  return players.value.find(p => p.id === gameStore.myPlayerId)?.avatar;
 }
 </script>

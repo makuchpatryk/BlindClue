@@ -15,7 +15,10 @@
       ]"
     >
       <div class="flex items-center justify-between">
-        <span>{{ player.name }}</span>
+        <div class="flex items-center gap-2">
+          <AvatarBadge :avatar="player.avatar" size="small" />
+          <span>{{ player.name }}</span>
+        </div>
         <div class="flex items-center gap-2">
           <span
             v-if="gameStore.hasPlayerVoted(player.id)"
@@ -36,6 +39,7 @@
 import { computed } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import Button from "@/shared/components/button.vue";
+import AvatarBadge from "@/shared/components/avatar-badge.vue";
 import type { PlayerDTO } from "@/shared/types/game.js";
 
 interface Props {

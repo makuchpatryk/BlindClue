@@ -198,7 +198,7 @@ onMounted(async () => {
   const playerName = lobbyStore.playerName;
   if (playerName.trim()) {
     gameStore.setJoinStatus(JoinStatus.PENDING);
-    gameClientService.requestJoin(props.gameId, playerName);
+    gameClientService.requestJoin(props.gameId, playerName, lobbyStore.playerAvatar);
   }
 });
 </script>

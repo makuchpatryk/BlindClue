@@ -18,11 +18,12 @@
 
 ## Update Socket Event Listeners
 
-- **File**: `packages/frontend/src/shared/services/game-client.service.ts`
-- Handle avatar in `GAME_STARTED` listener
-- Handle avatar in `REJOIN_SUCCESS` listener
-- Handle avatar in `JOIN_GAME_SUCCESS` listener
-- Handle avatar in `PLAYER_JOINED` listener
+- **File**: `packages/frontend/src/features/game/services/game-client.service.ts`
+- Handle avatar in `GAME_STARTED` listener (check actual event names in socket-events.js)
+- Handle avatar in `REJOIN_SUCCESS` listener (if exists)
+- Handle avatar in `JOIN_GAME_SUCCESS` listener (if exists)
+- Handle avatar in `PLAYER_JOINED` listener (if exists)
+- Verify event names against actual SOCKET_EVENTS constants
 
 ## Verification
 

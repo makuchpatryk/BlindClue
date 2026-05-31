@@ -12,6 +12,7 @@
         :key="desc.id"
         :player-name="desc.playerName"
         :text="desc.text"
+        :avatar="getPlayerAvatar(desc.playerId)"
       />
     </div>
   </Card>
@@ -36,4 +37,10 @@ const { gameStore } = useGameFacade();
 const roundDescriptions = computed(() => {
   return Array.from(gameStore.descriptions.get(props.round) || []);
 });
+
+const players = computed(() => gameStore.players);
+
+function getPlayerAvatar(playerId: string): string | undefined {
+  return players.value.find(p => p.id === playerId)?.avatar;
+}
 </script>

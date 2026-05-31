@@ -12,6 +12,7 @@ export type GameStore = ReturnType<typeof useGameStore>;
 export interface PlayerDTO {
   id: string;
   name: string;
+  avatar?: string;
 }
 
 export interface DescriptionDTO {

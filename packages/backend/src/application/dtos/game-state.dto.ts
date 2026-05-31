@@ -11,6 +11,7 @@ export interface GameStateDTO {
 export interface PlayerDTO {
   id: string;
   name: string;
+  avatar?: string;
 }
 
 export interface DescriptionDTO {

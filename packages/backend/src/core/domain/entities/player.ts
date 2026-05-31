@@ -7,6 +7,7 @@ export class Player {
     private id: PlayerId,
     private gameId: string,
     private name: string,
+    private avatar: string = "avatar-001",
   ) {}
 
   getId(): PlayerId {
@@ -19,6 +20,10 @@ export class Player {
 
   getGameId(): string {
     return this.gameId;
+  }
+
+  getAvatar(): string {
+    return this.avatar;
   }
 
   isTheImpostor(): boolean {

@@ -25,6 +25,7 @@ export interface PlayerJoinedEvent {
   gameId: string;
   playerId: string;
   playerName: string;
+  avatar?: string;
 }
 
 export interface GameStartedEvent {
@@ -35,6 +36,7 @@ export interface GameStartedEvent {
   players: Array<{
     id: string;
     name: string;
+    avatar?: string;
   }>;
   word?: string;
 }
@@ -47,6 +49,7 @@ export interface JoinRequestEvent {
   gameId: string;
   requestId: string;
   playerName: string;
+  avatar?: string;
 }
 
 export interface JoinApprovedEvent {

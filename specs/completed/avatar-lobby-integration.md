@@ -26,10 +26,10 @@
 
 ## Update Game Client Service
 
-- **File**: `packages/frontend/src/shared/services/game-client.service.ts`
-- Update `requestJoin()` signature to accept avatar parameter
-- Include avatar in emitted socket event data
-- Update `rejoinGame()` if needed to handle avatar
+- **File**: `packages/frontend/src/features/game/services/game-client.service.ts`
+- Add method or update existing to pass avatar when joining game
+- Check actual socket emit method names (likely uses SOCKET_EVENTS constants)
+- Ensure avatar flows through to backend via socket event
 
 ## Verification
 

@@ -75,10 +75,10 @@ Players need avatar selection during lobby (before game starts). 8 humanoid anim
 
 #### 4.1 Update socket event handlers
 
-- **File**: `packages/frontend/src/shared/services/game-client.service.ts`
-- Pass avatar in `requestJoin` event
-- Handle avatar in `JOIN_GAME_SUCCESS` listener
-- Update `REJOIN_SUCCESS` to handle avatar
+- **File**: `packages/frontend/src/features/game/services/game-client.service.ts`
+- Pass avatar in `joinGame` event (check socket-events constants)
+- Handle avatar in game state listener
+- Update event handlers to pass avatar through
 
 #### 4.2 Update backend socket handlers
 
@@ -169,7 +169,8 @@ Players need avatar selection during lobby (before game starts). 8 humanoid anim
 
 - `packages/frontend/src/features/lobby/stores/lobby.store.ts`
 - `packages/frontend/src/features/game/stores/game.store.ts`
-- `packages/frontend/src/shared/services/game-client.service.ts`
+- `packages/frontend/src/features/game/services/game-client.service.ts`
+- `packages/frontend/src/shared/utils/socket-events.js` (add avatar event constant if needed)
 
 ## Avatar Configuration
 

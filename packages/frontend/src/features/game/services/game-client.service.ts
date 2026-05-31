@@ -70,6 +70,7 @@ export class GameClientService {
       this.gameStore.addPlayer({
         id: data.playerId,
         name: data.playerName,
+        avatar: data.avatar,
       });
     });
 
@@ -197,8 +198,8 @@ export class GameClientService {
     this.socket.emit("guessWord", { gameId, guess });
   }
 
-  requestJoin(gameId: string, playerName: string): void {
-    this.socket.emit("requestJoin", { gameId, playerName });
+  requestJoin(gameId: string, playerName: string, avatar?: string): void {
+    this.socket.emit("requestJoin", { gameId, playerName, avatar });
   }
 
   rejoinGame(gameId: string, playerId: string): void {

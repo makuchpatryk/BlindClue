@@ -14,8 +14,9 @@
     <div class="mt-4">
       <h3 class="font-semibold mb-2 text-gray-300">Players:</h3>
       <ul class="space-y-2">
-        <li v-for="p in gameStore.players" :key="p.id" class="text-gray-400">
-          [{{ p.id.slice(0, 4).toUpperCase() }}] {{ p.name }}
+        <li v-for="p in gameStore.players" :key="p.id" class="text-gray-400 flex items-center gap-2">
+          <AvatarBadge :avatar="p.avatar" size="small" />
+          <span>[{{ p.id.slice(0, 4).toUpperCase() }}] {{ p.name }}</span>
         </li>
       </ul>
     </div>
@@ -31,6 +32,7 @@ import { useGameFacade } from "../../composables/use-game-facade.js";
 import { MIN_PLAYERS } from "@/shared/utils/constants.js";
 import Button from "@/shared/components/button.vue";
 import Heading from "@/shared/components/heading.vue";
+import AvatarBadge from "@/shared/components/avatar-badge.vue";
 
 const { gameStore } = useGameFacade();
 

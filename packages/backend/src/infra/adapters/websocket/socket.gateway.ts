@@ -21,8 +21,9 @@ export class SocketGateway {
     gameId: string,
     playerId: string,
     playerName: string,
+    avatar?: string,
   ): void {
-    const event: PlayerJoinedEvent = { gameId, playerId, playerName };
+    const event: PlayerJoinedEvent = { gameId, playerId, playerName, avatar };
     this.io.to(gameId).emit("PlayerJoined", event);
   }
 

@@ -9,6 +9,7 @@ export interface JoinRequestEvent {
   gameId: string;
   requestId: string;
   playerName: string;
+  avatar?: string;
 }
 
 export interface SocketGateway {
@@ -17,12 +18,13 @@ export interface SocketGateway {
     gameId: string,
     playerId: string,
     playerName: string,
+    avatar?: string,
   ): void;
   broadcastGameStarted(
     gameId: string,
     category: string,
     impostorId: string,
-    players: Array<{ id: string; name: string }>,
+    players: Array<{ id: string; name: string; avatar?: string }>,
     numberOfRounds?: number,
     word?: string,
   ): void;
@@ -33,7 +35,7 @@ export interface SocketGateway {
     gameId: string,
     category: string,
     impostorId: string,
-    players: Array<{ id: string; name: string }>,
+    players: Array<{ id: string; name: string; avatar?: string }>,
     numberOfRounds?: number,
     word?: string,
   ): void;
@@ -82,16 +84,19 @@ export class GameOrchestrator {
   async joinGame(
     gameId: string,
     playerName: string,
+    avatar?: string,
   ): Promise<Result<string, ResultError>> {
     const result = await this.gameApplicationService.joinGame(
       gameId,
       playerName,
+      avatar,
     );
     if (result.ok) {
       this.socketGateway.broadcastPlayerJoined(
         gameId,
         result.value,
         playerName,
+        avatar,
       );
     }
     return result;
@@ -114,7 +119,7 @@ export class GameOrchestrator {
         }
         const players = game
           .getPlayers()
-          .map((p) => ({ id: p.getId().value, name: p.getName() }));
+          .map((p) => ({ id: p.getId().value, name: p.getName(), avatar: p.getAvatar() }));
         this.socketGateway.broadcastGameStarted(
           gameId,
           game.getCategoryName(),
@@ -261,7 +266,7 @@ export class GameOrchestrator {
 
     const players = game
       .getPlayers()
-      .map((p) => ({ id: p.getId().value, name: p.getName() }));
+      .map((p) => ({ id: p.getId().value, name: p.getName(), avatar: p.getAvatar() }));
     this.socketGateway.broadcastGameRestarted(
       gameId,
       game.getCategoryName(),

@@ -5,6 +5,7 @@ interface PeerConnection {
   pc: RTCPeerConnection;
   stream?: MediaStream;
   analyzer?: AudioAnalyzer;
+  audioElement?: HTMLAudioElement;
 }
 
 interface VoiceState {
@@ -120,8 +121,17 @@ export class VoiceService {
         }
         peer.stream.addTrack(event.track);
 
-        if (this.audioContext && event.track.kind === "audio") {
-          if (!peer.analyzer) {
+        if (event.track.kind === "audio") {
+          if (!peer.audioElement) {
+            peer.audioElement = document.createElement("audio");
+            peer.audioElement.srcObject = peer.stream;
+            peer.audioElement.autoplay = true;
+            peer.audioElement.play().catch((err) => {
+              console.warn("Failed to autoplay audio for peer:", err);
+            });
+          }
+
+          if (this.audioContext && !peer.analyzer) {
             peer.analyzer = new AudioAnalyzer(peer.stream, this.audioContext);
             peer.analyzer.onLevelChange((level) => {
               this.audioLevels.set(peerId, level);
@@ -246,6 +256,13 @@ export class VoiceService {
   private closePeerConnection(peerId: string): void {
     const peer = this.state.peers.get(peerId);
     if (peer) {
+      if (peer.analyzer) {
+        peer.analyzer.stop();
+      }
+      if (peer.audioElement) {
+        peer.audioElement.pause();
+        peer.audioElement.srcObject = null;
+      }
       peer.pc.close();
       this.state.peers.delete(peerId);
       this.peerConnectionStates.delete(peerId);

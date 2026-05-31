@@ -20,11 +20,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref } from "vue";
+import { computed, onMounted, onUnmounted, provide, ref, watch } from "vue";
 import { useGameFacade } from "../composables/use-game-facade.js";
 import { useLobbyStore } from "@/features/lobby/stores/lobby.store.js";
 import { getSocket } from "@/shared/utils/socket.js";
 import { GameClientService } from "@/features/game/services/game-client.service.js";
+import { VoiceService } from "@/features/game/services/voice.service.js";
 import { GameStatus } from "@/shared/utils/game-status.js";
 import { JoinStatus } from "@/shared/types/game.js";
 import {
@@ -53,7 +54,9 @@ const lobbyStore = useLobbyStore();
 
 const socket = getSocket();
 const gameClientService = GameClientService.getInstance(socket, gameStore);
+const voiceService = VoiceService.getInstance(socket);
 provide("gameClientService", gameClientService);
+provide("voiceService", voiceService);
 
 interface PhaseConfig {
   component: any;
@@ -183,6 +186,31 @@ function playAgain() {
   gameClientService.restartGame(props.gameId);
 }
 
+async function initializeVoice() {
+  try {
+    await voiceService.initializeAudio(props.gameId, gameStore.myPlayerId);
+    const otherPlayers = gameStore.players.filter(
+      (p) => p.id !== gameStore.myPlayerId,
+    );
+    for (const player of otherPlayers) {
+      await voiceService.createOffer(props.gameId, player.id);
+    }
+  } catch (err) {
+    console.error("Failed to initialize voice:", err);
+  }
+}
+
+watch(
+  () => gameStore.status,
+  async (newStatus) => {
+    if (newStatus === GameStatus.RUNNING) {
+      await initializeVoice();
+    } else if (newStatus === GameStatus.ENDED) {
+      voiceService.cleanup();
+    }
+  },
+);
+
 onMounted(async () => {
   gameStore.gameId = props.gameId;
 
@@ -198,7 +226,15 @@ onMounted(async () => {
   const playerName = lobbyStore.playerName;
   if (playerName.trim()) {
     gameStore.setJoinStatus(JoinStatus.PENDING);
-    gameClientService.requestJoin(props.gameId, playerName, lobbyStore.playerAvatar);
+    gameClientService.requestJoin(
+      props.gameId,
+      playerName,
+      lobbyStore.playerAvatar,
+    );
   }
+});
+
+onUnmounted(() => {
+  voiceService.cleanup();
 });
 </script>

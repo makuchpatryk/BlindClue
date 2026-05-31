@@ -7,6 +7,9 @@ import {
   GameStartedEvent,
   GameCreatedEvent,
   JoinRequestEvent,
+  VoiceOfferEvent,
+  VoiceAnswerEvent,
+  VoiceIceCandidateEvent,
 } from "./events.js";
 
 export class SocketGateway {
@@ -158,5 +161,17 @@ export class SocketGateway {
     word: string,
   ): void {
     this.io.to(gameId).emit("GuessResult", { gameId, guess, isCorrect, word });
+  }
+
+  broadcastVoiceOffer(event: VoiceOfferEvent): void {
+    this.io.to(event.gameId).emit("VoiceOffer", event);
+  }
+
+  broadcastVoiceAnswer(event: VoiceAnswerEvent): void {
+    this.io.to(event.gameId).emit("VoiceAnswer", event);
+  }
+
+  broadcastVoiceIceCandidate(event: VoiceIceCandidateEvent): void {
+    this.io.to(event.gameId).emit("VoiceIceCandidate", event);
   }
 }

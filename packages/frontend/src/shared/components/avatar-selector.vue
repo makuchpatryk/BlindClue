@@ -29,7 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { AVATAR_STYLES, getAvatarUrl, type AvatarStyle } from "@/shared/utils/avatar-config.js";
+import {
+  AVATAR_STYLES,
+  getAvatarUrl,
+  type AvatarStyle,
+} from "@/shared/utils/avatar-config.js";
 
 defineProps<{
   modelValue?: string;

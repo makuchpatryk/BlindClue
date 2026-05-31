@@ -7,7 +7,9 @@
     />
     <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
       <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-300 mb-2">Your Name</label>
+        <label class="block text-sm font-medium text-gray-300 mb-2"
+          >Your Name</label
+        >
         <Input
           v-model="playerName"
           type="text"

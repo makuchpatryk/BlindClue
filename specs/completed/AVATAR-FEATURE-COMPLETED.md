@@ -7,6 +7,7 @@ Implementation date: 2026-05-31
 Full avatar feature implemented across backend and frontend with 5 phases:
 
 ### Phase 1: Backend Data Layer ✅
+
 - Player entity: added avatar field (default: "avatar-001")
 - DTOs: PlayerDTO includes avatar
 - Application service: accepts avatar in joinGame()
@@ -15,17 +16,20 @@ Full avatar feature implemented across backend and frontend with 5 phases:
 - Event types: updated for avatar support
 
 ### Phase 2: Frontend Types & Stores ✅
+
 - PlayerDTO interface: added avatar field
 - Game store: handles avatar in player data
 - Lobby store: tracks playerAvatar with persistent storage
 
 ### Phase 3: UI Components ✅
+
 - avatar-config.ts: 8 avatar styles, DiceBear URL generation
 - avatar-selector.vue: grid selector (removed - now modal only)
 - avatar-selector-modal.vue: modal dialog for selection
 - avatar-badge.vue: circular avatar display (small/medium/large)
 
 ### Phase 4: Form Integration ✅
+
 - lobby-waiting-room.vue: avatar button next to name input
 - Modal opens on button click
 - Avatar selection persists to store
@@ -33,6 +37,7 @@ Full avatar feature implemented across backend and frontend with 5 phases:
 - game-client.service.ts: requestJoin includes avatar
 
 ### Phase 5: Display Avatars ✅
+
 - Running phase: avatar next to player name (top + turn indicator)
 - Lobby phase: avatars in player list
 - Player selection list: avatars in voting buttons
@@ -43,6 +48,7 @@ Full avatar feature implemented across backend and frontend with 5 phases:
 ## Files Modified
 
 **Backend:**
+
 - player.ts
 - game-state.dto.ts
 - game.application-service.ts
@@ -52,6 +58,7 @@ Full avatar feature implemented across backend and frontend with 5 phases:
 - socket.gateway.ts
 
 **Frontend:**
+
 - avatar-config.ts (new)
 - avatar-selector-modal.vue (new)
 - avatar-badge.vue (new)

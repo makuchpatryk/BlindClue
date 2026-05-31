@@ -107,12 +107,18 @@
                   </span>
                 </span>
               </div>
-              <VoiceStatusIndicator
-                :display-name="p.name"
-                :connection-state="
-                  p.id === gameStore.myPlayerId ? 'local' : peerStates[p.id]
-                "
-              />
+              <div class="flex items-center gap-2">
+                <AudioLevelMeter
+                  v-if="p.id !== gameStore.myPlayerId"
+                  :level="audioLevels[p.id] ?? 0"
+                />
+                <VoiceStatusIndicator
+                  :display-name="p.name"
+                  :connection-state="
+                    p.id === gameStore.myPlayerId ? 'local' : peerStates[p.id]
+                  "
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -141,6 +147,7 @@ import Input from "@/shared/components/input.vue";
 import Alert from "@/shared/components/alert.vue";
 import AvatarBadge from "@/shared/components/avatar-badge.vue";
 import VoiceStatusIndicator from "@/shared/components/voice-status-indicator.vue";
+import AudioLevelMeter from "@/shared/components/audio-level-meter.vue";
 import PlayerSelectionList from "../player-selection-list.vue";
 
 const { gameStore } = useGameFacade();
@@ -148,7 +155,9 @@ const voiceService = inject<VoiceService>("voiceService");
 const playerWordInput = ref<string>("");
 const voiceState = reactive({ isMuted: false });
 const peerStates = reactive<Record<string, RTCPeerConnectionState>>({});
+const audioLevels = reactive<Record<string, number>>({});
 let unsubscribeVoice: (() => void) | null = null;
+const audioLevelUnsubscribers: Map<string, () => void> = new Map();
 
 const emit = defineEmits<{
   nextPerson: [word: string];
@@ -208,6 +217,14 @@ function updatePeerStates(): void {
       if (state) {
         peerStates[player.id] = state;
       }
+
+      const unsubscriber = audioLevelUnsubscribers.get(player.id);
+      if (!unsubscriber && voiceService) {
+        const unsub = voiceService.onAudioLevelChange(player.id, (level) => {
+          audioLevels[player.id] = level;
+        });
+        audioLevelUnsubscribers.set(player.id, unsub);
+      }
     }
   }
 }
@@ -224,5 +241,7 @@ onUnmounted(() => {
   if (unsubscribeVoice) {
     unsubscribeVoice();
   }
+  audioLevelUnsubscribers.forEach((unsub) => unsub());
+  audioLevelUnsubscribers.clear();
 });
 </script>

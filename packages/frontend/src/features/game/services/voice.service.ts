@@ -1,8 +1,10 @@
 import { Socket } from "socket.io-client";
+import { AudioAnalyzer } from "./audio-analyzer.js";
 
 interface PeerConnection {
   pc: RTCPeerConnection;
   stream?: MediaStream;
+  analyzer?: AudioAnalyzer;
 }
 
 interface VoiceState {
@@ -20,6 +22,9 @@ export class VoiceService {
 
   private peerConnectionStates: Map<string, RTCPeerConnectionState> = new Map();
   private listeners: Set<() => void> = new Set();
+  private audioContext: AudioContext | null = null;
+  private audioLevels: Map<string, number> = new Map();
+  private levelListeners: Map<string, Set<(level: number) => void>> = new Map();
 
   private constructor(private socket: Socket) {
     this.setupSocketListeners();
@@ -65,6 +70,12 @@ export class VoiceService {
 
   async initializeAudio(gameId: string, playerId: string): Promise<void> {
     try {
+      if (!this.audioContext) {
+        this.audioContext = new (
+          window.AudioContext || (window as any).webkitAudioContext
+        )();
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
@@ -108,6 +119,20 @@ export class VoiceService {
           peer.stream = new MediaStream();
         }
         peer.stream.addTrack(event.track);
+
+        if (this.audioContext && event.track.kind === "audio") {
+          if (!peer.analyzer) {
+            peer.analyzer = new AudioAnalyzer(peer.stream, this.audioContext);
+            peer.analyzer.onLevelChange((level) => {
+              this.audioLevels.set(peerId, level);
+              const listeners = this.levelListeners.get(peerId);
+              if (listeners) {
+                listeners.forEach((listener) => listener(level));
+              }
+            });
+            peer.analyzer.start();
+          }
+        }
       }
     };
 
@@ -192,6 +217,23 @@ export class VoiceService {
     return this.peerConnectionStates.get(peerId);
   }
 
+  getAudioLevel(peerId: string): number {
+    return this.audioLevels.get(peerId) ?? 0;
+  }
+
+  onAudioLevelChange(
+    peerId: string,
+    callback: (level: number) => void,
+  ): () => void {
+    if (!this.levelListeners.has(peerId)) {
+      this.levelListeners.set(peerId, new Set());
+    }
+    this.levelListeners.get(peerId)!.add(callback);
+    return () => {
+      this.levelListeners.get(peerId)?.delete(callback);
+    };
+  }
+
   onStateChange(callback: () => void): () => void {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
@@ -218,13 +260,23 @@ export class VoiceService {
     }
 
     this.state.peers.forEach((peer) => {
+      if (peer.analyzer) {
+        peer.analyzer.stop();
+      }
       peer.pc.close();
     });
 
     this.state.peers.clear();
     this.peerConnectionStates.clear();
+    this.audioLevels.clear();
+    this.levelListeners.clear();
     this.listeners.clear();
     this.state.localStream = undefined;
     this.state.isMuted = false;
+
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
   }
 }

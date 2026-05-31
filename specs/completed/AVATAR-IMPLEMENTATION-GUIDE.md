@@ -5,6 +5,7 @@
 ## File Paths (Verified)
 
 ### Backend
+
 ```
 packages/backend/src/
   ├── core/domain/entities/
@@ -19,6 +20,7 @@ packages/backend/src/
 ```
 
 ### Frontend
+
 ```
 packages/frontend/src/
   ├── shared/
@@ -58,32 +60,35 @@ packages/frontend/src/
 **Location**: `packages/frontend/src/shared/utils/socket-events.ts`
 
 Existing events to use:
+
 ```typescript
 SOCKET_EVENTS = {
-  PLAYER_JOINED: "PlayerJoined",          // Broadcast when player joins
-  JOIN_GAME_SUCCESS: "joinGameSuccess",    // Server response to join
-  GAME_STARTED: "GameStarted",             // Game starts (includes players)
-  GAME_RESTARTED: "GameRestarted",         // Game restarts (includes players)
-  REJOIN_SUCCESS: "rejoinSuccess",         // Rejoin response (includes players)
-}
+  PLAYER_JOINED: "PlayerJoined", // Broadcast when player joins
+  JOIN_GAME_SUCCESS: "joinGameSuccess", // Server response to join
+  GAME_STARTED: "GameStarted", // Game starts (includes players)
+  GAME_RESTARTED: "GameRestarted", // Game restarts (includes players)
+  REJOIN_SUCCESS: "rejoinSuccess", // Rejoin response (includes players)
+};
 ```
 
 **Client Emits** (update these to include avatar):
+
 ```typescript
 socket.emit("requestJoin", {
   gameId: string,
   playerName: string,
-  avatar: string  // ← ADD THIS
+  avatar: string, // ← ADD THIS
 });
 
 socket.emit("rejoinGame", {
   gameId: string,
   playerId: string,
-  avatar: string  // ← ADD THIS (if rejoin allows avatar change)
+  avatar: string, // ← ADD THIS (if rejoin allows avatar change)
 });
 ```
 
 **Backend Handler** (`packages/backend/src/infra/adapters/websocket/game-event.handler.ts`):
+
 - Extract `data.avatar` from "requestJoin" event
 - Extract `data.avatar` from "rejoinGame" event (if applicable)
 - Pass avatar to orchestrator/application service
@@ -93,6 +98,7 @@ socket.emit("rejoinGame", {
 Format: `https://api.dicebear.com/9.x/{style}/svg?seed={avatarId}`
 
 Styles (pick one or rotate):
+
 - adventurer
 - avataaars
 - big-ears
@@ -107,6 +113,7 @@ Example: `https://api.dicebear.com/9.x/avataaars/svg?seed=avatar-001`
 ## Implementation Order (Phases)
 
 **Phase 1: Backend Data Layer** (1-2 hours)
+
 1. Add avatar field to Player entity
 2. Update PlayerDTO in game-state.dto.ts
 3. Update GameApplicationService.joinGame() signature
@@ -114,21 +121,25 @@ Example: `https://api.dicebear.com/9.x/avataaars/svg?seed=avatar-001`
 5. Update socket handler to extract avatar
 
 **Phase 2: Frontend Types & Stores** (1 hour)
+
 1. Add avatar to PlayerDTO interface
 2. Update game.store.ts to handle avatar
 3. Add playerAvatar to lobby.store.ts
 
 **Phase 3: UI Components** (1.5-2 hours)
+
 1. Create avatar-selector.vue component
 2. Create avatar-badge.vue component
 3. Create avatar-config.ts utility
 
 **Phase 4: Form Integration** (1-1.5 hours)
+
 1. Update join-game-form.vue
 2. Update create-game-form.vue
 3. Update game-client.service.ts to pass avatar
 
 **Phase 5: Display Avatars Everywhere** (2-3 hours)
+
 1. Update game-view.vue (player list, turn indicator, vote results)
 2. Update round-phase.vue
 3. Update player-selection-list.vue

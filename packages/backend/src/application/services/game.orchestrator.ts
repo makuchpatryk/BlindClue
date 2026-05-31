@@ -117,9 +117,11 @@ export class GameOrchestrator {
           }
           game.setWord(wordResult.value.getText());
         }
-        const players = game
-          .getPlayers()
-          .map((p) => ({ id: p.getId().value, name: p.getName(), avatar: p.getAvatar() }));
+        const players = game.getPlayers().map((p) => ({
+          id: p.getId().value,
+          name: p.getName(),
+          avatar: p.getAvatar(),
+        }));
         this.socketGateway.broadcastGameStarted(
           gameId,
           game.getCategoryName(),
@@ -264,9 +266,11 @@ export class GameOrchestrator {
     }
     game.setWord(newWord.getText());
 
-    const players = game
-      .getPlayers()
-      .map((p) => ({ id: p.getId().value, name: p.getName(), avatar: p.getAvatar() }));
+    const players = game.getPlayers().map((p) => ({
+      id: p.getId().value,
+      name: p.getName(),
+      avatar: p.getAvatar(),
+    }));
     this.socketGateway.broadcastGameRestarted(
       gameId,
       game.getCategoryName(),

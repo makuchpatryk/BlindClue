@@ -7,14 +7,26 @@
     <Card>
       <div class="text-center">
         <div class="mb-6">
-          <div class="flex items-center gap-2 mb-2">
-            <AvatarBadge :avatar="getMyAvatar()" size="small" />
-            <p class="text-sm font-semibold text-gray-400">
-              {{ myPlayerName }} • GAME #{{ roundNumber }} • ROUND
-              {{ currentRound }}/{{ numberOfRounds }}
-            </p>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <AvatarBadge :avatar="getMyAvatar()" size="small" />
+              <p class="text-sm font-semibold text-gray-400">
+                {{ myPlayerName }} • GAME #{{ roundNumber }} • ROUND
+                {{ currentRound }}/{{ numberOfRounds }}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              :variant="voiceState.isMuted ? 'danger' : 'secondary'"
+              @click="toggleMute"
+            >
+              {{ voiceState.isMuted ? "🔇 Muted" : "🔊 Unmuted" }}
+            </Button>
           </div>
-          <Heading :level="2" class="mb-4 flex items-center justify-center gap-2">
+          <Heading
+            :level="2"
+            class="mb-4 flex items-center justify-center gap-2"
+          >
             <AvatarBadge :avatar="currentPlayer?.avatar" size="medium" />
             It's {{ currentPlayer?.name }}'s turn
           </Heading>
@@ -76,20 +88,31 @@
           </Button>
         </div>
 
-        <div
-          v-if="playerWords.size > 0"
-          class="bg-gray-600 rounded-lg p-4 mt-6"
-        >
-          <h3 class="text-gray-300 font-semibold mb-3">Words Submitted:</h3>
+        <div class="bg-gray-600 rounded-lg p-4 mt-6">
+          <h3 class="text-gray-300 font-semibold mb-3">
+            Players & Voice Status:
+          </h3>
           <div class="space-y-2">
-            <div v-for="p in players" :key="p.id" class="flex items-center gap-2">
-              <AvatarBadge :avatar="p.avatar" size="small" />
-              <span v-if="hasPlayerWord(p.id)" class="text-gray-200">
-                <span class="font-semibold">{{ p.name }}:</span>
-                <span class="text-gray-300 ml-2">{{
-                  playerWords.get(p.id)?.join(", ")
-                }}</span>
-              </span>
+            <div
+              v-for="p in players"
+              :key="p.id"
+              class="flex items-center justify-between gap-2"
+            >
+              <div class="flex items-center gap-2 flex-1">
+                <AvatarBadge :avatar="p.avatar" size="small" />
+                <span class="text-gray-200">
+                  <span class="font-semibold">{{ p.name }}</span>
+                  <span v-if="hasPlayerWord(p.id)" class="text-gray-300 ml-2">
+                    {{ playerWords.get(p.id)?.join(", ") }}
+                  </span>
+                </span>
+              </div>
+              <VoiceStatusIndicator
+                :display-name="p.name"
+                :connection-state="
+                  p.id === gameStore.myPlayerId ? 'local' : peerStates[p.id]
+                "
+              />
             </div>
           </div>
         </div>
@@ -99,8 +122,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import {
+  computed,
+  ref,
+  inject,
+  reactive,
+  watch,
+  onMounted,
+  onUnmounted,
+} from "vue";
 import { useGameFacade } from "../../composables/use-game-facade.js";
+import { VoiceService } from "../../services/voice.service.js";
 import Button from "@/shared/components/button.vue";
 import Card from "@/shared/components/card.vue";
 import Heading from "@/shared/components/heading.vue";
@@ -108,10 +140,15 @@ import FormField from "@/shared/components/form-field.vue";
 import Input from "@/shared/components/input.vue";
 import Alert from "@/shared/components/alert.vue";
 import AvatarBadge from "@/shared/components/avatar-badge.vue";
+import VoiceStatusIndicator from "@/shared/components/voice-status-indicator.vue";
 import PlayerSelectionList from "../player-selection-list.vue";
 
 const { gameStore } = useGameFacade();
+const voiceService = inject<VoiceService>("voiceService");
 const playerWordInput = ref<string>("");
+const voiceState = reactive({ isMuted: false });
+const peerStates = reactive<Record<string, RTCPeerConnectionState>>({});
+let unsubscribeVoice: (() => void) | null = null;
 
 const emit = defineEmits<{
   nextPerson: [word: string];
@@ -151,6 +188,41 @@ function handleShowImpostor() {
 }
 
 function getMyAvatar(): string | undefined {
-  return players.value.find(p => p.id === gameStore.myPlayerId)?.avatar;
+  return players.value.find((p) => p.id === gameStore.myPlayerId)?.avatar;
 }
+
+function toggleMute(): void {
+  if (voiceService) {
+    voiceService.toggleMute();
+    voiceState.isMuted = voiceService.isMuted();
+  }
+}
+
+function updatePeerStates(): void {
+  if (voiceService) {
+    const otherPlayers = gameStore.players.filter(
+      (p) => p.id !== gameStore.myPlayerId,
+    );
+    for (const player of otherPlayers) {
+      const state = voiceService.getPeerConnectionState(player.id);
+      if (state) {
+        peerStates[player.id] = state;
+      }
+    }
+  }
+}
+
+onMounted(() => {
+  if (voiceService) {
+    unsubscribeVoice = voiceService.onStateChange(() => {
+      updatePeerStates();
+    });
+  }
+});
+
+onUnmounted(() => {
+  if (unsubscribeVoice) {
+    unsubscribeVoice();
+  }
+});
 </script>

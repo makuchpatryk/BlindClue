@@ -372,6 +372,51 @@ export class GameEventHandler {
       }
     });
 
+    socket.on(
+      "voiceOffer",
+      (data: {
+        gameId: string;
+        fromPlayerId: string;
+        offer: RTCSessionDescriptionInit;
+      }) => {
+        this.socketGateway.broadcastVoiceOffer({
+          gameId: data.gameId,
+          fromPlayerId: data.fromPlayerId,
+          offer: data.offer,
+        });
+      },
+    );
+
+    socket.on(
+      "voiceAnswer",
+      (data: {
+        gameId: string;
+        fromPlayerId: string;
+        answer: RTCSessionDescriptionInit;
+      }) => {
+        this.socketGateway.broadcastVoiceAnswer({
+          gameId: data.gameId,
+          fromPlayerId: data.fromPlayerId,
+          answer: data.answer,
+        });
+      },
+    );
+
+    socket.on(
+      "voiceIceCandidate",
+      (data: {
+        gameId: string;
+        fromPlayerId: string;
+        candidate: RTCIceCandidateInit;
+      }) => {
+        this.socketGateway.broadcastVoiceIceCandidate({
+          gameId: data.gameId,
+          fromPlayerId: data.fromPlayerId,
+          candidate: data.candidate,
+        });
+      },
+    );
+
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
       const socketPlayer = this.socketToPlayer.get(socket.id);

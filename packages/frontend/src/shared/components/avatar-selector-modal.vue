@@ -1,5 +1,8 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+  <div
+    v-if="show"
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+  >
     <Card class="max-w-2xl w-full mx-4">
       <template #header>
         <Heading :level="2">Choose Your Avatar</Heading>
@@ -31,7 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import { AVATAR_STYLES, getAvatarUrl, type AvatarStyle } from "@/shared/utils/avatar-config.js";
+import {
+  AVATAR_STYLES,
+  getAvatarUrl,
+  type AvatarStyle,
+} from "@/shared/utils/avatar-config.js";
 import Card from "./card.vue";
 import Heading from "./heading.vue";
 

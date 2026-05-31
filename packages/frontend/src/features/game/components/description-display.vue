@@ -41,6 +41,6 @@ const roundDescriptions = computed(() => {
 const players = computed(() => gameStore.players);
 
 function getPlayerAvatar(playerId: string): string | undefined {
-  return players.value.find(p => p.id === playerId)?.avatar;
+  return players.value.find((p) => p.id === playerId)?.avatar;
 }
 </script>

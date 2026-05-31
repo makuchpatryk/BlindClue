@@ -63,7 +63,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should render impostor guessing form when isImpostor is true", () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
       ...mountOptions,
     });
@@ -72,7 +73,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should render waiting message when isImpostor is false", () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: false },
     });
 
@@ -80,7 +82,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should show input field for impostor", () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
     });
 
@@ -88,7 +91,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should not show input field when not impostor", () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: false },
     });
 
@@ -96,7 +100,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should disable submit button when input is empty", () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
     });
 
@@ -107,7 +112,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should enable submit button when input has value", async () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
     });
 
@@ -121,7 +127,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should show success alert after guess submitted", async () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
     });
 
@@ -136,7 +143,8 @@ describe("GuessingPhase", () => {
   });
 
   it("should handle empty guess submission", async () => {
-    const wrapper = mount(GuessingPhase, { ...mountOptions, 
+    const wrapper = mount(GuessingPhase, {
+      ...mountOptions,
       props: { isImpostor: true },
     });
 

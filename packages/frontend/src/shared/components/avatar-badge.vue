@@ -6,7 +6,10 @@
       :alt="avatar"
       class="w-full h-full rounded-full object-cover"
     />
-    <div v-else class="w-full h-full rounded-full bg-gray-600 flex items-center justify-center">
+    <div
+      v-else
+      class="w-full h-full rounded-full bg-gray-600 flex items-center justify-center"
+    >
       <span class="text-xs font-semibold text-white">?</span>
     </div>
   </div>

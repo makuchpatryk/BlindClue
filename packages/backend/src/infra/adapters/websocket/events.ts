@@ -59,3 +59,21 @@ export interface JoinApprovedEvent {
 export interface JoinRejectedEvent {
   reason: string;
 }
+
+export interface VoiceOfferEvent {
+  gameId: string;
+  fromPlayerId: string;
+  offer: RTCSessionDescriptionInit;
+}
+
+export interface VoiceAnswerEvent {
+  gameId: string;
+  fromPlayerId: string;
+  answer: RTCSessionDescriptionInit;
+}
+
+export interface VoiceIceCandidateEvent {
+  gameId: string;
+  fromPlayerId: string;
+  candidate: RTCIceCandidateInit;
+}

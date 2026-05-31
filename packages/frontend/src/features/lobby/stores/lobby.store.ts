@@ -8,7 +8,9 @@ const PLAYER_AVATAR_KEY = "impostor_playerAvatar";
 export const useLobbyStore = defineStore("lobby", () => {
   const storage = getStorageAdapter();
   const playerName = ref<string>(storage.getItem(PLAYER_NAME_KEY) || "");
-  const playerAvatar = ref<string>(storage.getItem(PLAYER_AVATAR_KEY) || "avatar-001");
+  const playerAvatar = ref<string>(
+    storage.getItem(PLAYER_AVATAR_KEY) || "avatar-001",
+  );
   const gameCode = ref<string>("");
   const numberOfRounds = ref<number>(3);
   const isCreatingGame = ref<boolean>(false);

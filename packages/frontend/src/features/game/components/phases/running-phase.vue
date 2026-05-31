@@ -19,6 +19,7 @@
               size="sm"
               :variant="voiceState.isMuted ? 'danger' : 'secondary'"
               @click="toggleMute"
+              title="Press K to toggle mute"
             >
               {{ voiceState.isMuted ? "🔇 Muted" : "🔊 Unmuted" }}
             </Button>
@@ -107,18 +108,7 @@
                   </span>
                 </span>
               </div>
-              <div class="flex items-center gap-2">
-                <AudioLevelMeter
-                  v-if="p.id !== gameStore.myPlayerId"
-                  :level="audioLevels[p.id] ?? 0"
-                />
-                <VoiceStatusIndicator
-                  :display-name="p.name"
-                  :connection-state="
-                    p.id === gameStore.myPlayerId ? 'local' : peerStates[p.id]
-                  "
-                />
-              </div>
+              <AudioLevelMeter :level="audioLevels[p.id] ?? 0" />
             </div>
           </div>
         </div>
@@ -146,7 +136,6 @@ import FormField from "@/shared/components/form-field.vue";
 import Input from "@/shared/components/input.vue";
 import Alert from "@/shared/components/alert.vue";
 import AvatarBadge from "@/shared/components/avatar-badge.vue";
-import VoiceStatusIndicator from "@/shared/components/voice-status-indicator.vue";
 import AudioLevelMeter from "@/shared/components/audio-level-meter.vue";
 import PlayerSelectionList from "../player-selection-list.vue";
 
@@ -154,10 +143,11 @@ const { gameStore } = useGameFacade();
 const voiceService = inject<VoiceService>("voiceService");
 const playerWordInput = ref<string>("");
 const voiceState = reactive({ isMuted: false });
-const peerStates = reactive<Record<string, RTCPeerConnectionState>>({});
 const audioLevels = reactive<Record<string, number>>({});
 let unsubscribeVoice: (() => void) | null = null;
 const audioLevelUnsubscribers: Map<string, () => void> = new Map();
+let unsubscribeLocalAudio: (() => void) | null = null;
+let handleKeyPress: ((event: KeyboardEvent) => void) | null = null;
 
 const emit = defineEmits<{
   nextPerson: [word: string];
@@ -209,21 +199,18 @@ function toggleMute(): void {
 
 function updatePeerStates(): void {
   if (voiceService) {
-    const otherPlayers = gameStore.players.filter(
-      (p) => p.id !== gameStore.myPlayerId,
-    );
-    for (const player of otherPlayers) {
-      const state = voiceService.getPeerConnectionState(player.id);
-      if (state) {
-        peerStates[player.id] = state;
-      }
-
-      const unsubscriber = audioLevelUnsubscribers.get(player.id);
-      if (!unsubscriber && voiceService) {
-        const unsub = voiceService.onAudioLevelChange(player.id, (level) => {
-          audioLevels[player.id] = level;
-        });
-        audioLevelUnsubscribers.set(player.id, unsub);
+    const allPlayers = gameStore.players;
+    for (const player of allPlayers) {
+      if (player.id === gameStore.myPlayerId) {
+        audioLevels[player.id] = voiceService.getLocalAudioLevel();
+      } else {
+        const unsubscriber = audioLevelUnsubscribers.get(player.id);
+        if (!unsubscriber && voiceService) {
+          const unsub = voiceService.onAudioLevelChange(player.id, (level) => {
+            audioLevels[player.id] = level;
+          });
+          audioLevelUnsubscribers.set(player.id, unsub);
+        }
       }
     }
   }
@@ -234,12 +221,30 @@ onMounted(() => {
     unsubscribeVoice = voiceService.onStateChange(() => {
       updatePeerStates();
     });
+    unsubscribeLocalAudio = voiceService.onLocalAudioLevelChange((level) => {
+      audioLevels[gameStore.myPlayerId] = level;
+    });
+    updatePeerStates();
   }
+
+  handleKeyPress = (event: KeyboardEvent) => {
+    if (event.key.toLowerCase() === "k") {
+      toggleMute();
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyPress);
 });
 
 onUnmounted(() => {
   if (unsubscribeVoice) {
     unsubscribeVoice();
+  }
+  if (unsubscribeLocalAudio) {
+    unsubscribeLocalAudio();
+  }
+  if (handleKeyPress) {
+    window.removeEventListener("keydown", handleKeyPress);
   }
   audioLevelUnsubscribers.forEach((unsub) => unsub());
   audioLevelUnsubscribers.clear();

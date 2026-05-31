@@ -6,6 +6,7 @@ interface PeerConnection {
   stream?: MediaStream;
   analyzer?: AudioAnalyzer;
   audioElement?: HTMLAudioElement;
+  iceCandidateBuffer: RTCIceCandidateInit[];
 }
 
 interface VoiceState {
@@ -26,6 +27,9 @@ export class VoiceService {
   private audioContext: AudioContext | null = null;
   private audioLevels: Map<string, number> = new Map();
   private levelListeners: Map<string, Set<(level: number) => void>> = new Map();
+  private localAudioLevel: number = 0;
+  private localLevelListeners: Set<(level: number) => void> = new Set();
+  private localAnalyzer: AudioAnalyzer | null = null;
 
   private constructor(private socket: Socket) {
     this.setupSocketListeners();
@@ -46,24 +50,59 @@ export class VoiceService {
 
     this.socket.on("VoiceAnswer", async (data) => {
       const { fromPlayerId, answer } = data;
-      const pc = this.state.peers.get(fromPlayerId)?.pc;
-      if (pc && answer) {
-        await pc
-          .setRemoteDescription(new RTCSessionDescription(answer))
-          .catch((err) =>
-            console.error("Failed to set remote description:", err),
-          );
+      const peer = this.state.peers.get(fromPlayerId);
+      if (peer && answer) {
+        const pc = peer.pc;
+        console.log(
+          "Received voice answer from:",
+          fromPlayerId,
+          "Connection state:",
+          pc.signalingState,
+        );
+        try {
+          if (pc.signalingState === "have-local-offer") {
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            console.log("Remote description set for:", fromPlayerId);
+            await this.flushIceCandidates(fromPlayerId);
+          } else {
+            console.warn(
+              "Cannot set remote answer - wrong signaling state:",
+              pc.signalingState,
+            );
+          }
+        } catch (err) {
+          console.error("Failed to set remote description:", err);
+        }
       }
     });
 
     this.socket.on("VoiceIceCandidate", async (data) => {
       const { fromPlayerId, candidate } = data;
-      const pc = this.state.peers.get(fromPlayerId)?.pc;
-      if (pc && candidate) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (err) {
-          console.error("Failed to add ICE candidate:", err);
+      let peer = this.state.peers.get(fromPlayerId);
+      if (!peer) {
+        console.log("No peer connection for ICE candidate from:", fromPlayerId);
+        return;
+      }
+
+      if (!peer.iceCandidateBuffer) {
+        peer.iceCandidateBuffer = [];
+      }
+
+      if (candidate) {
+        if (peer.pc.remoteDescription) {
+          try {
+            await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
+            console.log("ICE candidate added for:", fromPlayerId);
+          } catch (err) {
+            console.error("Failed to add ICE candidate:", err);
+          }
+        } else {
+          console.log(
+            "Buffering ICE candidate for:",
+            fromPlayerId,
+            "- remote description not ready",
+          );
+          peer.iceCandidateBuffer.push(candidate);
         }
       }
     });
@@ -82,6 +121,22 @@ export class VoiceService {
         video: false,
       });
       this.state.localStream = stream;
+      console.log("Local audio stream obtained:", stream);
+
+      if (this.audioContext && !this.localAnalyzer) {
+        this.localAnalyzer = new AudioAnalyzer(stream, this.audioContext);
+        let logCounter = 0;
+        this.localAnalyzer.onLevelChange((level) => {
+          this.localAudioLevel = level;
+          logCounter++;
+          if (logCounter % 30 === 0) {
+            console.log("Local audio level:", level);
+          }
+          this.localLevelListeners.forEach((listener) => listener(level));
+        });
+        this.localAnalyzer.start();
+        console.log("Local audio analyzer started");
+      }
     } catch (err) {
       console.error("Failed to get user media:", err);
       throw err;
@@ -96,6 +151,13 @@ export class VoiceService {
       iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
     });
 
+    if (!this.state.peers.has(peerId)) {
+      this.state.peers.set(peerId, { pc, iceCandidateBuffer: [] });
+    } else {
+      const peer = this.state.peers.get(peerId)!;
+      peer.pc = pc;
+    }
+
     if (this.state.localStream) {
       this.state.localStream.getTracks().forEach((track) => {
         pc.addTrack(track, this.state.localStream!);
@@ -104,6 +166,7 @@ export class VoiceService {
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log("Sending ICE candidate to:", peerId);
         this.socket.emit("voiceIceCandidate", {
           gameId,
           fromPlayerId: peerId,
@@ -165,12 +228,13 @@ export class VoiceService {
     let pc = this.state.peers.get(peerId)?.pc;
     if (!pc) {
       pc = this.createPeerConnection(gameId, peerId);
-      this.state.peers.set(peerId, { pc });
+      console.log("Created peer connection for:", peerId);
     }
 
     try {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
+      console.log("Sending voice offer to peer:", peerId);
       this.socket.emit("voiceOffer", {
         gameId,
         fromPlayerId: peerId,
@@ -181,26 +245,71 @@ export class VoiceService {
     }
   }
 
+  private async flushIceCandidates(peerId: string): Promise<void> {
+    const peer = this.state.peers.get(peerId);
+    if (peer && peer.iceCandidateBuffer.length > 0) {
+      console.log(
+        "Flushing",
+        peer.iceCandidateBuffer.length,
+        "buffered ICE candidates for:",
+        peerId,
+      );
+      for (const candidate of peer.iceCandidateBuffer) {
+        try {
+          await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.error("Failed to add buffered ICE candidate:", err);
+        }
+      }
+      peer.iceCandidateBuffer = [];
+    }
+  }
+
   private async handleVoiceOffer(
     gameId: string,
     fromPlayerId: string,
     offer: RTCSessionDescriptionInit,
   ): Promise<void> {
+    console.log("Received voice offer from:", fromPlayerId);
     let pc = this.state.peers.get(fromPlayerId)?.pc;
+
+    if (pc && pc.signalingState === "have-local-offer") {
+      console.log("Offer collision detected with:", fromPlayerId);
+      console.log("Using existing local offer, ignoring remote offer");
+      return;
+    }
+
     if (!pc) {
       pc = this.createPeerConnection(gameId, fromPlayerId);
-      this.state.peers.set(fromPlayerId, { pc });
+      console.log("Created peer connection for offer from:", fromPlayerId);
+    } else {
+      console.log(
+        "Using existing peer connection for:",
+        fromPlayerId,
+        "state:",
+        pc.signalingState,
+      );
     }
 
     try {
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      this.socket.emit("voiceAnswer", {
-        gameId,
-        fromPlayerId: fromPlayerId,
-        answer: answer,
-      });
+      if (pc.signalingState === "stable") {
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        console.log("Remote offer description set for:", fromPlayerId);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        console.log("Sending voice answer to:", fromPlayerId);
+        this.socket.emit("voiceAnswer", {
+          gameId,
+          fromPlayerId: fromPlayerId,
+          answer: answer,
+        });
+        await this.flushIceCandidates(fromPlayerId);
+      } else {
+        console.warn(
+          "Cannot handle offer - peer connection not in stable state:",
+          pc.signalingState,
+        );
+      }
     } catch (err) {
       console.error("Failed to handle voice offer:", err);
     }
@@ -231,6 +340,10 @@ export class VoiceService {
     return this.audioLevels.get(peerId) ?? 0;
   }
 
+  getLocalAudioLevel(): number {
+    return this.localAudioLevel;
+  }
+
   onAudioLevelChange(
     peerId: string,
     callback: (level: number) => void,
@@ -242,6 +355,11 @@ export class VoiceService {
     return () => {
       this.levelListeners.get(peerId)?.delete(callback);
     };
+  }
+
+  onLocalAudioLevelChange(callback: (level: number) => void): () => void {
+    this.localLevelListeners.add(callback);
+    return () => this.localLevelListeners.delete(callback);
   }
 
   onStateChange(callback: () => void): () => void {
@@ -270,6 +388,11 @@ export class VoiceService {
   }
 
   cleanup(): void {
+    if (this.localAnalyzer) {
+      this.localAnalyzer.stop();
+      this.localAnalyzer = null;
+    }
+
     if (this.state.localStream) {
       this.state.localStream.getTracks().forEach((track) => {
         track.stop();
@@ -280,6 +403,10 @@ export class VoiceService {
       if (peer.analyzer) {
         peer.analyzer.stop();
       }
+      if (peer.audioElement) {
+        peer.audioElement.pause();
+        peer.audioElement.srcObject = null;
+      }
       peer.pc.close();
     });
 
@@ -287,9 +414,11 @@ export class VoiceService {
     this.peerConnectionStates.clear();
     this.audioLevels.clear();
     this.levelListeners.clear();
+    this.localLevelListeners.clear();
     this.listeners.clear();
     this.state.localStream = undefined;
     this.state.isMuted = false;
+    this.localAudioLevel = 0;
 
     if (this.audioContext) {
       this.audioContext.close();

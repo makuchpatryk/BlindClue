@@ -5,7 +5,9 @@ export class AudioAnalyzer {
   private animationFrameId: number | null = null;
 
   constructor(stream: MediaStream, audioContext: AudioContext) {
-    const source = (audioContext as any).createMediaStreamAudioSource(stream);
+    const source = audioContext.createMediaStreamSource
+      ? audioContext.createMediaStreamSource(stream)
+      : (audioContext as any).createMediaStreamAudioSource(stream);
     this.analyser = audioContext.createAnalyser();
     this.analyser.fftSize = 256;
     source.connect(this.analyser);

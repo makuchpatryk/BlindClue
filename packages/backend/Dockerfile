@@ -1,20 +1,17 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy root files
-COPY package.json package-lock.json ./
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
 COPY tsconfig.json ./
 COPY packages/backend ./packages/backend/
 
-# Install dependencies
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
-# Build
-RUN npm run build --workspace=@impostor/backend
+RUN pnpm -r run build --filter @impostor/backend
 
-# Expose port
 EXPOSE 3000
 
-# Start server
 CMD ["node", "packages/backend/dist/main.js"]

@@ -39,5 +39,4 @@ pids/
 .env.*.local
 
 # Database
-*.db
 *.sqlite3

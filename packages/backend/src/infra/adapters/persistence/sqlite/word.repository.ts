@@ -1,7 +1,7 @@
 import sqlite3 from "sqlite3";
-import { Word } from "@backend/core/domain/entities/word";
-import { IWordRepository } from "@backend/core/domain/ports/word.repository";
-import { Result, ResultError } from "@backend/application/utils/result";
+import { Word } from "../../../../core/domain/entities/word";
+import { IWordRepository } from "../../../../core/domain/ports/word.repository";
+import { Result, ResultError } from "../../../../application/utils/result";
 
 export class WordRepository implements IWordRepository {
   constructor(private db: sqlite3.Database) {}

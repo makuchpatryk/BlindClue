@@ -4,19 +4,17 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml ./
-COPY tsconfig.json ./
-COPY packages/frontend ./packages/frontend/
+COPY . .
 
-RUN pnpm install --frozen-lockfile
+RUN CI=true pnpm install
 
-RUN pnpm -r run build --filter @impostor/frontend
+RUN pnpm -r --filter @impostor/frontend run build
 
 FROM nginx:alpine
 
 COPY --from=builder /app/packages/frontend/dist /usr/share/nginx/html
 
-COPY packages/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

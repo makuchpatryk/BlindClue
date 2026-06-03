@@ -4,13 +4,11 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml ./
-COPY tsconfig.json ./
-COPY packages/backend ./packages/backend/
+COPY . .
 
-RUN pnpm install --frozen-lockfile
+RUN CI=true pnpm install
 
-RUN pnpm -r run build --filter @impostor/backend
+RUN pnpm -r --filter @impostor/backend run build
 
 EXPOSE 3000
 

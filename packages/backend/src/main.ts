@@ -16,7 +16,7 @@ const fastify = Fastify({ logger: true });
 
 // Enable CORS
 await fastify.register(cors, {
-  origin: "*",
+  origin: config.corsOrigin,
   credentials: true,
 });
 

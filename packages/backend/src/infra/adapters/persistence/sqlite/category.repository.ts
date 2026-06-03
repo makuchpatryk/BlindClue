@@ -2,8 +2,8 @@ import sqlite3 from "sqlite3";
 import {
   Category,
   ICategoryRepository,
-} from "@backend/core/domain/ports/category.repository";
-import { Result, ResultError } from "@backend/application/utils/result";
+} from "../../../../core/domain/ports/category.repository";
+import { Result, ResultError } from "../../../../application/utils/result";
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(private db: sqlite3.Database) {}

@@ -8,14 +8,27 @@ COPY . .
 
 RUN CI=true pnpm install
 
+ARG VITE_API_URL=http://localhost:3000
+ARG VITE_SOCKET_URL=http://localhost:3000
+
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_SOCKET_URL=${VITE_SOCKET_URL}
+
 RUN pnpm -r --filter @impostor/frontend run build
 
 FROM nginx:alpine
+
+RUN apk add --no-cache openssl
+
+RUN mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem \
+    -out /etc/nginx/ssl/cert.pem -days 365 -nodes \
+    -subj "/C=US/ST=State/L=City/O=Org/CN=localhost"
 
 COPY --from=builder /app/packages/frontend/dist /usr/share/nginx/html
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 80 443
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -11,10 +11,10 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       DATABASE_PATH: /app/data/impostor.db
-      CORS_ORIGIN: http://localhost:8080
+      CORS_ORIGIN: ${VITE_URL:-http://localhost}
     volumes:
       - impostor_data:/app/data
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -26,14 +26,17 @@ services:
     build:
       context: .
       dockerfile: packages/frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_URL:-}/api
+        VITE_SOCKET_URL: ${VITE_URL:-}/
     container_name: impostor-frontend
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     depends_on:
       backend:
         condition: service_healthy
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s

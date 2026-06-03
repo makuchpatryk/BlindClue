@@ -16,7 +16,7 @@ export async function registerRoutes(
 
   // Category routes
   fastify.post<{ Body: { name: string } }>(
-    "/admin/categories",
+    "/api/admin/categories",
     async (request, reply) => {
       const { name } = request.body;
       const result = await adminGameService.createCategory(name);
@@ -27,7 +27,7 @@ export async function registerRoutes(
     },
   );
 
-  fastify.get("/admin/categories", async () => {
+  fastify.get("/api/admin/categories", async () => {
     const result = await adminGameService.getCategories();
     if (result.ok) {
       return result.value;
@@ -36,7 +36,7 @@ export async function registerRoutes(
   });
 
   fastify.delete<{ Params: { id: string } }>(
-    "/admin/categories/:id",
+    "/api/admin/categories/:id",
     async (request, reply) => {
       const { id } = request.params;
       const result = await adminGameService.deleteCategory(id);
@@ -49,7 +49,7 @@ export async function registerRoutes(
 
   // Word routes
   fastify.post<{ Body: { categoryId: string; word: string } }>(
-    "/admin/words",
+    "/api/admin/words",
     async (request, reply) => {
       const { categoryId, word } = request.body;
       const result = await adminGameService.addWord(categoryId, word);
@@ -61,7 +61,7 @@ export async function registerRoutes(
   );
 
   fastify.delete<{ Params: { id: string } }>(
-    "/admin/words/:id",
+    "/api/admin/words/:id",
     async (request, reply) => {
       const { id } = request.params;
       const result = await adminGameService.deleteWord(id);
@@ -74,7 +74,7 @@ export async function registerRoutes(
 
   // Game routes
   fastify.post<{ Body: { numberOfRounds?: number } }>(
-    "/games",
+    "/api/games",
     async (request, reply) => {
       const { numberOfRounds = 3 } = request.body || {};
       const result = await gameOrchestrator.createGame(numberOfRounds);
@@ -86,7 +86,7 @@ export async function registerRoutes(
   );
 
   fastify.get<{ Params: { gameId: string } }>(
-    "/games/:gameId",
+    "/api/games/:gameId",
     async (request) => {
       const { gameId } = request.params;
       const result = gameApplicationService.getGameState(gameId);

@@ -12,8 +12,8 @@ A real-time multiplayer game where one player is the impostor who doesn't know t
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 22+
+- pnpm 11+
 
 ### Setup
 

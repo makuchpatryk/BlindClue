@@ -11,7 +11,7 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       DATABASE_PATH: /app/data/impostor.db
-      CORS_ORIGIN: ${VITE_URL:-http://localhost}
+      CORS_ORIGIN: ${VITE_URL:-https://blind-clue.xyz}
     volumes:
       - impostor_data:/app/data
     restart: always
@@ -27,18 +27,20 @@ services:
       context: .
       dockerfile: packages/frontend/Dockerfile
       args:
-        VITE_API_URL: ${VITE_URL:-}/api
-        VITE_SOCKET_URL: ${VITE_URL:-}/
+        VITE_API_URL: ${VITE_URL:-https://blind-clue.xyz}/api
+        VITE_SOCKET_URL: ${VITE_URL:-https://blind-clue.xyz}/
     container_name: impostor-frontend
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - /home/ubuntu/certs:/etc/nginx/ssl:ro
     depends_on:
       backend:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      test: ["CMD", "curl", "-f", "https://localhost", "--insecure"]
       interval: 30s
       timeout: 10s
       retries: 3

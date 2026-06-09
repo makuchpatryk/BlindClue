@@ -20,8 +20,11 @@ FROM nginx:alpine
 
 RUN apk add --no-cache openssl
 
-RUN mkdir -p /etc/nginx/ssl && \
-    openssl req -x509 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem \
+# Create SSL directory
+RUN mkdir -p /etc/nginx/ssl
+
+# Generate self-signed cert as fallback (for development)
+RUN openssl req -x509 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem \
     -out /etc/nginx/ssl/cert.pem -days 365 -nodes \
     -subj "/C=US/ST=State/L=City/O=Org/CN=localhost"
 

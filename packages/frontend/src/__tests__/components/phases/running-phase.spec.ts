@@ -163,8 +163,11 @@ describe("RunningPhase", () => {
     mockGameStore.myPlayerId = "p1";
 
     const wrapper = mount(RunningPhase, mountOptions);
-    const buttons = wrapper.findAll("button");
+    const buttons = wrapper.findAllComponents({ name: "Button" });
+    const nextPersonButton = buttons.find(
+      (btn) => btn.text().includes("Next Person") || btn.text().includes("Waiting"),
+    );
 
-    expect(buttons[0].attributes("disabled")).toBeDefined();
+    expect(nextPersonButton?.props("disabled")).toBe(true);
   });
 });

@@ -11,7 +11,7 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
       DATABASE_PATH: /app/data/impostor.db
-      CORS_ORIGIN: ${VITE_URL:-https://blind-clue.xyz}
+      CORS_ORIGIN: ${VITE_URL}
     volumes:
       - impostor_data:/app/data
     restart: always
@@ -27,8 +27,8 @@ services:
       context: .
       dockerfile: packages/frontend/Dockerfile
       args:
-        VITE_API_URL: ${VITE_URL:-https://blind-clue.xyz}/api
-        VITE_SOCKET_URL: ${VITE_URL:-https://blind-clue.xyz}/
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
     container_name: impostor-frontend
     ports:
       - "80:80"

@@ -14,11 +14,3 @@ export interface PlayerDTO {
   name: string;
   avatar?: string;
 }
-
-export interface DescriptionDTO {
-  id: string;
-  playerId: string;
-  playerName: string;
-  text: string;
-  round: number;
-}

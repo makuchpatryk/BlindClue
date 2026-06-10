@@ -52,14 +52,6 @@ export interface JoinRequestEvent {
   avatar?: string;
 }
 
-export interface JoinApprovedEvent {
-  playerId: string;
-}
-
-export interface JoinRejectedEvent {
-  reason: string;
-}
-
 export interface VoiceOfferEvent {
   gameId: string;
   fromPlayerId: string;

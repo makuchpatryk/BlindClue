@@ -14,16 +14,24 @@ echo -e "${YELLOW}Pulling latest changes and restarting containers...${NC}"
 
 cd "$APP_DIR"
 
+# Load environment variables
+if [ -f .env.prod ]; then
+  echo -e "${YELLOW}[1/4] Loaded environment variables from .env.prod${NC}"
+else
+  echo -e "${RED}✗ .env.prod not found in $APP_DIR${NC}"
+  exit 1
+fi
+
 # Pull latest code
-echo -e "${YELLOW}[1/3] Pulling latest from main...${NC}"
+echo -e "${YELLOW}[2/4] Pulling latest from main...${NC}"
 sudo -u ubuntu git pull origin main
 
 # Rebuild and restart
-echo -e "${YELLOW}[2/3] Building containers...${NC}"
-docker compose -f docker-compose.prod.yml build
+echo -e "${YELLOW}[3/4] Building containers...${NC}"
+docker compose --env-file .env.prod -f docker-compose.prod.yml build
 
-echo -e "${YELLOW}[3/3] Restarting services...${NC}"
-docker compose -f docker-compose.prod.yml up -d
+echo -e "${YELLOW}[4/4] Restarting services...${NC}"
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
 
 sleep 3
 

@@ -82,10 +82,20 @@ vi.mock("@/features/game/composables/use-game-facade.js", () => ({
 }));
 
 describe("RunningPhase", () => {
+  const mockVoiceService = {
+    toggleMute: vi.fn(),
+    isMuted: vi.fn(() => false),
+    onStateChange: vi.fn(() => vi.fn()),
+    getLocalAudioLevel: vi.fn(() => 0),
+    onAudioLevelChange: vi.fn(() => vi.fn()),
+    onLocalAudioLevelChange: vi.fn(() => vi.fn()),
+  };
+
   const mountOptions = {
     global: {
       provide: {
         gameClientService: null,
+        voiceService: mockVoiceService,
       },
     },
   };

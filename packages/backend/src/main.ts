@@ -11,6 +11,7 @@ import { SocketGateway } from "./infra/adapters/websocket/socket.gateway.js";
 import { GameOrchestrator } from "./application/services/game.orchestrator.js";
 import { GameEventHandler } from "./infra/adapters/websocket/game-event.handler.js";
 import { registerRoutes } from "./infra/adapters/http/routes.js";
+import { registerConcurrentLimiter } from "./infra/middleware/concurrent-limiter.js";
 
 const fastify = Fastify({ logger: true });
 
@@ -19,6 +20,9 @@ await fastify.register(cors, {
   origin: config.corsOrigin,
   credentials: true,
 });
+
+// Register concurrent request limiter
+await registerConcurrentLimiter(fastify);
 
 // Initialize database
 const db = DatabaseConnection.getInstance(config.databasePath);

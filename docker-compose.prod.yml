@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: packages/backend/Dockerfile
+      dockerfile: packages/backend/Dockerfile.prod
     container_name: impostor-backend
     ports:
       - "3000:3000"
@@ -25,7 +25,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: packages/frontend/Dockerfile
+      dockerfile: packages/frontend/Dockerfile.prod
       args:
         VITE_API_URL: ${VITE_API_URL}
         VITE_SOCKET_URL: ${VITE_SOCKET_URL}

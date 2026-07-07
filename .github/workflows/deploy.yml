@@ -1,52 +1,168 @@
-name: deploy
+name: Build & Deploy to AWS ECR
 
 on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  AWS_REGION: eu-north-1
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  BACKEND_IMAGE: impostor-backend
+  FRONTEND_IMAGE: impostor-frontend
+  API_URL: https://blind-clue.xyz
+  SOCKET_URL: wss://blind-clue.xyz
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
-      packages: write
+
+    outputs:
+      backend-image: ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+      frontend-image: ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Verify ECR repositories exist
+        run: |
+          aws ecr describe-repositories \
+            --repository-names ${{ env.BACKEND_IMAGE }} ${{ env.FRONTEND_IMAGE }} \
+            --region ${{ env.AWS_REGION }} \
+            --output text > /dev/null || {
+              echo "ERROR: ECR repositories not found. Run 'terraform apply' first."
+              exit 1
+            }
 
       - name: Build backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: packages/backend/Dockerfile
-          push: false
-          tags: impostor-backend:latest
+        run: |
+          docker build -f packages/backend/Dockerfile.prod \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_IMAGE }}:latest \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            .
 
       - name: Build frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: packages/frontend/Dockerfile.prod
-          push: false
-          tags: impostor-frontend:latest
+        run: |
+          docker build -f packages/frontend/Dockerfile.prod \
+            --build-arg VITE_API_URL=${{ env.API_URL }} \
+            --build-arg VITE_SOCKET_URL=${{ env.SOCKET_URL }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_IMAGE }}:latest \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            .
+
+      - name: Push backend to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_IMAGE }}:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Push frontend to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_IMAGE }}:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get EC2 instance IP
+        id: instance
+        run: |
+          # Check how many instances match the tag
+          COUNT=$(aws ec2 describe-instances \
+            --region ${{ env.AWS_REGION }} \
+            --filters "Name=tag:Name,Values=impostor-server" "Name=instance-state-name,Values=running" \
+            --query 'Reservations[].Instances[] | length(@)' \
+            --output text)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "ERROR: No running EC2 instance with tag 'impostor-server' found"
+            exit 1
+          elif [ "$COUNT" -gt 1 ]; then
+            echo "ERROR: Multiple EC2 instances tagged 'impostor-server' found ($COUNT). Only one allowed."
+            echo "Please remove duplicate instances or update tags."
+            exit 1
+          fi
+
+          IP=$(aws ec2 describe-instances \
+            --region ${{ env.AWS_REGION }} \
+            --filters "Name=tag:Name,Values=impostor-server" "Name=instance-state-name,Values=running" \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text)
+          echo "ip=$IP" >> $GITHUB_OUTPUT
+          echo "Instance IP: $IP"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ steps.instance.outputs.ip }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/impostor
-            bash scripts/update-ec2.sh
+            set -e
+            echo "Deploying Impostor app..."
+
+            # Configure AWS
+            export AWS_DEFAULT_REGION=${{ env.AWS_REGION }}
+
+            # Login to ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
+              docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+            # Wait for Docker to be ready
+            echo "Waiting for Docker daemon..."
+            for i in {1..60}; do
+              docker ps > /dev/null 2>&1 && break
+              echo "Docker not ready, waiting... ($i/60)"
+              sleep 2
+            done
+
+            # Get app home directory
+            if [ -f ~/.app_home ]; then
+              source ~/.app_home
+            else
+              APP_HOME="~/impostor"
+            fi
+            cd "$APP_HOME"
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml pull
+
+            # Restart services
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d
+
+            # Wait for services to be healthy
+            echo "Waiting for services to be healthy..."
+            for i in {1..30}; do
+              HEALTHY=$(docker-compose --env-file .env.prod -f docker-compose.prod.yml ps | grep -c "healthy" || true)
+              if [ "$HEALTHY" -ge 2 ]; then
+                echo "✓ All services healthy"
+                break
+              fi
+              echo "Services starting... ($i/30)"
+              sleep 2
+            done
+
+            # Final verify
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml ps
+
+            echo "✓ Deployment complete"

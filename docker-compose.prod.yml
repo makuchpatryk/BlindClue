@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: packages/backend/Dockerfile.prod
+    image: 719982590319.dkr.ecr.eu-north-1.amazonaws.com/impostor-backend:latest
     container_name: impostor-backend
     ports:
       - "3000:3000"
@@ -23,12 +21,7 @@ services:
       start_period: 40s
 
   frontend:
-    build:
-      context: .
-      dockerfile: packages/frontend/Dockerfile.prod
-      args:
-        VITE_API_URL: ${VITE_API_URL}
-        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    image: 719982590319.dkr.ecr.eu-north-1.amazonaws.com/impostor-frontend:latest
     container_name: impostor-frontend
     ports:
       - "80:80"

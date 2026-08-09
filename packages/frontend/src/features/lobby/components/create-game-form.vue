@@ -17,8 +17,8 @@ import { ref } from "vue";
 import { useLobbyStore } from "../stores/lobby.store.js";
 import { useGameFacade } from "@/features/game/composables/use-game-facade.js";
 import { useRouter } from "vue-router";
-import { API_BASE_URL } from "@/shared/utils/constants.js";
 import { useFormSubmission } from "../composables/use-form-submission.js";
+import { httpClient } from "@/core/http-client.js";
 import Button from "@/shared/components/button.vue";
 import FormField from "@/shared/components/form-field.vue";
 import Input from "@/shared/components/input.vue";
@@ -40,19 +40,10 @@ async function createGame() {
   }
 
   await executeWithErrorHandling(async () => {
-    const response = await fetch(`${API_BASE_URL}/games`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        numberOfRounds: numberOfRounds.value,
-      }),
+    const data = await httpClient.post<{ gameId: string }>("/api/games", {
+      numberOfRounds: numberOfRounds.value,
     });
 
-    if (!response.ok) throw new Error("Failed to create game");
-
-    const data = await response.json();
     const gameId = data.gameId;
 
     gameStore.resetForNewGame();

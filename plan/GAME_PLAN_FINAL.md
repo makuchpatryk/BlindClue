@@ -1323,3 +1323,7 @@ Ready to start building:
 8. **Frontend initialization**
 
 Which should we start with?
+
+## 11. Related Plans
+
+- **Auth (Cognito)**: `specs/todos/cognito-auth-implementation.md` — adds user accounts on top of this anonymous-play architecture. Not yet built; touches WebSocket gateway (§2.10, §3.1) and game creation flow (§2.8) once implemented.

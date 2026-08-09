@@ -1,4 +1,5 @@
 <template>
+  asdsadsadsadsad
   <div class="max-w-2xl mx-auto p-6">
     <AvatarSelectorModal
       :show="showAvatarModal"

@@ -48,6 +48,7 @@ export class GameApplicationService {
 
   async joinGame(
     gameId: string,
+    userId: string,
     playerName: string,
     avatar?: string,
   ): Promise<Result<string, ResultError>> {
@@ -59,7 +60,7 @@ export class GameApplicationService {
       };
     }
 
-    const playerId = PlayerId.generate();
+    const playerId = new PlayerId(userId);
     const player = new Player(playerId, gameId, playerName, avatar);
     const result = game.addPlayer(player);
 

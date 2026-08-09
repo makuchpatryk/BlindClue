@@ -83,11 +83,13 @@ export class GameOrchestrator {
 
   async joinGame(
     gameId: string,
+    userId: string,
     playerName: string,
     avatar?: string,
   ): Promise<Result<string, ResultError>> {
     const result = await this.gameApplicationService.joinGame(
       gameId,
+      userId,
       playerName,
       avatar,
     );

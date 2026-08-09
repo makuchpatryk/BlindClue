@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 export default defineConfig({
   plugins: [vue()],
   server: {
-    port: 8080,
+    port: parseInt(process.env.VITE_PORT || "8000", 10),
   },
   resolve: {
     alias: {

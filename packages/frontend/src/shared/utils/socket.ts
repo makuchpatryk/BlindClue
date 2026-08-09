@@ -10,6 +10,7 @@ export function getSocket(): Socket {
       reconnectionDelay: 1000,
       reconnectionDelayMax: SOCKET_RECONNECTION_DELAY_MAX,
       reconnectionAttempts: 5,
+      withCredentials: true,
     });
   }
   return socket;

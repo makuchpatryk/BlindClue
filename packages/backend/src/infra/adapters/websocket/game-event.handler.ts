@@ -48,6 +48,7 @@ export class GameEventHandler {
           socket.join(data.gameId);
           const result = await this.gameOrchestrator.joinGame(
             data.gameId,
+            socket.data.userId!,
             data.playerName,
             data.avatar,
           );
@@ -97,6 +98,7 @@ export class GameEventHandler {
           pendingRequest.socket.join(data.gameId);
           const result = await this.gameOrchestrator.joinGame(
             data.gameId,
+            pendingRequest.socket.data.userId!,
             pendingRequest.playerName,
             pendingRequest.avatar,
           );

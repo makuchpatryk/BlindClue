@@ -1,0 +1,89 @@
+<template>
+  <form @submit.prevent="handleSubmit" class="space-y-4">
+    <FormField label="Email">
+      <Input
+        v-model="email"
+        type="email"
+        placeholder="your@email.com"
+        required
+      />
+    </FormField>
+
+    <FormField label="Password">
+      <Input
+        v-model="password"
+        type="password"
+        placeholder="••••••••"
+        required
+      />
+    </FormField>
+
+    <Alert v-if="error" variant="error">
+      {{ error }}
+    </Alert>
+
+    <Button type="submit" :disabled="loading" fullWidth>
+      {{ loading ? "Signing in..." : "Sign In" }}
+    </Button>
+
+    <div class="space-y-2 text-center text-sm">
+      <p class="text-gray-400">
+        Don't have an account?
+        <button
+          type="button"
+          @click="$emit('switch-to-signup')"
+          class="text-blue-400 hover:text-blue-300"
+        >
+          Sign up
+        </button>
+      </p>
+      <p class="text-gray-400">
+        <button
+          type="button"
+          @click="$emit('switch-to-forgot-password')"
+          class="text-blue-400 hover:text-blue-300"
+        >
+          Forgot password?
+        </button>
+      </p>
+    </div>
+  </form>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import FormField from "@/shared/components/form-field.vue";
+import Input from "@/shared/components/input.vue";
+import Alert from "@/shared/components/alert.vue";
+import Button from "@/shared/components/button.vue";
+
+interface Props {
+  loading?: boolean;
+  error?: string | null;
+}
+
+withDefaults(defineProps<Props>(), {
+  loading: false,
+  error: null,
+});
+
+const email = ref("");
+const password = ref("");
+
+const emit = defineEmits<{
+  submit: [{ email: string; password: string }];
+  "switch-to-signup": [];
+  "switch-to-forgot-password": [];
+}>();
+
+const handleSubmit = () => {
+  emit("submit", { email: email.value, password: password.value });
+};
+
+defineExpose({
+  reset: () => {
+    email.value = "";
+    password.value = "";
+  },
+});
+</script>

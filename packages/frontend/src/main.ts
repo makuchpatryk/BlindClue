@@ -5,6 +5,7 @@ import App from "./App.vue";
 import { getSocket } from "./shared/utils/socket.js";
 import { GameClientService } from "./features/game/services/game-client.service.js";
 import { useGameStore } from "./features/game/stores/game.store.js";
+import { useAuthStore } from "./features/auth/stores/auth.store.js";
 import "./shared/styles/index.css";
 
 const app = createApp(App);
@@ -15,6 +16,10 @@ app.use(pinia);
 
 // Initialize router
 app.use(router);
+
+// Initialize auth on app load
+const authStore = useAuthStore();
+authStore.initializeAuth().catch(console.error);
 
 // Initialize Socket.io and GameClientService
 const socket = getSocket();
